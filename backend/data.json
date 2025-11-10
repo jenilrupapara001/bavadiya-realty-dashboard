@@ -1,0 +1,18 @@
+[
+  {
+    "date": "2025-11-01",
+    "unitNo": "A101",
+    "projectName": "Sky Residency",
+    "ownerName": "John Doe",
+    "ownerNumber": "9876543210",
+    "customerName": "Jane Smith",
+    "customerNumber": "9123456789",
+    "timePeriod": "12 Months",
+    "basePrice": 1200000,
+    "ownerBro": 24000,
+    "receiveDate": "2025-11-05",
+    "customerBro": 22000,
+    "customerReceiveDate": "",
+    "employee": "Amit"
+  }
+]
