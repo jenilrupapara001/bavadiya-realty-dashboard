@@ -22,8 +22,8 @@ app.use(cors({
 app.use(bodyParser.json());
 
 // ---- Admin Credentials ----
-const defaultUsername = process.env.DEFAULT_ADMIN_USERNAME || 'admin';
-const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'password123';
+const defaultUsername = process.env.DEFAULT_ADMIN_USERNAME || 'DharmeshBavadiya';
+const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'BavadiyaRealtyAdmin!2024';
 
 const users = [
   { username: defaultUsername, password: bcrypt.hashSync(defaultPassword, parseInt(process.env.BCRYPT_ROUNDS) || 8) }

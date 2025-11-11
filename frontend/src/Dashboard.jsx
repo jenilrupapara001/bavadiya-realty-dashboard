@@ -43,6 +43,7 @@ import { Logout, Add, Edit, Dashboard as DashboardIcon, BarChart as BarChartIcon
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { useMediaQuery } from '@mui/material';
 import Analytics from './Analytics';
 import DataTable from './DataTable';
 
@@ -169,12 +170,14 @@ const AccountSettings = () => {
 
 const Dashboard = ({ darkMode, toggleDarkMode }) => {
   const { logout } = useContext(AuthContext);
+  const isMobile = useMediaQuery((theme) => theme.breakpoints.down('md'));
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [filterDate, setFilterDate] = useState('');
   const [filterEmployee, setFilterEmployee] = useState('');
   const [open, setOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeView, setActiveView] = useState('dashboard');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -909,6 +912,17 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
         boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
       }}>
         <Toolbar>
+          {isMobile && (
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              onClick={toggleDrawer}
+              edge="start"
+              sx={{ mr: 2 }}
+            >
+              <Menu />
+            </IconButton>
+          )}
           <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 600 }}>
             Bavadiya Realty LLP
           </Typography>
@@ -929,7 +943,9 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
         </Toolbar>
       </AppBar>
       <Drawer
-        variant="permanent"
+        variant={isMobile ? 'temporary' : 'permanent'}
+        open={isMobile ? drawerOpen : true}
+        onClose={isMobile ? toggleDrawer : undefined}
         sx={{
           width: 240,
           flexShrink: 0,
@@ -958,7 +974,10 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
               <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
                 <ListItemButton
                   selected={activeView === item.view}
-                  onClick={() => setActiveView(item.view)}
+                  onClick={() => {
+                    setActiveView(item.view);
+                    if (isMobile) setDrawerOpen(false);
+                  }}
                   sx={{
                     borderRadius: 2,
                     '&.Mui-selected': {
@@ -991,7 +1010,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
         flexGrow: 1,
         p: 0,
         minHeight: 'calc(100vh - 64px)',
-        marginLeft: '240px'
+        marginLeft: isMobile ? 0 : '240px'
       }}>
         <Toolbar />
         <Box sx={{ p: 3, pb: 8 }}>
