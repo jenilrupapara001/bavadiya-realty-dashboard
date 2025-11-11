@@ -11,7 +11,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const SECRET = process.env.JWT_SECRET || 'your_super_secret_key_here';
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:3000'];
+const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['https://bavadiya-realty-backend.vercel.app/'];
 app.use(cors({
   origin: allowedOrigins,
   credentials: true
@@ -75,4 +75,4 @@ app.put('/api/data/:index', authenticateToken, (req, res) => {
   res.json({ success: true });
 });
 
-app.listen(PORT, () => console.log(`API running at http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`API running at https://bavadiya-realty-backend.vercel.app/`));
