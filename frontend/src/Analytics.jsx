@@ -10,13 +10,19 @@ import {
 } from '@mui/material';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell
+} from 'recharts';
 
 const Analytics = () => {
   const { logout } = useContext(AuthContext);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // ✅ backend base URL (production)
+  const API_BASE_URL = 'https://bavadiya-realty-backend.vercel.app';
 
   useEffect(() => {
     fetchData();
@@ -27,7 +33,7 @@ const Analytics = () => {
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('/api/data', {
+      const response = await axios.get(`${API_BASE_URL}/api/data`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setData(response.data);
@@ -39,9 +45,11 @@ const Analytics = () => {
     }
   };
 
-  // Calculate analytics data
+  // ---- ANALYTICS CALCULATIONS ----
   const totalPayments = data.reduce((sum, item) => sum + (item.basePrice || 0), 0);
-  const receivedPayments = data.filter(item => item.receiveDate).reduce((sum, item) => sum + (item.basePrice || 0), 0);
+  const receivedPayments = data
+    .filter(item => item.receiveDate)
+    .reduce((sum, item) => sum + (item.basePrice || 0), 0);
   const pendingPayments = totalPayments - receivedPayments;
 
   // Monthly trends (last 6 months)
@@ -62,21 +70,20 @@ const Analytics = () => {
     acc[item.employee].revenue += item.basePrice || 0;
     return acc;
   }, {});
-
   const employeeChartData = Object.values(employeeData).sort((a, b) => b.revenue - a.revenue);
 
-  // Project types distribution
+  // Project distribution
   const projectData = data.reduce((acc, item) => {
     const project = item.projectName || 'Unknown';
     if (!acc[project]) acc[project] = { name: project, value: 0 };
     acc[project].value += item.basePrice || 0;
     return acc;
   }, {});
-
-  const projectChartData = Object.values(projectData).slice(0, 8); // Top 8 projects
+  const projectChartData = Object.values(projectData).slice(0, 8);
 
   const COLORS = ['#1a365d', '#3b82f6', '#059669', '#d97706', '#7c3aed', '#dc2626', '#ea580c', '#0891b2'];
 
+  // ---- UI ----
   if (loading) {
     return (
       <Container maxWidth="xl" sx={{ mt: 4 }}>

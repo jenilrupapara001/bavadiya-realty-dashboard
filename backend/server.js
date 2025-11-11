@@ -1,4 +1,3 @@
-// server.js
 require('dotenv').config();
 const express = require('express');
 const jwt = require('jsonwebtoken');
@@ -11,18 +10,21 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const SECRET = process.env.JWT_SECRET || 'your_super_secret_key_here';
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['https://bavadiya-realty-backend.vercel.app/'];
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : ['https://bavadiyarealty.vercel.app']; // ✅ Use frontend URL, no slash at end
+
 app.use(cors({
   origin: allowedOrigins,
   credentials: true
 }));
+
 app.use(bodyParser.json());
 
-// Load admin credentials from environment variables
+// ---- Admin Credentials ----
 const defaultUsername = process.env.DEFAULT_ADMIN_USERNAME || 'admin';
 const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'password123';
 
-// Replace with your own user DB or secure storage in production!
 const users = [
   { username: defaultUsername, password: bcrypt.hashSync(defaultPassword, parseInt(process.env.BCRYPT_ROUNDS) || 8) }
 ];
@@ -75,4 +77,4 @@ app.put('/api/data/:index', authenticateToken, (req, res) => {
   res.json({ success: true });
 });
 
-app.listen(PORT, () => console.log(`API running at https://bavadiya-realty-backend.vercel.app/`));
+app.listen(PORT, () => console.log(`✅ API running on port ${PORT}`));

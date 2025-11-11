@@ -197,7 +197,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
   });
 
   useEffect(() => {
-    fetchData();
+    fetchData("https://bavadiya-realty-backend.vercel.app/api/data");
   }, []);
 
   useEffect(() => {
@@ -216,7 +216,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('/api/data', {
+      const response = await axios.get('https://bavadiya-realty-backend.vercel.app/api/data', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setData(response.data);
@@ -262,11 +262,11 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
     try {
       const token = localStorage.getItem('token');
       if (editingIndex !== null) {
-        await axios.put(`/api/data/${editingIndex}`, formData, {
+        await axios.put(`https://bavadiya-realty-backend.vercel.app/api/data/${editingIndex}`, formData, {
           headers: { Authorization: `Bearer ${token}` },
         });
       } else {
-        await axios.post('/api/data', formData, {
+        await axios.post('https://bavadiya-realty-backend.vercel.app/api/data', formData, {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
@@ -978,225 +978,225 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
         <Box sx={{ p: 3, pb: 8 }}>
           {renderView()}
         </Box>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        maxWidth="lg"
-        fullWidth
-        sx={{
-          '& .MuiDialog-paper': {
-            borderRadius: 3,
-            boxShadow: '0 25px 50px rgba(0,0,0,0.25)',
-          }
-        }}
-      >
-        <DialogTitle sx={{
-          bgcolor: 'primary.main',
-          color: 'white',
-          fontWeight: 600,
-          fontSize: '1.25rem'
-        }}>
-          {editingIndex !== null ? 'Edit Payment Entry' : 'Add New Payment Entry'}
-        </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Fill in the details below to {editingIndex !== null ? 'update' : 'create'} a payment entry.
-          </Typography>
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Date"
-                type="date"
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                InputLabelProps={{ shrink: true }}
-              />
+        <Dialog
+          open={open}
+          onClose={handleClose}
+          maxWidth="lg"
+          fullWidth
+          sx={{
+            '& .MuiDialog-paper': {
+              borderRadius: 3,
+              boxShadow: '0 25px 50px rgba(0,0,0,0.25)',
+            }
+          }}
+        >
+          <DialogTitle sx={{
+            bgcolor: 'primary.main',
+            color: 'white',
+            fontWeight: 600,
+            fontSize: '1.25rem'
+          }}>
+            {editingIndex !== null ? 'Edit Payment Entry' : 'Add New Payment Entry'}
+          </DialogTitle>
+          <DialogContent sx={{ p: 3 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Fill in the details below to {editingIndex !== null ? 'update' : 'create'} a payment entry.
+            </Typography>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Date"
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Unit No"
+                  value={formData.unitNo}
+                  onChange={(e) => setFormData({ ...formData, unitNo: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Project Name"
+                  value={formData.projectName}
+                  onChange={(e) => setFormData({ ...formData, projectName: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Owner Name"
+                  value={formData.ownerName}
+                  onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Owner Number"
+                  value={formData.ownerNumber}
+                  onChange={(e) => setFormData({ ...formData, ownerNumber: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Customer Name"
+                  value={formData.customerName}
+                  onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Customer Number"
+                  value={formData.customerNumber}
+                  onChange={(e) => setFormData({ ...formData, customerNumber: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Time Period"
+                  value={formData.timePeriod}
+                  onChange={(e) => setFormData({ ...formData, timePeriod: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Base Price"
+                  type="number"
+                  value={formData.basePrice}
+                  onChange={(e) => setFormData({ ...formData, basePrice: parseFloat(e.target.value) || '' })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Owner Brokerage"
+                  type="number"
+                  value={formData.ownerBro}
+                  onChange={(e) => setFormData({ ...formData, ownerBro: parseFloat(e.target.value) || '' })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Receive Date"
+                  type="date"
+                  value={formData.receiveDate}
+                  onChange={(e) => setFormData({ ...formData, receiveDate: e.target.value })}
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Customer Brokerage"
+                  type="number"
+                  value={formData.customerBro}
+                  onChange={(e) => setFormData({ ...formData, customerBro: parseFloat(e.target.value) || '' })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Customer Receive Date"
+                  type="date"
+                  value={formData.customerReceiveDate}
+                  onChange={(e) => setFormData({ ...formData, customerReceiveDate: e.target.value })}
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Employee"
+                  value={formData.employee}
+                  onChange={(e) => setFormData({ ...formData, employee: e.target.value })}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Unit No"
-                value={formData.unitNo}
-                onChange={(e) => setFormData({ ...formData, unitNo: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Project Name"
-                value={formData.projectName}
-                onChange={(e) => setFormData({ ...formData, projectName: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Owner Name"
-                value={formData.ownerName}
-                onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Owner Number"
-                value={formData.ownerNumber}
-                onChange={(e) => setFormData({ ...formData, ownerNumber: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Customer Name"
-                value={formData.customerName}
-                onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Customer Number"
-                value={formData.customerNumber}
-                onChange={(e) => setFormData({ ...formData, customerNumber: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Time Period"
-                value={formData.timePeriod}
-                onChange={(e) => setFormData({ ...formData, timePeriod: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Base Price"
-                type="number"
-                value={formData.basePrice}
-                onChange={(e) => setFormData({ ...formData, basePrice: parseFloat(e.target.value) || '' })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Owner Brokerage"
-                type="number"
-                value={formData.ownerBro}
-                onChange={(e) => setFormData({ ...formData, ownerBro: parseFloat(e.target.value) || '' })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Receive Date"
-                type="date"
-                value={formData.receiveDate}
-                onChange={(e) => setFormData({ ...formData, receiveDate: e.target.value })}
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Customer Brokerage"
-                type="number"
-                value={formData.customerBro}
-                onChange={(e) => setFormData({ ...formData, customerBro: parseFloat(e.target.value) || '' })}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Customer Receive Date"
-                type="date"
-                value={formData.customerReceiveDate}
-                onChange={(e) => setFormData({ ...formData, customerReceiveDate: e.target.value })}
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Employee"
-                value={formData.employee}
-                onChange={(e) => setFormData({ ...formData, employee: e.target.value })}
-              />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions sx={{ p: 3, pt: 0 }}>
-          <Button
-            onClick={handleClose}
-            variant="outlined"
-            sx={{
-              borderRadius: 2,
-              px: 3,
-              textTransform: 'none'
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSave}
-            variant="contained"
-            sx={{
-              borderRadius: 2,
-              px: 3,
-              textTransform: 'none',
-              fontWeight: 600,
-            }}
-          >
-            Save Entry
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </DialogContent>
+          <DialogActions sx={{ p: 3, pt: 0 }}>
+            <Button
+              onClick={handleClose}
+              variant="outlined"
+              sx={{
+                borderRadius: 2,
+                px: 3,
+                textTransform: 'none'
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSave}
+              variant="contained"
+              sx={{
+                borderRadius: 2,
+                px: 3,
+                textTransform: 'none',
+                fontWeight: 600,
+              }}
+            >
+              Save Entry
+            </Button>
+          </DialogActions>
+        </Dialog>
 
-      {/* Footer */}
-      <Box
-        component="footer"
-        sx={{
-          py: 3,
-          px: 2,
-          mt: 'auto',
-          backgroundColor: (theme) =>
-            theme.palette.mode === 'light'
-              ? theme.palette.grey[100]
-              : theme.palette.grey[900],
-          borderTop: '1px solid',
-          borderColor: 'divider',
-        }}
-      >
-        <Container maxWidth="lg">
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: 2,
-            }}
-          >
-            <Box>
-              <Typography variant="body2" color="text.secondary">
-                © 2024 Bavadiya Realty LLP. All rights reserved.
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Real Estate Payment Management System
-              </Typography>
+        {/* Footer */}
+        <Box
+          component="footer"
+          sx={{
+            py: 3,
+            px: 2,
+            mt: 'auto',
+            backgroundColor: (theme) =>
+              theme.palette.mode === 'light'
+                ? theme.palette.grey[100]
+                : theme.palette.grey[900],
+            borderTop: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Container maxWidth="lg">
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: 2,
+              }}
+            >
+              <Box>
+                <Typography variant="body2" color="text.secondary">
+                  © 2024 Bavadiya Realty LLP. All rights reserved.
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Real Estate Payment Management System
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', gap: 3 }}>
+                <Typography variant="caption" color="text.secondary">
+                  Version 1.0.0
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Last updated: {new Date().toLocaleDateString()}
+                </Typography>
+              </Box>
             </Box>
-            <Box sx={{ display: 'flex', gap: 3 }}>
-              <Typography variant="caption" color="text.secondary">
-                Version 1.0.0
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Last updated: {new Date().toLocaleDateString()}
-              </Typography>
-            </Box>
-          </Box>
-        </Container>
-      </Box>
+          </Container>
+        </Box>
       </Box>
     </Box>
   );

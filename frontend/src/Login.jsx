@@ -23,7 +23,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/api/login', {
+      const response = await axios.post('https://bavadiya-realty-backend.vercel.app/api/login', {
         username,
         password,
       });
