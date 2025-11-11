@@ -175,7 +175,6 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
   const [filterEmployee, setFilterEmployee] = useState('');
   const [open, setOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeView, setActiveView] = useState('dashboard');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -292,9 +291,6 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
     { name: 'Pending', value: pendingPayments, color: '#d97706' },
   ];
 
-  const toggleDrawer = () => {
-    setDrawerOpen(!drawerOpen);
-  };
 
   const menuItems = [
     { text: 'Overview', icon: <DashboardIcon />, view: 'dashboard' },
@@ -308,7 +304,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
       case 'analytics':
         return <Analytics />;
       case 'table':
-        return <DataTable onEditEntry={(index) => handleOpen(index)} />;
+        return <DataTable onEditEntry={(row) => handleOpen(data.indexOf(row))} />;
       case 'settings':
         return <AccountSettings />;
       case 'dashboard':
@@ -889,7 +885,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
                           </TableCell>
                           <TableCell>{row.employee}</TableCell>
                           <TableCell>
-                            <IconButton onClick={() => handleOpen(index)}>
+                            <IconButton onClick={() => handleOpen(data.indexOf(row))}>
                               <Edit />
                             </IconButton>
                           </TableCell>
@@ -907,18 +903,13 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+      <AppBar position="fixed" sx={{
+        zIndex: (theme) => theme.zIndex.drawer + 1,
+        background: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
+      }}>
         <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={toggleDrawer}
-            edge="start"
-            sx={{ mr: 2 }}
-          >
-            <Menu />
-          </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 600 }}>
             Bavadiya Realty LLP
           </Typography>
           <FormControlLabel
@@ -938,31 +929,54 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
         </Toolbar>
       </AppBar>
       <Drawer
-        variant="temporary"
-        open={drawerOpen}
-        onClose={toggleDrawer}
+        variant="permanent"
         sx={{
           width: 240,
           flexShrink: 0,
           '& .MuiDrawer-paper': {
             width: 240,
             boxSizing: 'border-box',
+            background: 'linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%)',
+            borderRight: '1px solid rgba(0,0,0,0.08)',
+            boxShadow: '2px 0 10px rgba(0,0,0,0.05)'
           },
         }}
       >
         <Toolbar />
-        <Box sx={{ overflow: 'auto' }}>
+        <Box sx={{ overflow: 'auto', p: 1 }}>
+          <Box sx={{ p: 2, textAlign: 'center' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
+              Dashboard
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Realty Management
+            </Typography>
+          </Box>
+          <Divider sx={{ mb: 2 }} />
           <List>
             {menuItems.map((item) => (
-              <ListItem key={item.text} disablePadding>
+              <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
                 <ListItemButton
                   selected={activeView === item.view}
-                  onClick={() => {
-                    setActiveView(item.view);
-                    setDrawerOpen(false);
+                  onClick={() => setActiveView(item.view)}
+                  sx={{
+                    borderRadius: 2,
+                    '&.Mui-selected': {
+                      backgroundColor: 'primary.main',
+                      color: 'white',
+                      '&:hover': {
+                        backgroundColor: 'primary.dark',
+                      },
+                      '& .MuiListItemIcon-root': {
+                        color: 'white',
+                      }
+                    },
+                    '&:hover': {
+                      backgroundColor: 'rgba(0,0,0,0.04)',
+                    }
                   }}
                 >
-                  <ListItemIcon>
+                  <ListItemIcon sx={{ minWidth: 40 }}>
                     {item.icon}
                   </ListItemIcon>
                   <ListItemText primary={item.text} />
@@ -970,10 +984,15 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
               </ListItem>
             ))}
           </List>
-          <Divider />
+          <Divider sx={{ my: 2 }} />
         </Box>
       </Drawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 0, minHeight: 'calc(100vh - 64px)' }}>
+      <Box component="main" sx={{
+        flexGrow: 1,
+        p: 0,
+        minHeight: 'calc(100vh - 64px)',
+        marginLeft: '240px'
+      }}>
         <Toolbar />
         <Box sx={{ p: 3, pb: 8 }}>
           {renderView()}

@@ -308,7 +308,7 @@ const DataTable = ({ onEditEntry }) => {
                   <TableCell>{row.employee}</TableCell>
                   <TableCell>
                     <IconButton
-                      onClick={() => onEditEntry && onEditEntry(row.id || index)}
+                      onClick={() => onEditEntry && onEditEntry(row)}
                       sx={{
                         color: 'primary.main',
                         '&:hover': {

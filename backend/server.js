@@ -53,28 +53,28 @@ function authenticateToken(req, res, next) {
 }
 
 // ---- DATA ------------------------
-const DATA_FILE = './data.json';
+let data = [];
+if (fs.existsSync('./data.json')) {
+  data = JSON.parse(fs.readFileSync('./data.json'));
+}
 
 app.get('/api/data', authenticateToken, (req, res) => {
-  if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, '[]');
-  const data = JSON.parse(fs.readFileSync(DATA_FILE));
   res.json(data);
 });
 
 app.post('/api/data', authenticateToken, (req, res) => {
-  if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, '[]');
-  const data = JSON.parse(fs.readFileSync(DATA_FILE));
   data.push(req.body);
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
   res.json({ success: true });
 });
 
 app.put('/api/data/:index', authenticateToken, (req, res) => {
-  if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, '[]');
-  const data = JSON.parse(fs.readFileSync(DATA_FILE));
-  data[req.params.index] = req.body;
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
-  res.json({ success: true });
+  const index = parseInt(req.params.index);
+  if (index >= 0 && index < data.length) {
+    data[index] = req.body;
+    res.json({ success: true });
+  } else {
+    res.status(400).json({ error: 'Invalid index' });
+  }
 });
 
 app.listen(PORT, () => console.log(`✅ API running on port ${PORT}`));
