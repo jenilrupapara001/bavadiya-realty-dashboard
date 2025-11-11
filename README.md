@@ -57,17 +57,20 @@ git clone https://github.com/jenilrupapara001/bavadiya-realty-dashboard.git
 cd bavadiya-realty-dashboard
 ```
 
-### 2. Backend Setup
+### 2. Development Setup
+
+#### Backend Setup
 
 ```bash
 cd backend
 npm install
-npm start
+cp .env.example .env  # Configure environment variables
+npm run dev  # Development with nodemon
 ```
 
-The backend server will run on `http://localhost:3001`
+The backend server will run on `http://localhost:3002`
 
-### 3. Frontend Setup
+#### Frontend Setup
 
 Open a new terminal:
 
@@ -78,6 +81,33 @@ npm start
 ```
 
 The React app will run on `http://localhost:3000`
+
+### 3. Production Deployment
+
+#### Using Docker Compose (Recommended)
+
+```bash
+# Build and run with Docker Compose
+docker-compose up --build
+```
+
+The application will be available at `http://localhost`
+
+#### Manual Production Build
+
+```bash
+# Backend
+cd backend
+npm install
+npm run build  # If needed
+npm start
+
+# Frontend (in another terminal)
+cd frontend
+npm install
+npm run build
+# Serve the build folder with nginx or any static server
+```
 
 ## Default Login Credentials
 
@@ -209,15 +239,57 @@ All data endpoints require `Authorization: Bearer <token>` header.
 - If `receiveDate` is filled → Status: **Payment Received** (Green)
 - If `receiveDate` is empty → Status: **Payment Pending** (Dark Green)
 
+## Deployment
+
+### Environment Variables
+
+Copy `backend/.env.example` to `backend/.env` and configure:
+
+```bash
+JWT_SECRET=your_secure_random_jwt_secret_here
+PORT=3002
+NODE_ENV=production
+ALLOWED_ORIGINS=https://yourdomain.com,http://localhost
+```
+
+### Docker Deployment
+
+1. **Build and run with Docker Compose:**
+   ```bash
+   docker-compose up --build -d
+   ```
+
+2. **Access the application:**
+   - Frontend: `http://your-server-ip`
+   - Backend API: `http://your-server-ip/api`
+
+### Manual Deployment
+
+1. **Backend:**
+   ```bash
+   cd backend
+   npm ci --only=production
+   npm start
+   ```
+
+2. **Frontend:**
+   ```bash
+   cd frontend
+   npm run build
+   # Serve build/ with nginx or Apache
+   ```
+
 ## Security Notes
 
 ⚠️ **For Production:**
-1. Change the JWT secret in `server.js`
-2. Use environment variables for sensitive data
+1. Change the JWT secret to a strong random key
+2. Use environment variables for all sensitive data
 3. Implement proper password reset flow
 4. Use a real database (MongoDB, PostgreSQL)
 5. Add HTTPS/SSL certificates
-6. Implement rate limiting
+6. Implement rate limiting and security headers
+7. Use Docker for containerized deployment
+8. Regularly update dependencies
 
 ## License
 

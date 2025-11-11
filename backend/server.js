@@ -1,4 +1,5 @@
 // server.js
+require('dotenv').config();
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
@@ -7,14 +8,23 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 const app = express();
-const SECRET = 'your_super_secret_key_here';
+const PORT = process.env.PORT || 3000;
+const SECRET = process.env.JWT_SECRET || 'your_super_secret_key_here';
 
-app.use(cors());
+const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : ['http://localhost:3000'];
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
 app.use(bodyParser.json());
+
+// Load admin credentials from environment variables
+const defaultUsername = process.env.DEFAULT_ADMIN_USERNAME || 'admin';
+const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'password123';
 
 // Replace with your own user DB or secure storage in production!
 const users = [
-  { username: 'admin', password: bcrypt.hashSync('password123', 8) }
+  { username: defaultUsername, password: bcrypt.hashSync(defaultPassword, parseInt(process.env.BCRYPT_ROUNDS) || 8) }
 ];
 
 // ---- AUTH ------------------------
@@ -65,4 +75,4 @@ app.put('/api/data/:index', authenticateToken, (req, res) => {
   res.json({ success: true });
 });
 
-app.listen(3001, () => console.log('API running at http://localhost:3001'));
+app.listen(PORT, () => console.log(`API running at http://localhost:${PORT}`));
