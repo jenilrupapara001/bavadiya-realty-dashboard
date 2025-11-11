@@ -3,6 +3,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const fs = require('fs');
+const path = require('path');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
@@ -54,8 +55,9 @@ function authenticateToken(req, res, next) {
 
 // ---- DATA ------------------------
 let data = [];
-if (fs.existsSync('./data.json')) {
-  data = JSON.parse(fs.readFileSync('./data.json'));
+const dataFilePath = path.join(__dirname, 'data.json');
+if (fs.existsSync(dataFilePath)) {
+  data = JSON.parse(fs.readFileSync(dataFilePath));
 }
 
 app.get('/api/data', authenticateToken, (req, res) => {
