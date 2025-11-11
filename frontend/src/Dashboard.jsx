@@ -197,7 +197,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
   });
 
   useEffect(() => {
-    fetchData("https://bavadiya-realty-backend.vercel.app/api/data");
+    fetchData();
   }, []);
 
   useEffect(() => {

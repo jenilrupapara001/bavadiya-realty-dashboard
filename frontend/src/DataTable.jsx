@@ -53,7 +53,7 @@ const DataTable = ({ onEditEntry }) => {
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('/api/data', {
+      const response = await axios.get('https://bavadiya-realty-backend.vercel.app/api/data', {
         headers: { Authorization: `Bearer ${token}` },
       });
       setData(response.data);
