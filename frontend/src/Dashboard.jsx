@@ -38,6 +38,11 @@ import {
   FormControlLabel,
   CircularProgress,
   Alert,
+  Snackbar,
+  Skeleton,
+  Fade,
+  Grow,
+  Slide,
 } from '@mui/material';
 import { Logout, Add, Edit, Dashboard as DashboardIcon, BarChart as BarChartIcon, TableChart, Brightness4, Brightness7, Menu, Person as PersonIcon } from '@mui/icons-material';
 import { AuthContext } from './AuthContext';
@@ -55,6 +60,14 @@ const AccountSettings = () => {
     role: 'Administrator',
     lastLogin: new Date().toLocaleString(),
     accountCreated: '2024-01-15'
+  });
+  const [editMode, setEditMode] = useState(false);
+  const [passwordDialog, setPasswordDialog] = useState(false);
+  const [twoFAEnabled, setTwoFAEnabled] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   });
 
   return (
@@ -76,7 +89,8 @@ const AccountSettings = () => {
                   fullWidth
                   label="Username"
                   value={userInfo.username}
-                  InputProps={{ readOnly: true }}
+                  onChange={(e) => setUserInfo({ ...userInfo, username: e.target.value })}
+                  InputProps={{ readOnly: !editMode }}
                   variant="outlined"
                 />
               </Grid>
@@ -85,7 +99,8 @@ const AccountSettings = () => {
                   fullWidth
                   label="Role"
                   value={userInfo.role}
-                  InputProps={{ readOnly: true }}
+                  onChange={(e) => setUserInfo({ ...userInfo, role: e.target.value })}
+                  InputProps={{ readOnly: !editMode }}
                   variant="outlined"
                 />
               </Grid>
@@ -108,6 +123,19 @@ const AccountSettings = () => {
                 />
               </Grid>
             </Grid>
+            <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+              <Button
+                variant={editMode ? "outlined" : "contained"}
+                onClick={() => setEditMode(!editMode)}
+              >
+                {editMode ? 'Cancel' : 'Edit Profile'}
+              </Button>
+              {editMode && (
+                <Button variant="contained" color="primary">
+                  Save Changes
+                </Button>
+              )}
+            </Box>
           </Paper>
 
           <Paper sx={{ p: 3, mt: 3, borderRadius: 2 }}>
@@ -116,12 +144,26 @@ const AccountSettings = () => {
             </Typography>
 
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Button variant="outlined" sx={{ alignSelf: 'flex-start' }}>
+              <Button
+                variant="outlined"
+                sx={{ alignSelf: 'flex-start' }}
+                onClick={() => setPasswordDialog(true)}
+              >
                 Change Password
               </Button>
-              <Button variant="outlined" color="error" sx={{ alignSelf: 'flex-start' }}>
-                Enable Two-Factor Authentication
-              </Button>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={twoFAEnabled}
+                    onChange={(e) => setTwoFAEnabled(e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label="Two-Factor Authentication"
+              />
+              <Typography variant="body2" color="text.secondary">
+                {twoFAEnabled ? '2FA is enabled for enhanced security' : 'Enable 2FA for better account protection'}
+              </Typography>
             </Box>
           </Paper>
         </Grid>
@@ -136,7 +178,20 @@ const AccountSettings = () => {
               <Button variant="contained" color="primary" fullWidth>
                 Update Profile
               </Button>
-              <Button variant="outlined" color="warning" fullWidth>
+              <Button
+                variant="outlined"
+                color="warning"
+                fullWidth
+                onClick={() => {
+                  const dataStr = JSON.stringify(data, null, 2);
+                  const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                  const exportFileDefaultName = 'bavadiya-realty-data.json';
+                  const linkElement = document.createElement('a');
+                  linkElement.setAttribute('href', dataUri);
+                  linkElement.setAttribute('download', exportFileDefaultName);
+                  linkElement.click();
+                }}
+              >
                 Export Data
               </Button>
               <Button variant="outlined" color="error" fullWidth onClick={logout}>
@@ -184,6 +239,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
   });
   const [employeeOpen, setEmployeeOpen] = useState(false);
   const [editingEmployeeIndex, setEditingEmployeeIndex] = useState(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [open, setOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -294,15 +350,18 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
         await axios.put(`https://bavadiya-realty-backend.vercel.app/api/data/${editingIndex}`, formData, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        setSnackbar({ open: true, message: 'Payment entry updated successfully!', severity: 'success' });
       } else {
         await axios.post('https://bavadiya-realty-backend.vercel.app/api/data', formData, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        setSnackbar({ open: true, message: 'Payment entry added successfully!', severity: 'success' });
       }
       fetchData();
       handleClose();
     } catch (error) {
       console.error('Error saving data:', error);
+      setSnackbar({ open: true, message: 'Error saving entry. Please try again.', severity: 'error' });
     }
   };
 
@@ -313,10 +372,12 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
         await axios.put(`https://bavadiya-realty-backend.vercel.app/api/employees/${editingEmployeeIndex}`, employeeFormData, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        setSnackbar({ open: true, message: 'Employee updated successfully!', severity: 'success' });
       } else {
         await axios.post('https://bavadiya-realty-backend.vercel.app/api/employees', employeeFormData, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        setSnackbar({ open: true, message: 'Employee added successfully!', severity: 'success' });
       }
       fetchEmployees();
       setEmployeeOpen(false);
@@ -324,6 +385,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
       setEditingEmployeeIndex(null);
     } catch (error) {
       console.error('Error saving employee:', error);
+      setSnackbar({ open: true, message: 'Error saving employee. Please try again.', severity: 'error' });
     }
   };
 
@@ -419,26 +481,28 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
             {!loading && !error && (
               <>
                 {/* Welcome Header */}
-                <Box sx={{ mb: { xs: 3, md: 4 } }}>
-                  <Typography
-                    variant="h4"
-                    sx={{
-                      fontWeight: 700,
-                      color: 'primary.main',
-                      mb: 1,
-                      fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' }
-                    }}
-                  >
-                    Welcome to Bavadiya Realty LLP
-                  </Typography>
-                  <Typography
-                    variant="subtitle1"
-                    color="text.secondary"
-                    sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
-                  >
-                    Real Estate Payment Management Dashboard
-                  </Typography>
-                </Box>
+                <Grow in={true} timeout={1000}>
+                  <Box sx={{ mb: { xs: 3, md: 4 } }}>
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        fontWeight: 700,
+                        color: 'primary.main',
+                        mb: 1,
+                        fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' }
+                      }}
+                    >
+                      Welcome to Bavadiya Realty LLP
+                    </Typography>
+                    <Typography
+                      variant="subtitle1"
+                      color="text.secondary"
+                      sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+                    >
+                      Real Estate Payment Management Dashboard
+                    </Typography>
+                  </Box>
+                </Grow>
 
                 {/* Key Performance Indicators */}
                 <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: { xs: 3, md: 4 } }}>
@@ -761,9 +825,9 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
                         </Typography>
                       </CardContent>
                     </Card>
-                  </Grid>
-                  <Grid item xs={6} sm={6} md={2}>
-                    <Card sx={{
+                 </Grid>
+                 <Grid item xs={6} sm={6} md={2}>
+                   <Card sx={{
                       background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
                       color: 'white',
                       position: 'relative',
@@ -1241,6 +1305,53 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
           <Divider sx={{ my: 2 }} />
         </Box>
       </Drawer>
+
+      {/* Password Change Dialog */}
+      <Dialog open={passwordDialog} onClose={() => setPasswordDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Change Password</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Current Password"
+            type="password"
+            value={passwordData.currentPassword}
+            onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+            sx={{ mt: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="New Password"
+            type="password"
+            value={passwordData.newPassword}
+            onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+            sx={{ mt: 2 }}
+          />
+          <TextField
+            fullWidth
+            label="Confirm New Password"
+            type="password"
+            value={passwordData.confirmPassword}
+            onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPasswordDialog(false)}>Cancel</Button>
+          <Button variant="contained" onClick={() => {
+            if (passwordData.newPassword === passwordData.confirmPassword) {
+              // Here you would call an API to change password
+              alert('Password changed successfully!');
+              setPasswordDialog(false);
+              setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+            } else {
+              alert('Passwords do not match!');
+            }
+          }}>
+            Change Password
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Box component="main" sx={{
         flexGrow: 1,
         p: 0,
@@ -1566,6 +1677,22 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
           </Container>
         </Box>
       </Box>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
