@@ -62,13 +62,7 @@ const AccountSettings = () => {
     accountCreated: '2024-01-15'
   });
   const [editMode, setEditMode] = useState(false);
-  const [passwordDialog, setPasswordDialog] = useState(false);
   const [twoFAEnabled, setTwoFAEnabled] = useState(false);
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -182,15 +176,7 @@ const AccountSettings = () => {
                 variant="outlined"
                 color="warning"
                 fullWidth
-                onClick={() => {
-                  const dataStr = JSON.stringify(data, null, 2);
-                  const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-                  const exportFileDefaultName = 'bavadiya-realty-data.json';
-                  const linkElement = document.createElement('a');
-                  linkElement.setAttribute('href', dataUri);
-                  linkElement.setAttribute('download', exportFileDefaultName);
-                  linkElement.click();
-                }}
+                onClick={() => setSnackbar({ open: true, message: 'Data export feature coming soon!', severity: 'info' })}
               >
                 Export Data
               </Button>
@@ -246,6 +232,12 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
   const [activeView, setActiveView] = useState('dashboard');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [passwordDialog, setPasswordDialog] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
   const [formData, setFormData] = useState({
     date: '',
     unitNo: '',
