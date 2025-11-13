@@ -175,6 +175,15 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
   const [filteredData, setFilteredData] = useState([]);
   const [filterDate, setFilterDate] = useState('');
   const [filterEmployee, setFilterEmployee] = useState('');
+  const [filterProject, setFilterProject] = useState('');
+  const [employees, setEmployees] = useState([]);
+  const [employeeFormData, setEmployeeFormData] = useState({
+    name: '',
+    code: '',
+    number: '',
+  });
+  const [employeeOpen, setEmployeeOpen] = useState(false);
+  const [editingEmployeeIndex, setEditingEmployeeIndex] = useState(null);
   const [open, setOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -196,10 +205,12 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
     customerBro: '',
     customerReceiveDate: '',
     employee: '',
+    commission: '',
   });
 
   useEffect(() => {
     fetchData();
+    fetchEmployees();
   }, []);
 
   useEffect(() => {
@@ -210,8 +221,11 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
     if (filterEmployee) {
       filtered = filtered.filter(item => item.employee === filterEmployee);
     }
+    if (filterProject) {
+      filtered = filtered.filter(item => item.projectName === filterProject);
+    }
     setFilteredData(filtered);
-  }, [data, filterDate, filterEmployee]);
+  }, [data, filterDate, filterEmployee, filterProject, employees]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -227,6 +241,18 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
       setError('Failed to load data. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchEmployees = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('https://bavadiya-realty-backend.vercel.app/api/employees', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setEmployees(response.data);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
     }
   };
 
@@ -250,6 +276,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
         customerBro: '',
         customerReceiveDate: '',
         employee: '',
+        commission: '',
       });
       setEditingIndex(null);
     }
@@ -279,12 +306,37 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
     }
   };
 
+  const handleEmployeeSave = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (editingEmployeeIndex !== null) {
+        await axios.put(`https://bavadiya-realty-backend.vercel.app/api/employees/${editingEmployeeIndex}`, employeeFormData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } else {
+        await axios.post('https://bavadiya-realty-backend.vercel.app/api/employees', employeeFormData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+      fetchEmployees();
+      setEmployeeOpen(false);
+      setEmployeeFormData({ name: '', code: '', number: '' });
+      setEditingEmployeeIndex(null);
+    } catch (error) {
+      console.error('Error saving employee:', error);
+    }
+  };
+
   const totalPayments = data.reduce((sum, item) => sum + (item.basePrice || 0), 0);
-  const receivedPayments = data.filter(item => item.receiveDate).reduce((sum, item) => sum + (item.basePrice || 0), 0);
+  const receivedPayments = data.filter(item => item.receiveDate && item.customerReceiveDate).reduce((sum, item) => sum + (item.basePrice || 0), 0);
   const pendingPayments = totalPayments - receivedPayments;
+  const totalOwnerBrok = data.reduce((sum, item) => sum + (item.ownerBro || 0), 0);
+  const totalCustomerBrok = data.reduce((sum, item) => sum + (item.customerBro || 0), 0);
 
   const employeeData = data.reduce((acc, item) => {
-    acc[item.employee] = (acc[item.employee] || 0) + (item.basePrice || 0);
+    const emp = employees.find(e => e.code === item.employee);
+    const empName = emp ? emp.name : item.employee;
+    acc[empName] = (acc[empName] || 0) + (item.basePrice || 0);
     return acc;
   }, {});
   const chartData = Object.entries(employeeData).map(([name, value]) => ({ name, value }));
@@ -299,6 +351,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
     { text: 'Overview', icon: <DashboardIcon />, view: 'dashboard' },
     { text: 'Reports & Analytics', icon: <BarChartIcon />, view: 'analytics' },
     { text: 'Payment Records', icon: <TableChart />, view: 'table' },
+    { text: 'Employee Management', icon: <PersonIcon />, view: 'employees' },
     { text: 'Account Settings', icon: <PersonIcon />, view: 'settings' },
   ];
 
@@ -308,6 +361,45 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
         return <Analytics />;
       case 'table':
         return <DataTable onEditEntry={(row) => handleOpen(data.indexOf(row))} />;
+      case 'employees':
+        return (
+          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+            <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: 'primary.main', mb: 4 }}>
+              Employee Management
+            </Typography>
+            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end' }}>
+              <Button variant="contained" startIcon={<Add />} onClick={() => setEmployeeOpen(true)}>
+                Add Employee
+              </Button>
+            </Box>
+            <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+              <Table>
+                <TableHead>
+                  <TableRow sx={{ bgcolor: 'primary.main', '& th': { color: 'white', fontWeight: 600 } }}>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Code</TableCell>
+                    <TableCell>Number</TableCell>
+                    <TableCell>Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {employees.map((emp, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{emp.name}</TableCell>
+                      <TableCell>{emp.code}</TableCell>
+                      <TableCell>{emp.number}</TableCell>
+                      <TableCell>
+                        <IconButton onClick={() => { setEmployeeFormData(emp); setEditingEmployeeIndex(index); setEmployeeOpen(true); }}>
+                          <Edit />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Container>
+        );
       case 'settings':
         return <AccountSettings />;
       case 'dashboard':
@@ -350,7 +442,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
 
                 {/* Key Performance Indicators */}
                 <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: { xs: 3, md: 4 } }}>
-                  <Grid item xs={6} sm={6} md={3}>
+                  <Grid item xs={6} sm={6} md={2}>
                     <Card sx={{
                       background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
                       color: 'white',
@@ -414,7 +506,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
                       </CardContent>
                     </Card>
                   </Grid>
-                  <Grid item xs={6} sm={6} md={3}>
+                  <Grid item xs={6} sm={6} md={2}>
                     <Card sx={{
                       background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
                       color: 'white',
@@ -478,7 +570,135 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
                       </CardContent>
                     </Card>
                   </Grid>
-                  <Grid item xs={6} sm={6} md={3}>
+                  <Grid item xs={6} sm={6} md={2}>
+                    <Card sx={{
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      color: 'white',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      borderRadius: 3,
+                      boxShadow: '0 4px 16px rgba(16, 185, 129, 0.2)',
+                      minHeight: { xs: 120, sm: 140 },
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        width: { xs: '80px', sm: '120px' },
+                        height: { xs: '80px', sm: '120px' },
+                        background: 'rgba(255,255,255,0.1)',
+                        borderRadius: '50%',
+                        transform: 'translate(30px, -30px)',
+                      }
+                    }}>
+                      <CardContent sx={{
+                        position: 'relative',
+                        zIndex: 1,
+                        p: { xs: 1.5, sm: 2 },
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
+                      }}>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontWeight: 600,
+                            fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                            mb: 0.5,
+                            lineHeight: 1.2
+                          }}
+                        >
+                          Total Owner Brokerage
+                        </Typography>
+                        <Typography
+                          variant="h5"
+                          sx={{
+                            fontWeight: 700,
+                            fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                            mb: 0.5,
+                            lineHeight: 1.2
+                          }}
+                        >
+                          ₹{totalOwnerBrok.toLocaleString()}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            opacity: 0.8,
+                            fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                          }}
+                        >
+                          Owner commissions
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={6} sm={6} md={2}>
+                    <Card sx={{
+                      background: 'linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)',
+                      color: 'white',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      borderRadius: 3,
+                      boxShadow: '0 4px 16px rgba(59, 130, 246, 0.2)',
+                      minHeight: { xs: 120, sm: 140 },
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        width: { xs: '80px', sm: '120px' },
+                        height: { xs: '80px', sm: '120px' },
+                        background: 'rgba(255,255,255,0.1)',
+                        borderRadius: '50%',
+                        transform: 'translate(30px, -30px)',
+                      }
+                    }}>
+                      <CardContent sx={{
+                        position: 'relative',
+                        zIndex: 1,
+                        p: { xs: 1.5, sm: 2 },
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center'
+                      }}>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontWeight: 600,
+                            fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                            mb: 0.5,
+                            lineHeight: 1.2
+                          }}
+                        >
+                          Total Customer Brokerage
+                        </Typography>
+                        <Typography
+                          variant="h5"
+                          sx={{
+                            fontWeight: 700,
+                            fontSize: { xs: '1.1rem', sm: '1.25rem' },
+                            mb: 0.5,
+                            lineHeight: 1.2
+                          }}
+                        >
+                          ₹{totalCustomerBrok.toLocaleString()}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            opacity: 0.8,
+                            fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                          }}
+                        >
+                          Customer commissions
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={6} sm={6} md={2}>
                     <Card sx={{
                       background: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
                       color: 'white',
@@ -542,7 +762,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
                       </CardContent>
                     </Card>
                   </Grid>
-                  <Grid item xs={6} sm={6} md={3}>
+                  <Grid item xs={6} sm={6} md={2}>
                     <Card sx={{
                       background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
                       color: 'white',
@@ -823,8 +1043,21 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
                       onChange={(e) => setFilterEmployee(e.target.value)}
                     >
                       <MenuItem value="">All</MenuItem>
-                      {[...new Set(data.map(item => item.employee))].map(emp => (
-                        <MenuItem key={emp} value={emp}>{emp}</MenuItem>
+                      {employees.map((emp, index) => (
+                        <MenuItem key={index} value={emp.code}>{emp.name}</MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <FormControl sx={{ minWidth: { xs: '100%', sm: 120 } }} size="small">
+                    <InputLabel>Filter by Project</InputLabel>
+                    <Select
+                      value={filterProject}
+                      label="Filter by Project"
+                      onChange={(e) => setFilterProject(e.target.value)}
+                    >
+                      <MenuItem value="">All</MenuItem>
+                      {[...new Set(data.map(item => item.projectName))].map(proj => (
+                        <MenuItem key={proj} value={proj}>{proj}</MenuItem>
                       ))}
                     </Select>
                   </FormControl>
@@ -857,6 +1090,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
                         <TableCell>Base Price</TableCell>
                         <TableCell>Status</TableCell>
                         <TableCell>Employee</TableCell>
+                        <TableCell>Commission (%)</TableCell>
                         <TableCell>Actions</TableCell>
                       </TableRow>
                     </TableHead>
@@ -880,13 +1114,14 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
                           </TableCell>
                           <TableCell>
                             <Chip
-                              label={row.receiveDate ? 'Received' : 'Pending'}
-                              color={row.receiveDate ? 'success' : 'warning'}
+                              label={row.receiveDate && row.customerReceiveDate ? 'Received' : row.customerReceiveDate ? 'Partial' : 'Pending'}
+                              color={row.receiveDate && row.customerReceiveDate ? 'success' : row.customerReceiveDate ? 'warning' : 'error'}
                               size="small"
                               variant="outlined"
                             />
                           </TableCell>
-                          <TableCell>{row.employee}</TableCell>
+                          <TableCell>{employees.find(e => e.code === row.employee)?.name || row.employee}</TableCell>
+                          <TableCell>{row.commission}%</TableCell>
                           <TableCell>
                             <IconButton onClick={() => handleOpen(data.indexOf(row))}>
                               <Edit />
@@ -1155,11 +1390,27 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Employee</InputLabel>
+                  <Select
+                    value={formData.employee}
+                    label="Employee"
+                    onChange={(e) => setFormData({ ...formData, employee: e.target.value })}
+                  >
+                    <MenuItem value="">Select Employee</MenuItem>
+                    {employees.map((emp, index) => (
+                      <MenuItem key={index} value={emp.code}>{emp.name} ({emp.code})</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="Employee"
-                  value={formData.employee}
-                  onChange={(e) => setFormData({ ...formData, employee: e.target.value })}
+                  label="Employee Commission (%)"
+                  type="number"
+                  value={formData.commission}
+                  onChange={(e) => setFormData({ ...formData, commission: parseFloat(e.target.value) || '' })}
                 />
               </Grid>
             </Grid>
@@ -1187,6 +1438,85 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
               }}
             >
               Save Entry
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Employee Dialog */}
+        <Dialog
+          open={employeeOpen}
+          onClose={() => setEmployeeOpen(false)}
+          maxWidth="sm"
+          fullWidth
+          sx={{
+            '& .MuiDialog-paper': {
+              borderRadius: 3,
+              boxShadow: '0 25px 50px rgba(0,0,0,0.25)',
+            }
+          }}
+        >
+          <DialogTitle sx={{
+            bgcolor: 'primary.main',
+            color: 'white',
+            fontWeight: 600,
+            fontSize: '1.25rem'
+          }}>
+            {editingEmployeeIndex !== null ? 'Edit Employee' : 'Add New Employee'}
+          </DialogTitle>
+          <DialogContent sx={{ p: 3 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Enter employee details below.
+            </Typography>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Employee Name"
+                  value={employeeFormData.name}
+                  onChange={(e) => setEmployeeFormData({ ...employeeFormData, name: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Employee Code"
+                  value={employeeFormData.code}
+                  onChange={(e) => setEmployeeFormData({ ...employeeFormData, code: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Employee Number"
+                  value={employeeFormData.number}
+                  onChange={(e) => setEmployeeFormData({ ...employeeFormData, number: e.target.value })}
+                />
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions sx={{ p: 3, pt: 0 }}>
+            <Button
+              onClick={() => { setEmployeeOpen(false); setEmployeeFormData({ name: '', code: '', number: '' }); setEditingEmployeeIndex(null); }}
+              variant="outlined"
+              sx={{
+                borderRadius: 2,
+                px: 3,
+                textTransform: 'none'
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleEmployeeSave}
+              variant="contained"
+              sx={{
+                borderRadius: 2,
+                px: 3,
+                textTransform: 'none',
+                fontWeight: 600,
+              }}
+            >
+              Save
             </Button>
           </DialogActions>
         </Dialog>

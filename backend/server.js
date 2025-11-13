@@ -57,7 +57,14 @@ function authenticateToken(req, res, next) {
 let data = [];
 const dataFilePath = path.join(__dirname, 'data.json');
 if (fs.existsSync(dataFilePath)) {
-  data = JSON.parse(fs.readFileSync(dataFilePath));
+   data = JSON.parse(fs.readFileSync(dataFilePath));
+}
+
+// ---- EMPLOYEES ------------------------
+let employees = [];
+const employeesFilePath = path.join(__dirname, 'employees.json');
+if (fs.existsSync(employeesFilePath)) {
+   employees = JSON.parse(fs.readFileSync(employeesFilePath));
 }
 
 app.get('/api/data', authenticateToken, (req, res) => {
@@ -65,18 +72,53 @@ app.get('/api/data', authenticateToken, (req, res) => {
 });
 
 app.post('/api/data', authenticateToken, (req, res) => {
-  data.push(req.body);
-  res.json({ success: true });
+   data.push(req.body);
+   fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
+   res.json({ success: true });
 });
 
 app.put('/api/data/:index', authenticateToken, (req, res) => {
-  const index = parseInt(req.params.index);
-  if (index >= 0 && index < data.length) {
-    data[index] = req.body;
-    res.json({ success: true });
-  } else {
-    res.status(400).json({ error: 'Invalid index' });
-  }
+   const index = parseInt(req.params.index);
+   if (index >= 0 && index < data.length) {
+     data[index] = req.body;
+     fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
+     res.json({ success: true });
+   } else {
+     res.status(400).json({ error: 'Invalid index' });
+   }
+});
+
+// ---- EMPLOYEE ENDPOINTS ------------------------
+app.get('/api/employees', authenticateToken, (req, res) => {
+   res.json(employees);
+});
+
+app.post('/api/employees', authenticateToken, (req, res) => {
+   employees.push(req.body);
+   fs.writeFileSync(employeesFilePath, JSON.stringify(employees, null, 2));
+   res.json({ success: true });
+});
+
+app.put('/api/employees/:index', authenticateToken, (req, res) => {
+   const index = parseInt(req.params.index);
+   if (index >= 0 && index < employees.length) {
+     employees[index] = req.body;
+     fs.writeFileSync(employeesFilePath, JSON.stringify(employees, null, 2));
+     res.json({ success: true });
+   } else {
+     res.status(400).json({ error: 'Invalid index' });
+   }
+});
+
+app.delete('/api/employees/:index', authenticateToken, (req, res) => {
+   const index = parseInt(req.params.index);
+   if (index >= 0 && index < employees.length) {
+     employees.splice(index, 1);
+     fs.writeFileSync(employeesFilePath, JSON.stringify(employees, null, 2));
+     res.json({ success: true });
+   } else {
+     res.status(400).json({ error: 'Invalid index' });
+   }
 });
 
 app.listen(PORT, () => console.log(`✅ API running on port ${PORT}`));
