@@ -73,7 +73,8 @@ app.get('/api/data', authenticateToken, (req, res) => {
 
 app.post('/api/data', authenticateToken, (req, res) => {
    data.push(req.body);
-   fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
+   // Note: In serverless environment, data persists only during session
+   // For production persistence, implement database storage
    res.json({ success: true });
 });
 
@@ -81,7 +82,7 @@ app.put('/api/data/:index', authenticateToken, (req, res) => {
    const index = parseInt(req.params.index);
    if (index >= 0 && index < data.length) {
      data[index] = req.body;
-     fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
+     // Note: In serverless environment, data persists only during session
      res.json({ success: true });
    } else {
      res.status(400).json({ error: 'Invalid index' });
@@ -95,7 +96,7 @@ app.get('/api/employees', authenticateToken, (req, res) => {
 
 app.post('/api/employees', authenticateToken, (req, res) => {
    employees.push(req.body);
-   fs.writeFileSync(employeesFilePath, JSON.stringify(employees, null, 2));
+   // Note: In serverless environment, data persists only during session
    res.json({ success: true });
 });
 
@@ -103,7 +104,7 @@ app.put('/api/employees/:index', authenticateToken, (req, res) => {
    const index = parseInt(req.params.index);
    if (index >= 0 && index < employees.length) {
      employees[index] = req.body;
-     fs.writeFileSync(employeesFilePath, JSON.stringify(employees, null, 2));
+     // Note: In serverless environment, data persists only during session
      res.json({ success: true });
    } else {
      res.status(400).json({ error: 'Invalid index' });
@@ -114,7 +115,7 @@ app.delete('/api/employees/:index', authenticateToken, (req, res) => {
    const index = parseInt(req.params.index);
    if (index >= 0 && index < employees.length) {
      employees.splice(index, 1);
-     fs.writeFileSync(employeesFilePath, JSON.stringify(employees, null, 2));
+     // Note: In serverless environment, data persists only during session
      res.json({ success: true });
    } else {
      res.status(400).json({ error: 'Invalid index' });
