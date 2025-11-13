@@ -258,7 +258,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
 
   const handleOpen = (index = null) => {
     if (index !== null) {
-      setFormData(data[index]);
+      setFormData(data.find(item => item._id === index));
       setEditingIndex(index);
     } else {
       setFormData({
@@ -389,7 +389,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
                       <TableCell>{emp.code}</TableCell>
                       <TableCell>{emp.number}</TableCell>
                       <TableCell>
-                        <IconButton onClick={() => { setEmployeeFormData(emp); setEditingEmployeeIndex(index); setEmployeeOpen(true); }}>
+                        <IconButton onClick={() => { setEmployeeFormData(emp); setEditingEmployeeIndex(emp._id); setEmployeeOpen(true); }}>
                           <Edit />
                         </IconButton>
                       </TableCell>
@@ -1123,7 +1123,7 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
                           <TableCell>{employees.find(e => e.code === row.employee)?.name || row.employee}</TableCell>
                           <TableCell>{row.commission}%</TableCell>
                           <TableCell>
-                            <IconButton onClick={() => handleOpen(data.indexOf(row))}>
+                            <IconButton onClick={() => handleOpen(row._id)}>
                               <Edit />
                             </IconButton>
                           </TableCell>

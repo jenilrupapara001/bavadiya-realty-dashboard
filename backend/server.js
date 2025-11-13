@@ -2,8 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const fs = require('fs');
-const path = require('path');
+const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
@@ -21,6 +20,40 @@ app.use(cors({
 }));
 
 app.use(bodyParser.json());
+
+// ---- MongoDB Connection ----
+const mongoURI = process.env.MONGO_URI || 'mongodb+srv://jenilrupapara340_db_user:gPaASk6ZOa4Wa44L@sample-data.vyal4lo.mongodb.net/bavadiya-realty?appName=Sample-Data';
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
+
+// ---- Schemas ----
+const dataSchema = new mongoose.Schema({
+  date: String,
+  unitNo: String,
+  projectName: String,
+  ownerName: String,
+  ownerNumber: String,
+  customerName: String,
+  customerNumber: String,
+  timePeriod: String,
+  basePrice: Number,
+  ownerBro: Number,
+  receiveDate: String,
+  customerBro: Number,
+  customerReceiveDate: String,
+  employee: String,
+  commission: Number,
+});
+
+const employeeSchema = new mongoose.Schema({
+  name: String,
+  code: String,
+  number: String,
+});
+
+const Data = mongoose.model('Data', dataSchema);
+const Employee = mongoose.model('Employee', employeeSchema);
 
 // ---- Admin Credentials ----
 const defaultUsername = process.env.DEFAULT_ADMIN_USERNAME || 'DharmeshBavadiya';
@@ -53,72 +86,71 @@ function authenticateToken(req, res, next) {
   });
 }
 
-// ---- DATA ------------------------
-let data = [];
-const dataFilePath = path.join(__dirname, 'data.json');
-if (fs.existsSync(dataFilePath)) {
-   data = JSON.parse(fs.readFileSync(dataFilePath));
-}
+// ---- DATA and EMPLOYEES now handled by MongoDB ----
 
-// ---- EMPLOYEES ------------------------
-let employees = [];
-const employeesFilePath = path.join(__dirname, 'employees.json');
-if (fs.existsSync(employeesFilePath)) {
-   employees = JSON.parse(fs.readFileSync(employeesFilePath));
-}
-
-app.get('/api/data', authenticateToken, (req, res) => {
-  res.json(data);
+app.get('/api/data', authenticateToken, async (req, res) => {
+   try {
+     const data = await Data.find();
+     res.json(data);
+   } catch (error) {
+     res.status(500).json({ error: 'Failed to fetch data' });
+   }
 });
 
-app.post('/api/data', authenticateToken, (req, res) => {
-   data.push(req.body);
-   // Note: In serverless environment, data persists only during session
-   // For production persistence, implement database storage
-   res.json({ success: true });
-});
-
-app.put('/api/data/:index', authenticateToken, (req, res) => {
-   const index = parseInt(req.params.index);
-   if (index >= 0 && index < data.length) {
-     data[index] = req.body;
-     // Note: In serverless environment, data persists only during session
+app.post('/api/data', authenticateToken, async (req, res) => {
+   try {
+     const newData = new Data(req.body);
+     await newData.save();
      res.json({ success: true });
-   } else {
-     res.status(400).json({ error: 'Invalid index' });
+   } catch (error) {
+     res.status(500).json({ error: 'Failed to save data' });
+   }
+});
+
+app.put('/api/data/:id', authenticateToken, async (req, res) => {
+   try {
+     await Data.findByIdAndUpdate(req.params.id, req.body);
+     res.json({ success: true });
+   } catch (error) {
+     res.status(500).json({ error: 'Failed to update data' });
    }
 });
 
 // ---- EMPLOYEE ENDPOINTS ------------------------
-app.get('/api/employees', authenticateToken, (req, res) => {
-   res.json(employees);
-});
-
-app.post('/api/employees', authenticateToken, (req, res) => {
-   employees.push(req.body);
-   // Note: In serverless environment, data persists only during session
-   res.json({ success: true });
-});
-
-app.put('/api/employees/:index', authenticateToken, (req, res) => {
-   const index = parseInt(req.params.index);
-   if (index >= 0 && index < employees.length) {
-     employees[index] = req.body;
-     // Note: In serverless environment, data persists only during session
-     res.json({ success: true });
-   } else {
-     res.status(400).json({ error: 'Invalid index' });
+app.get('/api/employees', authenticateToken, async (req, res) => {
+   try {
+     const employees = await Employee.find();
+     res.json(employees);
+   } catch (error) {
+     res.status(500).json({ error: 'Failed to fetch employees' });
    }
 });
 
-app.delete('/api/employees/:index', authenticateToken, (req, res) => {
-   const index = parseInt(req.params.index);
-   if (index >= 0 && index < employees.length) {
-     employees.splice(index, 1);
-     // Note: In serverless environment, data persists only during session
+app.post('/api/employees', authenticateToken, async (req, res) => {
+   try {
+     const newEmployee = new Employee(req.body);
+     await newEmployee.save();
      res.json({ success: true });
-   } else {
-     res.status(400).json({ error: 'Invalid index' });
+   } catch (error) {
+     res.status(500).json({ error: 'Failed to save employee' });
+   }
+});
+
+app.put('/api/employees/:id', authenticateToken, async (req, res) => {
+   try {
+     await Employee.findByIdAndUpdate(req.params.id, req.body);
+     res.json({ success: true });
+   } catch (error) {
+     res.status(500).json({ error: 'Failed to update employee' });
+   }
+});
+
+app.delete('/api/employees/:id', authenticateToken, async (req, res) => {
+   try {
+     await Employee.findByIdAndDelete(req.params.id);
+     res.json({ success: true });
+   } catch (error) {
+     res.status(500).json({ error: 'Failed to delete employee' });
    }
 });
 
