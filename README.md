@@ -203,22 +203,6 @@ docker-compose up --build -d
 
 **All protected endpoints require:** `Authorization: Bearer <jwt-token>`
 
-## API Endpoints
-
-### Authentication
-
-- `POST /api/login` - Login with username and password
-  - Request: `{ "username": "admin", "password": "password123" }`
-  - Response: `{ "token": "jwt-token-here" }`
-
-### Data Management (Protected)
-
-- `GET /api/data` - Get all payment data
-- `POST /api/data` - Add new payment entry
-- `PUT /api/data/:index` - Update payment entry
-
-All data endpoints require `Authorization: Bearer <token>` header.
-
 ## 📊 Data Models
 
 ### Payment Entry Schema
