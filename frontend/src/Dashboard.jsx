@@ -38,9 +38,6 @@ import {
   CircularProgress,
   Alert,
   Snackbar,
-  Skeleton,
-  Fade,
-  Grow,
 } from '@mui/material';
 import { Logout, Add, Edit, Delete, Dashboard as DashboardIcon, BarChart as BarChartIcon, TableChart, Menu, Person as PersonIcon } from '@mui/icons-material';
 import { AuthContext } from './AuthContext';
@@ -70,14 +67,6 @@ const Dashboard = () => {
   const [employeeOpen, setEmployeeOpen] = useState(false);
   const [editingEmployeeIndex, setEditingEmployeeIndex] = useState(null);
   const [projects, setProjects] = useState([]);
-  const [projectFormData, setProjectFormData] = useState({
-    name: '',
-    description: '',
-    location: '',
-    status: 'Active',
-  });
-  const [projectOpen, setProjectOpen] = useState(false);
-  const [editingProjectIndex, setEditingProjectIndex] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [open, setOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
@@ -97,9 +86,10 @@ const Dashboard = () => {
     basePrice: '',
     ownerBro: '',
     receiveDate: '',
+    ownerReceivedBy: '',
     customerBro: '',
     customerReceiveDate: '',
-    receivedBy: '',
+    customerReceivedBy: '',
     employee: '',
     commission: '',
   });
@@ -223,9 +213,10 @@ const Dashboard = () => {
       basePrice: '',
       ownerBro: '',
       receiveDate: '',
+      ownerReceivedBy: '',
       customerBro: '',
       customerReceiveDate: '',
-      receivedBy: '',
+      customerReceivedBy: '',
       employee: '',
       commission: '',
     });
@@ -317,46 +308,6 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error saving employee:', error);
       setSnackbar({ open: true, message: 'Error saving employee. Please try again.', severity: 'error' });
-    }
-  };
-
-  const handleProjectSave = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (editingProjectIndex !== null) {
-        await axios.put(`https://bavadiya-realty-backend.vercel.app/api/projects/${editingProjectIndex}`, projectFormData, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setSnackbar({ open: true, message: 'Project updated successfully!', severity: 'success' });
-      } else {
-        await axios.post('https://bavadiya-realty-backend.vercel.app/api/projects', projectFormData, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setSnackbar({ open: true, message: 'Project added successfully!', severity: 'success' });
-      }
-      fetchProjects();
-      setProjectOpen(false);
-      setProjectFormData({ name: '', description: '', location: '', status: 'Active' });
-      setEditingProjectIndex(null);
-    } catch (error) {
-      console.error('Error saving project:', error);
-      setSnackbar({ open: true, message: 'Error saving project. Please try again.', severity: 'error' });
-    }
-  };
-
-  const handleProjectDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this project?')) {
-      try {
-        const token = localStorage.getItem('token');
-        await axios.delete(`https://bavadiya-realty-backend.vercel.app/api/projects/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setSnackbar({ open: true, message: 'Project deleted successfully!', severity: 'success' });
-        fetchProjects();
-      } catch (error) {
-        console.error('Error deleting project:', error);
-        setSnackbar({ open: true, message: 'Error deleting project. Please try again.', severity: 'error' });
-      }
     }
   };
 
@@ -652,92 +603,92 @@ const Dashboard = () => {
                 </Grow>
 
                 {/* Cards On Dashboard */}
-                <Grid container spacing={3} sx={{ mb: 4 }}>
-                  <Grid item xs={12} sm={6} md={4} lg={2}>
-                    <Card sx={{ minWidth: 275, borderRadius: 2, boxShadow: 2 }}>
-                      <CardContent>
-                        <Typography sx={{ fontSize: 14, color: 'text.secondary', mb: 1 }}>
+                <Grid container spacing={2} sx={{ mb: 4 }}>
+                  <Grid item xs={6} sm={4} md={3} lg={2}>
+                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%' }}>
+                      <CardContent sx={{ p: 2 }}>
+                        <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
                           Total Portfolio
                         </Typography>
-                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}>
+                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 0.5, fontSize: '1.1rem' }}>
                           ₹{totalPortfolio.toLocaleString()}
                         </Typography>
-                        <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+                        <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>
                           Base Price • All transactions
                         </Typography>
                       </CardContent>
                     </Card>
                   </Grid>
-                  <Grid item xs={12} sm={6} md={4} lg={2}>
-                    <Card sx={{ minWidth: 275, borderRadius: 2, boxShadow: 2 }}>
-                      <CardContent>
-                        <Typography sx={{ fontSize: 14, color: 'text.secondary', mb: 1 }}>
+                  <Grid item xs={6} sm={4} md={3} lg={2}>
+                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%' }}>
+                      <CardContent sx={{ p: 2 }}>
+                        <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
                           Total Brokerage
                         </Typography>
-                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'success.main', mb: 1 }}>
+                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: 'success.main', mb: 0.5, fontSize: '1.1rem' }}>
                           ₹{totalBrokerage.toLocaleString()}
                         </Typography>
-                        <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+                        <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>
                           Owner + Customer commissions
                         </Typography>
                       </CardContent>
                     </Card>
                   </Grid>
-                  <Grid item xs={12} sm={6} md={4} lg={2}>
-                    <Card sx={{ minWidth: 275, borderRadius: 2, boxShadow: 2 }}>
-                      <CardContent>
-                        <Typography sx={{ fontSize: 14, color: 'text.secondary', mb: 1 }}>
+                  <Grid item xs={6} sm={4} md={3} lg={2}>
+                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%' }}>
+                      <CardContent sx={{ p: 2 }}>
+                        <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
                           Owner Brokerage
                         </Typography>
-                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'info.main', mb: 1 }}>
+                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: 'info.main', mb: 0.5, fontSize: '1.1rem' }}>
                           ₹{totalOwnerBrok.toLocaleString()}
                         </Typography>
-                        <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+                        <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>
                           Owner commissions
                         </Typography>
                       </CardContent>
                     </Card>
                   </Grid>
-                  <Grid item xs={12} sm={6} md={4} lg={2}>
-                    <Card sx={{ minWidth: 275, borderRadius: 2, boxShadow: 2 }}>
-                      <CardContent>
-                        <Typography sx={{ fontSize: 14, color: 'text.secondary', mb: 1 }}>
+                  <Grid item xs={6} sm={4} md={3} lg={2}>
+                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%' }}>
+                      <CardContent sx={{ p: 2 }}>
+                        <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
                           Customer Brokerage
                         </Typography>
-                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'secondary.main', mb: 1 }}>
+                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: 'secondary.main', mb: 0.5, fontSize: '1.1rem' }}>
                           ₹{totalCustomerBrok.toLocaleString()}
                         </Typography>
-                        <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+                        <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>
                           Customer commissions
                         </Typography>
                       </CardContent>
                     </Card>
                   </Grid>
-                  <Grid item xs={12} sm={6} md={4} lg={2}>
-                    <Card sx={{ minWidth: 275, borderRadius: 2, boxShadow: 2 }}>
-                      <CardContent>
-                        <Typography sx={{ fontSize: 14, color: 'text.secondary', mb: 1 }}>
+                  <Grid item xs={6} sm={4} md={3} lg={2}>
+                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%' }}>
+                      <CardContent sx={{ p: 2 }}>
+                        <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
                           Payment Received
                         </Typography>
-                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'warning.main', mb: 1 }}>
+                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: 'warning.main', mb: 0.5, fontSize: '1.1rem' }}>
                           ₹{paymentReceived.toLocaleString()}
                         </Typography>
-                        <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+                        <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>
                           Based on receive dates
                         </Typography>
                       </CardContent>
                     </Card>
                   </Grid>
-                  <Grid item xs={12} sm={6} md={4} lg={2}>
-                    <Card sx={{ minWidth: 275, borderRadius: 2, boxShadow: 2 }}>
-                      <CardContent>
-                        <Typography sx={{ fontSize: 14, color: 'text.secondary', mb: 1 }}>
+                  <Grid item xs={6} sm={4} md={3} lg={2}>
+                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%' }}>
+                      <CardContent sx={{ p: 2 }}>
+                        <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
                           Outstanding Amount
                         </Typography>
-                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'error.main', mb: 1 }}>
+                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: 'error.main', mb: 0.5, fontSize: '1.1rem' }}>
                           ₹{outstandingAmount.toLocaleString()}
                         </Typography>
-                        <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
+                        <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>
                           Pending payments
                         </Typography>
                       </CardContent>
@@ -1401,16 +1352,33 @@ const Dashboard = () => {
                   />
                 </Box>
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={6} sm={3}>
                 <TextField
                   fullWidth
-                  label="Receive Date"
+                  size="small"
+                  label="Owner Receive Date"
                   type="date"
                   value={formData.receiveDate}
                   onChange={(e) => setFormData({ ...formData, receiveDate: e.target.value })}
                   InputLabelProps={{ shrink: true }}
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                 />
+              </Grid>
+              <Grid item xs={6} sm={3}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Owner Received By</InputLabel>
+                  <Select
+                    value={formData.ownerReceivedBy || ''}
+                    label="Owner Received By"
+                    onChange={(e) => setFormData({ ...formData, ownerReceivedBy: e.target.value })}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    <MenuItem value="">Select</MenuItem>
+                    <MenuItem value="Dharmesh Bavadiya">Dharmesh</MenuItem>
+                    <MenuItem value="Yogesh Bavadiya">Yogesh</MenuItem>
+                    <MenuItem value="Bavadiya Realty LLP">Company</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Box>
@@ -1438,9 +1406,10 @@ const Dashboard = () => {
                   />
                 </Box>
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={6} sm={3}>
                 <TextField
                   fullWidth
+                  size="small"
                   label="Customer Receive Date"
                   type="date"
                   value={formData.customerReceiveDate}
@@ -1449,19 +1418,19 @@ const Dashboard = () => {
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Received By</InputLabel>
+              <Grid item xs={6} sm={3}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Customer Received By</InputLabel>
                   <Select
-                    value={formData.receivedBy || ''}
-                    label="Received By"
-                    onChange={(e) => setFormData({ ...formData, receivedBy: e.target.value })}
+                    value={formData.customerReceivedBy || ''}
+                    label="Customer Received By"
+                    onChange={(e) => setFormData({ ...formData, customerReceivedBy: e.target.value })}
                     sx={{ borderRadius: 2 }}
                   >
-                    <MenuItem value="">Select Receiver</MenuItem>
-                    <MenuItem value="Dharmesh Bavadiya">Dharmesh Bavadiya</MenuItem>
-                    <MenuItem value="Yogesh Bavadiya">Yogesh Bavadiya</MenuItem>
-                    <MenuItem value="Bavadiya Realty LLP">Bavadiya Realty LLP</MenuItem>
+                    <MenuItem value="">Select</MenuItem>
+                    <MenuItem value="Dharmesh Bavadiya">Dharmesh</MenuItem>
+                    <MenuItem value="Yogesh Bavadiya">Yogesh</MenuItem>
+                    <MenuItem value="Bavadiya Realty LLP">Company</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -1606,106 +1575,6 @@ const Dashboard = () => {
           </DialogActions>
         </Dialog>
 
-        {/* Project Dialog */}
-        <Dialog
-          open={projectOpen}
-          onClose={() => setProjectOpen(false)}
-          maxWidth="md"
-          fullWidth
-          sx={{
-            '& .MuiDialog-paper': {
-              borderRadius: 4,
-              boxShadow: '0 25px 50px rgba(0,0,0,0.25)',
-            }
-          }}
-        >
-          <DialogTitle sx={{
-            bgcolor: 'primary.main',
-            color: 'white',
-            fontWeight: 600,
-            fontSize: '1.25rem',
-            borderTopLeftRadius: 4,
-            borderTopRightRadius: 4
-          }}>
-            {editingProjectIndex !== null ? 'Edit Project' : 'Add New Project'}
-          </DialogTitle>
-          <DialogContent sx={{ p: 4 }}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Enter project details below.
-            </Typography>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Project Name"
-                  value={projectFormData.name}
-                  onChange={(e) => setProjectFormData({ ...projectFormData, name: e.target.value })}
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Description"
-                  multiline
-                  rows={3}
-                  value={projectFormData.description}
-                  onChange={(e) => setProjectFormData({ ...projectFormData, description: e.target.value })}
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Location"
-                  value={projectFormData.location}
-                  onChange={(e) => setProjectFormData({ ...projectFormData, location: e.target.value })}
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Status</InputLabel>
-                  <Select
-                    value={projectFormData.status}
-                    label="Status"
-                    onChange={(e) => setProjectFormData({ ...projectFormData, status: e.target.value })}
-                    sx={{ borderRadius: 2 }}
-                  >
-                    <MenuItem value="Active">Active</MenuItem>
-                    <MenuItem value="Completed">Completed</MenuItem>
-                    <MenuItem value="On Hold">On Hold</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
-          </DialogContent>
-          <DialogActions sx={{ p: 4, pt: 0 }}>
-            <Button
-              onClick={() => { setProjectOpen(false); setProjectFormData({ name: '', description: '', location: '', status: 'Active' }); setEditingProjectIndex(null); }}
-              variant="outlined"
-              sx={{
-                borderRadius: 3,
-                px: 3,
-                textTransform: 'none'
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleProjectSave}
-              variant="contained"
-              sx={{
-                borderRadius: 3,
-                px: 3,
-                textTransform: 'none',
-                fontWeight: 600,
-              }}
-            >
-              Save
-            </Button>
-          </DialogActions>
-        </Dialog>
 
         {/* Footer */}
         <Box
