@@ -1163,9 +1163,16 @@ const Dashboard = () => {
               <Menu />
             </IconButton>
           )}
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 600 }}>
-            Bavadiya Realty LLP
-          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+            <img
+              src="https://crm.bavadiyarealty.com/storage/uploads/logo/1754457837_logo.png"
+              alt="Bavadiya Realty LLP"
+              style={{ height: '40px', marginRight: '12px' }}
+            />
+            <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+              Bavadiya Realty LLP
+            </Typography>
+          </Box>
           <IconButton color="inherit" onClick={logout}>
             <Logout />
           </IconButton>

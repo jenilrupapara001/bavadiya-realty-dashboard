@@ -2,7 +2,13 @@
 
 ## Complete Real Estate Payment Management System with iOS-themed UI
 
-![Bavadiya Realty](https://bavadiyarealty.com/logo.png)
+<div align="center">
+  <img src="https://crm.bavadiyarealty.com/storage/uploads/logo/1754457837_logo.png" alt="Bavadiya Realty LLP Logo" width="200"/>
+</div>
+
+<p align="center">
+  <strong>Professional Real Estate Payment Management Dashboard</strong>
+</p>
 
 A comprehensive, production-ready dashboard for managing real estate payments, brokerages, projects, and employees with a beautiful iOS-inspired interface.
 
