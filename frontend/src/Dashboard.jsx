@@ -55,10 +55,12 @@ const Dashboard = () => {
   const isMobile = useMediaQuery((theme) => theme.breakpoints.down('md'));
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [filterDate, setFilterDate] = useState('');
+  const [filterDateFrom, setFilterDateFrom] = useState('');
+  const [filterDateTo, setFilterDateTo] = useState('');
   const [filterEmployee, setFilterEmployee] = useState('');
   const [filterProject, setFilterProject] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [filterReceivedBy, setFilterReceivedBy] = useState('');
   const [employees, setEmployees] = useState([]);
   const [employeeFormData, setEmployeeFormData] = useState({
     name: '',
@@ -97,6 +99,7 @@ const Dashboard = () => {
     receiveDate: '',
     customerBro: '',
     customerReceiveDate: '',
+    receivedBy: '',
     employee: '',
     commission: '',
   });
@@ -109,8 +112,16 @@ const Dashboard = () => {
 
   useEffect(() => {
     let filtered = data;
-    if (filterDate) {
-      filtered = filtered.filter(item => item.receiveDate === filterDate);
+    if (filterDateFrom || filterDateTo) {
+      filtered = filtered.filter(item => {
+        const itemDate = new Date(item.receiveDate);
+        const fromDate = filterDateFrom ? new Date(filterDateFrom) : null;
+        const toDate = filterDateTo ? new Date(filterDateTo) : null;
+
+        if (fromDate && itemDate < fromDate) return false;
+        if (toDate && itemDate > toDate) return false;
+        return true;
+      });
     }
     if (filterEmployee) {
       filtered = filtered.filter(item => item.employee === filterEmployee);
@@ -125,8 +136,11 @@ const Dashboard = () => {
         filtered = filtered.filter(item => !item.receiveDate || !item.customerReceiveDate);
       }
     }
+    if (filterReceivedBy) {
+      filtered = filtered.filter(item => item.receivedBy === filterReceivedBy);
+    }
     setFilteredData(filtered);
-  }, [data, filterDate, filterEmployee, filterProject, filterStatus, employees]);
+  }, [data, filterDateFrom, filterDateTo, filterEmployee, filterProject, filterStatus, filterReceivedBy, employees]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -197,6 +211,25 @@ const Dashboard = () => {
   };
 
   const handleClose = () => {
+    setFormData({
+      date: '',
+      unitNo: '',
+      projectName: '',
+      ownerName: '',
+      ownerNumber: '',
+      customerName: '',
+      customerNumber: '',
+      timePeriod: '',
+      basePrice: '',
+      ownerBro: '',
+      receiveDate: '',
+      customerBro: '',
+      customerReceiveDate: '',
+      receivedBy: '',
+      employee: '',
+      commission: '',
+    });
+    setEditingIndex(null);
     setOpen(false);
   };
 
@@ -371,7 +404,14 @@ const Dashboard = () => {
       case 'analytics':
         return <Analytics />;
       case 'table':
-        return <DataTable onEditEntry={(row) => handleOpen(data.indexOf(row))} />;
+        return <DataTable onEditEntry={(row) => {
+          const itemToEdit = data.find(item => item._id === row._id);
+          if (itemToEdit) {
+            setFormData(itemToEdit);
+            setEditingIndex(row._id);
+            setOpen(true);
+          }
+        }} />;
       case 'employees':
         return (
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -612,422 +652,92 @@ const Dashboard = () => {
                 </Grow>
 
                 {/* Cards On Dashboard */}
-                <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: { xs: 3, md: 4 } }}>
-                  <Grid item xs={6} sm={6} md={2}>
-                    <Card sx={{
-                      background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
-                      color: 'white',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      borderRadius: 3,
-                      boxShadow: '0 4px 16px rgba(30, 64, 175, 0.2)',
-                      minHeight: { xs: 120, sm: 140 },
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        width: { xs: '80px', sm: '120px' },
-                        height: { xs: '80px', sm: '120px' },
-                        background: 'rgba(255,255,255,0.1)',
-                        borderRadius: '50%',
-                        transform: 'translate(30px, -30px)',
-                      }
-                    }}>
-                      <CardContent sx={{
-                        position: 'relative',
-                        zIndex: 1,
-                        p: { xs: 2, sm: 3 },
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between'
-                      }}>
-                        <Box>
-                          <Typography
-                            variant="subtitle2"
-                            sx={{
-                              fontWeight: 600,
-                              fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                              mb: 1,
-                              lineHeight: 1.2,
-                              textAlign: 'left'
-                            }}
-                          >
-                            Total Portfolio
-                          </Typography>
-                          <Typography
-                            variant="h4"
-                            sx={{
-                              fontWeight: 700,
-                              fontSize: { xs: '1.5rem', sm: '1.75rem' },
-                              mb: 0.5,
-                              lineHeight: 1.2,
-                              textAlign: 'left'
-                            }}
-                          >
-                            ₹{totalPortfolio.toLocaleString()}
-                          </Typography>
-                        </Box>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            opacity: 0.8,
-                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
-                            textAlign: 'left',
-                            alignSelf: 'flex-start'
-                          }}
-                        >
+                <Grid container spacing={3} sx={{ mb: 4 }}>
+                  <Grid item xs={12} sm={6} md={4} lg={2}>
+                    <Card sx={{ minWidth: 275, borderRadius: 2, boxShadow: 2 }}>
+                      <CardContent>
+                        <Typography sx={{ fontSize: 14, color: 'text.secondary', mb: 1 }}>
+                          Total Portfolio
+                        </Typography>
+                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1 }}>
+                          ₹{totalPortfolio.toLocaleString()}
+                        </Typography>
+                        <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
                           Base Price • All transactions
                         </Typography>
                       </CardContent>
                     </Card>
                   </Grid>
-                  <Grid item xs={6} sm={6} md={2}>
-                    <Card sx={{
-                      background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-                      color: 'white',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      borderRadius: 3,
-                      boxShadow: '0 4px 16px rgba(5, 150, 105, 0.2)',
-                      minHeight: { xs: 120, sm: 140 },
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        width: { xs: '80px', sm: '120px' },
-                        height: { xs: '80px', sm: '120px' },
-                        background: 'rgba(255,255,255,0.1)',
-                        borderRadius: '50%',
-                        transform: 'translate(30px, -30px)',
-                      }
-                    }}>
-                      <CardContent sx={{
-                        position: 'relative',
-                        zIndex: 1,
-                        p: { xs: 2, sm: 3 },
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between'
-                      }}>
-                        <Box>
-                          <Typography
-                            variant="subtitle2"
-                            sx={{
-                              fontWeight: 600,
-                              fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                              mb: 1,
-                              lineHeight: 1.2,
-                              textAlign: 'left'
-                            }}
-                          >
-                            Total Brokerage
-                          </Typography>
-                          <Typography
-                            variant="h4"
-                            sx={{
-                              fontWeight: 700,
-                              fontSize: { xs: '1.5rem', sm: '1.75rem' },
-                              mb: 0.5,
-                              lineHeight: 1.2,
-                              textAlign: 'left'
-                            }}
-                          >
-                            ₹{totalBrokerage.toLocaleString()}
-                          </Typography>
-                        </Box>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            opacity: 0.8,
-                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
-                            textAlign: 'left',
-                            alignSelf: 'flex-start'
-                          }}
-                        >
+                  <Grid item xs={12} sm={6} md={4} lg={2}>
+                    <Card sx={{ minWidth: 275, borderRadius: 2, boxShadow: 2 }}>
+                      <CardContent>
+                        <Typography sx={{ fontSize: 14, color: 'text.secondary', mb: 1 }}>
+                          Total Brokerage
+                        </Typography>
+                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'success.main', mb: 1 }}>
+                          ₹{totalBrokerage.toLocaleString()}
+                        </Typography>
+                        <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
                           Owner + Customer commissions
                         </Typography>
                       </CardContent>
                     </Card>
                   </Grid>
-                  <Grid item xs={6} sm={6} md={2}>
-                    <Card sx={{
-                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                      color: 'white',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      borderRadius: 3,
-                      boxShadow: '0 4px 16px rgba(16, 185, 129, 0.2)',
-                      minHeight: { xs: 120, sm: 140 },
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        width: { xs: '80px', sm: '120px' },
-                        height: { xs: '80px', sm: '120px' },
-                        background: 'rgba(255,255,255,0.1)',
-                        borderRadius: '50%',
-                        transform: 'translate(30px, -30px)',
-                      }
-                    }}>
-                      <CardContent sx={{
-                        position: 'relative',
-                        zIndex: 1,
-                        p: { xs: 2, sm: 3 },
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between'
-                      }}>
-                        <Box>
-                          <Typography
-                            variant="subtitle2"
-                            sx={{
-                              fontWeight: 600,
-                              fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                              mb: 1,
-                              lineHeight: 1.2,
-                              textAlign: 'left'
-                            }}
-                          >
-                            Owner Brokerage
-                          </Typography>
-                          <Typography
-                            variant="h4"
-                            sx={{
-                              fontWeight: 700,
-                              fontSize: { xs: '1.5rem', sm: '1.75rem' },
-                              mb: 0.5,
-                              lineHeight: 1.2,
-                              textAlign: 'left'
-                            }}
-                          >
-                            ₹{totalOwnerBrok.toLocaleString()}
-                          </Typography>
-                        </Box>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            opacity: 0.8,
-                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
-                            textAlign: 'left',
-                            alignSelf: 'flex-start'
-                          }}
-                        >
+                  <Grid item xs={12} sm={6} md={4} lg={2}>
+                    <Card sx={{ minWidth: 275, borderRadius: 2, boxShadow: 2 }}>
+                      <CardContent>
+                        <Typography sx={{ fontSize: 14, color: 'text.secondary', mb: 1 }}>
+                          Owner Brokerage
+                        </Typography>
+                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'info.main', mb: 1 }}>
+                          ₹{totalOwnerBrok.toLocaleString()}
+                        </Typography>
+                        <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
                           Owner commissions
                         </Typography>
                       </CardContent>
                     </Card>
                   </Grid>
-                  <Grid item xs={6} sm={6} md={2}>
-                    <Card sx={{
-                      background: 'linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)',
-                      color: 'white',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      borderRadius: 3,
-                      boxShadow: '0 4px 16px rgba(59, 130, 246, 0.2)',
-                      minHeight: { xs: 120, sm: 140 },
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        width: { xs: '80px', sm: '120px' },
-                        height: { xs: '80px', sm: '120px' },
-                        background: 'rgba(255,255,255,0.1)',
-                        borderRadius: '50%',
-                        transform: 'translate(30px, -30px)',
-                      }
-                    }}>
-                      <CardContent sx={{
-                        position: 'relative',
-                        zIndex: 1,
-                        p: { xs: 2, sm: 3 },
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between'
-                      }}>
-                        <Box>
-                          <Typography
-                            variant="subtitle2"
-                            sx={{
-                              fontWeight: 600,
-                              fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                              mb: 1,
-                              lineHeight: 1.2,
-                              textAlign: 'left'
-                            }}
-                          >
-                            Customer Brokerage
-                          </Typography>
-                          <Typography
-                            variant="h4"
-                            sx={{
-                              fontWeight: 700,
-                              fontSize: { xs: '1.5rem', sm: '1.75rem' },
-                              mb: 0.5,
-                              lineHeight: 1.2,
-                              textAlign: 'left'
-                            }}
-                          >
-                            ₹{totalCustomerBrok.toLocaleString()}
-                          </Typography>
-                        </Box>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            opacity: 0.8,
-                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
-                            textAlign: 'left',
-                            alignSelf: 'flex-start'
-                          }}
-                        >
+                  <Grid item xs={12} sm={6} md={4} lg={2}>
+                    <Card sx={{ minWidth: 275, borderRadius: 2, boxShadow: 2 }}>
+                      <CardContent>
+                        <Typography sx={{ fontSize: 14, color: 'text.secondary', mb: 1 }}>
+                          Customer Brokerage
+                        </Typography>
+                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'secondary.main', mb: 1 }}>
+                          ₹{totalCustomerBrok.toLocaleString()}
+                        </Typography>
+                        <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
                           Customer commissions
                         </Typography>
                       </CardContent>
                     </Card>
                   </Grid>
-                  <Grid item xs={6} sm={6} md={2}>
-                    <Card sx={{
-                      background: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
-                      color: 'white',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      borderRadius: 3,
-                      boxShadow: '0 4px 16px rgba(217, 119, 6, 0.2)',
-                      minHeight: { xs: 120, sm: 140 },
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        width: { xs: '80px', sm: '120px' },
-                        height: { xs: '80px', sm: '120px' },
-                        background: 'rgba(255,255,255,0.1)',
-                        borderRadius: '50%',
-                        transform: 'translate(30px, -30px)',
-                      }
-                    }}>
-                      <CardContent sx={{
-                        position: 'relative',
-                        zIndex: 1,
-                        p: { xs: 2, sm: 3 },
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between'
-                      }}>
-                        <Box>
-                          <Typography
-                            variant="subtitle2"
-                            sx={{
-                              fontWeight: 600,
-                              fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                              mb: 1,
-                              lineHeight: 1.2,
-                              textAlign: 'left'
-                            }}
-                          >
-                            Payment Received
-                          </Typography>
-                          <Typography
-                            variant="h4"
-                            sx={{
-                              fontWeight: 700,
-                              fontSize: { xs: '1.5rem', sm: '1.75rem' },
-                              mb: 0.5,
-                              lineHeight: 1.2,
-                              textAlign: 'left'
-                            }}
-                          >
-                            ₹{paymentReceived.toLocaleString()}
-                          </Typography>
-                        </Box>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            opacity: 0.8,
-                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
-                            textAlign: 'left',
-                            alignSelf: 'flex-start'
-                          }}
-                        >
+                  <Grid item xs={12} sm={6} md={4} lg={2}>
+                    <Card sx={{ minWidth: 275, borderRadius: 2, boxShadow: 2 }}>
+                      <CardContent>
+                        <Typography sx={{ fontSize: 14, color: 'text.secondary', mb: 1 }}>
+                          Payment Received
+                        </Typography>
+                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'warning.main', mb: 1 }}>
+                          ₹{paymentReceived.toLocaleString()}
+                        </Typography>
+                        <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
                           Based on receive dates
                         </Typography>
                       </CardContent>
                     </Card>
                   </Grid>
-                  <Grid item xs={6} sm={6} md={2}>
-                    <Card sx={{
-                      background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
-                      color: 'white',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      borderRadius: 3,
-                      boxShadow: '0 4px 16px rgba(220, 38, 38, 0.2)',
-                      minHeight: { xs: 120, sm: 140 },
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        width: { xs: '80px', sm: '120px' },
-                        height: { xs: '80px', sm: '120px' },
-                        background: 'rgba(255,255,255,0.1)',
-                        borderRadius: '50%',
-                        transform: 'translate(30px, -30px)',
-                      }
-                    }}>
-                      <CardContent sx={{
-                        position: 'relative',
-                        zIndex: 1,
-                        p: { xs: 2, sm: 3 },
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'space-between'
-                      }}>
-                        <Box>
-                          <Typography
-                            variant="subtitle2"
-                            sx={{
-                              fontWeight: 600,
-                              fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                              mb: 1,
-                              lineHeight: 1.2,
-                              textAlign: 'left'
-                            }}
-                          >
-                            Outstanding Amount
-                          </Typography>
-                          <Typography
-                            variant="h4"
-                            sx={{
-                              fontWeight: 700,
-                              fontSize: { xs: '1.5rem', sm: '1.75rem' },
-                              mb: 0.5,
-                              lineHeight: 1.2,
-                              textAlign: 'left'
-                            }}
-                          >
-                            ₹{outstandingAmount.toLocaleString()}
-                          </Typography>
-                        </Box>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            opacity: 0.8,
-                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
-                            textAlign: 'left',
-                            alignSelf: 'flex-start'
-                          }}
-                        >
+                  <Grid item xs={12} sm={6} md={4} lg={2}>
+                    <Card sx={{ minWidth: 275, borderRadius: 2, boxShadow: 2 }}>
+                      <CardContent>
+                        <Typography sx={{ fontSize: 14, color: 'text.secondary', mb: 1 }}>
+                          Outstanding Amount
+                        </Typography>
+                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'error.main', mb: 1 }}>
+                          ₹{outstandingAmount.toLocaleString()}
+                        </Typography>
+                        <Typography sx={{ fontSize: 12, color: 'text.secondary' }}>
                           Pending payments
                         </Typography>
                       </CardContent>
@@ -1237,19 +947,31 @@ const Dashboard = () => {
                     Filters
                   </Typography>
                   <Grid container spacing={3} alignItems="center">
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={2}>
                       <TextField
-                        label="Date Range"
+                        label="From Date"
                         type="date"
-                        value={filterDate}
-                        onChange={(e) => setFilterDate(e.target.value)}
+                        value={filterDateFrom}
+                        onChange={(e) => setFilterDateFrom(e.target.value)}
                         InputLabelProps={{ shrink: true }}
                         fullWidth
                         size="small"
                         sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                       />
                     </Grid>
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={2}>
+                      <TextField
+                        label="To Date"
+                        type="date"
+                        value={filterDateTo}
+                        onChange={(e) => setFilterDateTo(e.target.value)}
+                        InputLabelProps={{ shrink: true }}
+                        fullWidth
+                        size="small"
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={2}>
                       <FormControl sx={{ minWidth: { xs: '100%', sm: 120 } }} size="small" fullWidth>
                         <InputLabel>Employee Name</InputLabel>
                         <Select
@@ -1265,7 +987,7 @@ const Dashboard = () => {
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={2}>
                       <FormControl sx={{ minWidth: { xs: '100%', sm: 120 } }} size="small" fullWidth>
                         <InputLabel>Project</InputLabel>
                         <Select
@@ -1281,7 +1003,7 @@ const Dashboard = () => {
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} md={3}>
+                    <Grid item xs={12} md={2}>
                       <FormControl sx={{ minWidth: { xs: '100%', sm: 120 } }} size="small" fullWidth>
                         <InputLabel>Status</InputLabel>
                         <Select
@@ -1293,6 +1015,22 @@ const Dashboard = () => {
                           <MenuItem value="">All</MenuItem>
                           <MenuItem value="received">Received</MenuItem>
                           <MenuItem value="pending">Pending</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} md={2}>
+                      <FormControl sx={{ minWidth: { xs: '100%', sm: 120 } }} size="small" fullWidth>
+                        <InputLabel>Received By</InputLabel>
+                        <Select
+                          value={filterReceivedBy}
+                          label="Received By"
+                          onChange={(e) => setFilterReceivedBy(e.target.value)}
+                          sx={{ borderRadius: 2 }}
+                        >
+                          <MenuItem value="">All</MenuItem>
+                          <MenuItem value="Dharmesh Bavadiya">Dharmesh Bavadiya</MenuItem>
+                          <MenuItem value="Yogesh Bavadiya">Yogesh Bavadiya</MenuItem>
+                          <MenuItem value="Bavadiya Realty LLP">Bavadiya Realty LLP</MenuItem>
                         </Select>
                       </FormControl>
                     </Grid>
@@ -1710,6 +1448,22 @@ const Dashboard = () => {
                   InputLabelProps={{ shrink: true }}
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                 />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Received By</InputLabel>
+                  <Select
+                    value={formData.receivedBy || ''}
+                    label="Received By"
+                    onChange={(e) => setFormData({ ...formData, receivedBy: e.target.value })}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    <MenuItem value="">Select Receiver</MenuItem>
+                    <MenuItem value="Dharmesh Bavadiya">Dharmesh Bavadiya</MenuItem>
+                    <MenuItem value="Yogesh Bavadiya">Yogesh Bavadiya</MenuItem>
+                    <MenuItem value="Bavadiya Realty LLP">Bavadiya Realty LLP</MenuItem>
+                  </Select>
+                </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <FormControl fullWidth>
