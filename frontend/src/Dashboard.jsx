@@ -67,6 +67,15 @@ const Dashboard = () => {
   });
   const [employeeOpen, setEmployeeOpen] = useState(false);
   const [editingEmployeeIndex, setEditingEmployeeIndex] = useState(null);
+  const [projects, setProjects] = useState([]);
+  const [projectFormData, setProjectFormData] = useState({
+    name: '',
+    description: '',
+    location: '',
+    status: 'Active',
+  });
+  const [projectOpen, setProjectOpen] = useState(false);
+  const [editingProjectIndex, setEditingProjectIndex] = useState(null);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [open, setOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
@@ -97,6 +106,7 @@ const Dashboard = () => {
   useEffect(() => {
     fetchData();
     fetchEmployees();
+    fetchProjects();
   }, []);
 
   useEffect(() => {
@@ -157,6 +167,18 @@ const Dashboard = () => {
       setEmployees(response.data);
     } catch (error) {
       console.error('Error fetching employees:', error);
+    }
+  };
+
+  const fetchProjects = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('https://bavadiya-realty-backend.vercel.app/api/projects', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProjects(response.data);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
     }
   };
 
@@ -296,6 +318,46 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error saving employee:', error);
       setSnackbar({ open: true, message: 'Error saving employee. Please try again.', severity: 'error' });
+    }
+  };
+
+  const handleProjectSave = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (editingProjectIndex !== null) {
+        await axios.put(`https://bavadiya-realty-backend.vercel.app/api/projects/${editingProjectIndex}`, projectFormData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSnackbar({ open: true, message: 'Project updated successfully!', severity: 'success' });
+      } else {
+        await axios.post('https://bavadiya-realty-backend.vercel.app/api/projects', projectFormData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSnackbar({ open: true, message: 'Project added successfully!', severity: 'success' });
+      }
+      fetchProjects();
+      setProjectOpen(false);
+      setProjectFormData({ name: '', description: '', location: '', status: 'Active' });
+      setEditingProjectIndex(null);
+    } catch (error) {
+      console.error('Error saving project:', error);
+      setSnackbar({ open: true, message: 'Error saving project. Please try again.', severity: 'error' });
+    }
+  };
+
+  const handleProjectDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this project?')) {
+      try {
+        const token = localStorage.getItem('token');
+        await axios.delete(`https://bavadiya-realty-backend.vercel.app/api/projects/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSnackbar({ open: true, message: 'Project deleted successfully!', severity: 'success' });
+        fetchProjects();
+      } catch (error) {
+        console.error('Error deleting project:', error);
+        setSnackbar({ open: true, message: 'Error deleting project. Please try again.', severity: 'error' });
+      }
     }
   };
 
@@ -1550,6 +1612,107 @@ const Dashboard = () => {
             </Button>
             <Button
               onClick={handleEmployeeSave}
+              variant="contained"
+              sx={{
+                borderRadius: 3,
+                px: 3,
+                textTransform: 'none',
+                fontWeight: 600,
+              }}
+            >
+              Save
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Project Dialog */}
+        <Dialog
+          open={projectOpen}
+          onClose={() => setProjectOpen(false)}
+          maxWidth="md"
+          fullWidth
+          sx={{
+            '& .MuiDialog-paper': {
+              borderRadius: 4,
+              boxShadow: '0 25px 50px rgba(0,0,0,0.25)',
+            }
+          }}
+        >
+          <DialogTitle sx={{
+            bgcolor: 'primary.main',
+            color: 'white',
+            fontWeight: 600,
+            fontSize: '1.25rem',
+            borderTopLeftRadius: 4,
+            borderTopRightRadius: 4
+          }}>
+            {editingProjectIndex !== null ? 'Edit Project' : 'Add New Project'}
+          </DialogTitle>
+          <DialogContent sx={{ p: 4 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Enter project details below.
+            </Typography>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Project Name"
+                  value={projectFormData.name}
+                  onChange={(e) => setProjectFormData({ ...projectFormData, name: e.target.value })}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Description"
+                  value={projectFormData.description}
+                  onChange={(e) => setProjectFormData({ ...projectFormData, description: e.target.value })}
+                  multiline
+                  rows={3}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Location"
+                  value={projectFormData.location}
+                  onChange={(e) => setProjectFormData({ ...projectFormData, location: e.target.value })}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    value={projectFormData.status}
+                    label="Status"
+                    onChange={(e) => setProjectFormData({ ...projectFormData, status: e.target.value })}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    <MenuItem value="Active">Active</MenuItem>
+                    <MenuItem value="Completed">Completed</MenuItem>
+                    <MenuItem value="On Hold">On Hold</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions sx={{ p: 4, pt: 0 }}>
+            <Button
+              onClick={() => { setProjectOpen(false); setProjectFormData({ name: '', description: '', location: '', status: 'Active' }); setEditingProjectIndex(null); }}
+              variant="outlined"
+              sx={{
+                borderRadius: 3,
+                px: 3,
+                textTransform: 'none'
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleProjectSave}
               variant="contained"
               sx={{
                 borderRadius: 3,
