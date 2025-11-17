@@ -58,6 +58,7 @@ const Dashboard = () => {
   const [filterDate, setFilterDate] = useState('');
   const [filterEmployee, setFilterEmployee] = useState('');
   const [filterProject, setFilterProject] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
   const [employees, setEmployees] = useState([]);
   const [employeeFormData, setEmployeeFormData] = useState({
     name: '',
@@ -107,8 +108,15 @@ const Dashboard = () => {
     if (filterProject) {
       filtered = filtered.filter(item => item.projectName === filterProject);
     }
+    if (filterStatus) {
+      if (filterStatus === 'received') {
+        filtered = filtered.filter(item => item.receiveDate && item.customerReceiveDate);
+      } else if (filterStatus === 'pending') {
+        filtered = filtered.filter(item => !item.receiveDate || !item.customerReceiveDate);
+      }
+    }
     setFilteredData(filtered);
-  }, [data, filterDate, filterEmployee, filterProject, employees]);
+  }, [data, filterDate, filterEmployee, filterProject, filterStatus, employees]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -605,42 +613,48 @@ const Dashboard = () => {
                       <CardContent sx={{
                         position: 'relative',
                         zIndex: 1,
-                        p: { xs: 1.5, sm: 2 },
+                        p: { xs: 2, sm: 3 },
                         height: '100%',
                         display: 'flex',
                         flexDirection: 'column',
-                        justifyContent: 'center'
+                        justifyContent: 'space-between'
                       }}>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          Total Brokerage
-                        </Typography>
-                        <Typography
-                          variant="h5"
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          ₹{totalBrokerage.toLocaleString()}
-                        </Typography>
+                        <Box>
+                          <Typography
+                            variant="subtitle2"
+                            sx={{
+                              fontWeight: 600,
+                              fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                              mb: 1,
+                              lineHeight: 1.2,
+                              textAlign: 'left'
+                            }}
+                          >
+                            Total Brokerage
+                          </Typography>
+                          <Typography
+                            variant="h4"
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: { xs: '1.5rem', sm: '1.75rem' },
+                              mb: 0.5,
+                              lineHeight: 1.2,
+                              textAlign: 'left'
+                            }}
+                          >
+                            ₹{totalBrokerage.toLocaleString()}
+                          </Typography>
+                        </Box>
                         <Typography
                           variant="caption"
                           sx={{
                             opacity: 0.8,
-                            fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                            textAlign: 'left',
+                            alignSelf: 'flex-start'
                           }}
                         >
-                          Owner + Customer
+                          Owner + Customer commissions
                         </Typography>
                       </CardContent>
                     </Card>
@@ -669,39 +683,45 @@ const Dashboard = () => {
                       <CardContent sx={{
                         position: 'relative',
                         zIndex: 1,
-                        p: { xs: 1.5, sm: 2 },
+                        p: { xs: 2, sm: 3 },
                         height: '100%',
                         display: 'flex',
                         flexDirection: 'column',
-                        justifyContent: 'center'
+                        justifyContent: 'space-between'
                       }}>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          Owner Total Brokerage
-                        </Typography>
-                        <Typography
-                          variant="h5"
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          ₹{totalOwnerBrok.toLocaleString()}
-                        </Typography>
+                        <Box>
+                          <Typography
+                            variant="subtitle2"
+                            sx={{
+                              fontWeight: 600,
+                              fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                              mb: 1,
+                              lineHeight: 1.2,
+                              textAlign: 'left'
+                            }}
+                          >
+                            Owner Brokerage
+                          </Typography>
+                          <Typography
+                            variant="h4"
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: { xs: '1.5rem', sm: '1.75rem' },
+                              mb: 0.5,
+                              lineHeight: 1.2,
+                              textAlign: 'left'
+                            }}
+                          >
+                            ₹{totalOwnerBrok.toLocaleString()}
+                          </Typography>
+                        </Box>
                         <Typography
                           variant="caption"
                           sx={{
                             opacity: 0.8,
-                            fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                            textAlign: 'left',
+                            alignSelf: 'flex-start'
                           }}
                         >
                           Owner commissions
@@ -733,39 +753,45 @@ const Dashboard = () => {
                       <CardContent sx={{
                         position: 'relative',
                         zIndex: 1,
-                        p: { xs: 1.5, sm: 2 },
+                        p: { xs: 2, sm: 3 },
                         height: '100%',
                         display: 'flex',
                         flexDirection: 'column',
-                        justifyContent: 'center'
+                        justifyContent: 'space-between'
                       }}>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          Customer Total Brokerage
-                        </Typography>
-                        <Typography
-                          variant="h5"
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          ₹{totalCustomerBrok.toLocaleString()}
-                        </Typography>
+                        <Box>
+                          <Typography
+                            variant="subtitle2"
+                            sx={{
+                              fontWeight: 600,
+                              fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                              mb: 1,
+                              lineHeight: 1.2,
+                              textAlign: 'left'
+                            }}
+                          >
+                            Customer Brokerage
+                          </Typography>
+                          <Typography
+                            variant="h4"
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: { xs: '1.5rem', sm: '1.75rem' },
+                              mb: 0.5,
+                              lineHeight: 1.2,
+                              textAlign: 'left'
+                            }}
+                          >
+                            ₹{totalCustomerBrok.toLocaleString()}
+                          </Typography>
+                        </Box>
                         <Typography
                           variant="caption"
                           sx={{
                             opacity: 0.8,
-                            fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                            textAlign: 'left',
+                            alignSelf: 'flex-start'
                           }}
                         >
                           Customer commissions
@@ -797,42 +823,48 @@ const Dashboard = () => {
                       <CardContent sx={{
                         position: 'relative',
                         zIndex: 1,
-                        p: { xs: 1.5, sm: 2 },
+                        p: { xs: 2, sm: 3 },
                         height: '100%',
                         display: 'flex',
                         flexDirection: 'column',
-                        justifyContent: 'center'
+                        justifyContent: 'space-between'
                       }}>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          Payment Received
-                        </Typography>
-                        <Typography
-                          variant="h5"
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          ₹{paymentReceived.toLocaleString()}
-                        </Typography>
+                        <Box>
+                          <Typography
+                            variant="subtitle2"
+                            sx={{
+                              fontWeight: 600,
+                              fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                              mb: 1,
+                              lineHeight: 1.2,
+                              textAlign: 'left'
+                            }}
+                          >
+                            Payment Received
+                          </Typography>
+                          <Typography
+                            variant="h4"
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: { xs: '1.5rem', sm: '1.75rem' },
+                              mb: 0.5,
+                              lineHeight: 1.2,
+                              textAlign: 'left'
+                            }}
+                          >
+                            ₹{paymentReceived.toLocaleString()}
+                          </Typography>
+                        </Box>
                         <Typography
                           variant="caption"
                           sx={{
                             opacity: 0.8,
-                            fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                            textAlign: 'left',
+                            alignSelf: 'flex-start'
                           }}
                         >
-                          Based on receive date
+                          Based on receive dates
                         </Typography>
                       </CardContent>
                     </Card>
@@ -861,42 +893,48 @@ const Dashboard = () => {
                       <CardContent sx={{
                         position: 'relative',
                         zIndex: 1,
-                        p: { xs: 1.5, sm: 2 },
+                        p: { xs: 2, sm: 3 },
                         height: '100%',
                         display: 'flex',
                         flexDirection: 'column',
-                        justifyContent: 'center'
+                        justifyContent: 'space-between'
                       }}>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          Outstanding Amount
-                        </Typography>
-                        <Typography
-                          variant="h5"
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          ₹{outstandingAmount.toLocaleString()}
-                        </Typography>
+                        <Box>
+                          <Typography
+                            variant="subtitle2"
+                            sx={{
+                              fontWeight: 600,
+                              fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                              mb: 1,
+                              lineHeight: 1.2,
+                              textAlign: 'left'
+                            }}
+                          >
+                            Outstanding Amount
+                          </Typography>
+                          <Typography
+                            variant="h4"
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: { xs: '1.5rem', sm: '1.75rem' },
+                              mb: 0.5,
+                              lineHeight: 1.2,
+                              textAlign: 'left'
+                            }}
+                          >
+                            ₹{outstandingAmount.toLocaleString()}
+                          </Typography>
+                        </Box>
                         <Typography
                           variant="caption"
                           sx={{
                             opacity: 0.8,
-                            fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                            textAlign: 'left',
+                            alignSelf: 'flex-start'
                           }}
                         >
-                          Based on receive date
+                          Pending payments
                         </Typography>
                       </CardContent>
                     </Card>
@@ -1153,6 +1191,9 @@ const Dashboard = () => {
                       <FormControl sx={{ minWidth: { xs: '100%', sm: 120 } }} size="small" fullWidth>
                         <InputLabel>Status</InputLabel>
                         <Select
+                          value={filterStatus}
+                          label="Status"
+                          onChange={(e) => setFilterStatus(e.target.value)}
                           sx={{ borderRadius: 2 }}
                         >
                           <MenuItem value="">All</MenuItem>
@@ -1230,21 +1271,6 @@ const Dashboard = () => {
                           <TableCell>
                             <IconButton onClick={() => handleOpen(row._id)} sx={{ borderRadius: 2 }}>
                               <Edit />
-                            </IconButton>
-                          </TableCell>
-                          <TableCell>
-                            <IconButton
-                              onClick={() => handleDelete(row._id)}
-                              sx={{
-                                borderRadius: 2,
-                                color: 'error.main',
-                                '&:hover': {
-                                  bgcolor: 'error.light',
-                                  color: 'white'
-                                }
-                              }}
-                            >
-                              <Delete />
                             </IconButton>
                           </TableCell>
                           <TableCell>
@@ -1440,9 +1466,10 @@ const Dashboard = () => {
                     sx={{ borderRadius: 2 }}
                   >
                     <MenuItem value="">Select Project</MenuItem>
-                    {[...new Set(data.map(item => item.projectName))].map(proj => (
+                    {[...new Set(data.map(item => item.projectName).filter(Boolean))].map(proj => (
                       <MenuItem key={proj} value={proj}>{proj}</MenuItem>
                     ))}
+                    <MenuItem value="new">+ Add New Project</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
