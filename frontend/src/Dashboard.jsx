@@ -1,243 +1,97 @@
 import React, { useState, useEffect, useContext } from 'react';
 import {
-  Container,
-  Typography,
   Box,
   Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  TextField,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
+  Container,
+  Flex,
   Grid,
-  Card,
-  CardContent,
-  Chip,
-  AppBar,
-  Toolbar,
-  IconButton,
+  GridItem,
+  Heading,
+  Text,
+  VStack,
+  HStack,
+  Input,
+  Select,
+  FormControl,
+  FormLabel,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
   Drawer,
+  DrawerBody,
+  DrawerHeader,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerCloseButton,
   List,
   ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
+  ListIcon,
   Divider,
-  Switch,
-  FormControlLabel,
-  CircularProgress,
+  Badge,
+  Card,
+  CardBody,
+  CardHeader,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  useToast,
+  Spinner,
   Alert,
-  Snackbar,
-  Skeleton,
-  Fade,
-  Grow,
-  Slide,
-} from '@mui/material';
-import { Logout, Add, Edit, Dashboard as DashboardIcon, BarChart as BarChartIcon, TableChart, Brightness4, Brightness7, Menu, Person as PersonIcon } from '@mui/icons-material';
+  AlertIcon,
+  IconButton,
+  useBreakpointValue,
+} from '@chakra-ui/react';
+import {
+  AddIcon,
+  EditIcon,
+  ViewIcon,
+  DeleteIcon,
+  HamburgerIcon,
+  LogoutIcon,
+  DashboardIcon,
+  BarChartIcon,
+  TableIcon,
+  PersonIcon,
+} from '@chakra-ui/icons';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { useMediaQuery } from '@mui/material';
 import Analytics from './Analytics';
 import DataTable from './DataTable';
 
-// Account Settings Component
-const AccountSettings = () => {
+const Dashboard = () => {
   const { logout } = useContext(AuthContext);
-  const [userInfo, setUserInfo] = useState({
-    username: 'admin',
-    role: 'Administrator',
-    lastLogin: new Date().toLocaleString(),
-    accountCreated: '2024-01-15'
-  });
-  const [editMode, setEditMode] = useState(false);
-  const [twoFAEnabled, setTwoFAEnabled] = useState(false);
+  const isMobile = useBreakpointValue({ base: true, md: false });
+  const { isOpen: drawerOpen, onOpen: onDrawerOpen, onClose: onDrawerClose } = useDisclosure();
+  const { isOpen: modalOpen, onOpen: onModalOpen, onClose: onModalClose } = useDisclosure();
+  const { isOpen: employeeModalOpen, onOpen: onEmployeeModalOpen, onClose: onEmployeeModalClose } = useDisclosure();
+  const toast = useToast();
 
-  return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: 'primary.main', mb: 4 }}>
-        Account Settings
-      </Typography>
-
-      <Grid container spacing={4}>
-        <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3, borderRadius: 2 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
-              Profile Information
-            </Typography>
-
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Username"
-                  value={userInfo.username}
-                  onChange={(e) => setUserInfo({ ...userInfo, username: e.target.value })}
-                  InputProps={{ readOnly: !editMode }}
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Role"
-                  value={userInfo.role}
-                  onChange={(e) => setUserInfo({ ...userInfo, role: e.target.value })}
-                  InputProps={{ readOnly: !editMode }}
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Account Created"
-                  value={userInfo.accountCreated}
-                  InputProps={{ readOnly: true }}
-                  variant="outlined"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Last Login"
-                  value={userInfo.lastLogin}
-                  InputProps={{ readOnly: true }}
-                  variant="outlined"
-                />
-              </Grid>
-            </Grid>
-            <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
-              <Button
-                variant={editMode ? "outlined" : "contained"}
-                onClick={() => setEditMode(!editMode)}
-              >
-                {editMode ? 'Cancel' : 'Edit Profile'}
-              </Button>
-              {editMode && (
-                <Button variant="contained" color="primary">
-                  Save Changes
-                </Button>
-              )}
-            </Box>
-          </Paper>
-
-          <Paper sx={{ p: 3, mt: 3, borderRadius: 2 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
-              Security Settings
-            </Typography>
-
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Button
-                variant="outlined"
-                sx={{ alignSelf: 'flex-start' }}
-                onClick={() => setPasswordDialog(true)}
-              >
-                Change Password
-              </Button>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={twoFAEnabled}
-                    onChange={(e) => setTwoFAEnabled(e.target.checked)}
-                    color="primary"
-                  />
-                }
-                label="Two-Factor Authentication"
-              />
-              <Typography variant="body2" color="text.secondary">
-                {twoFAEnabled ? '2FA is enabled for enhanced security' : 'Enable 2FA for better account protection'}
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-
-        <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 3, borderRadius: 2 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
-              Account Actions
-            </Typography>
-
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Button variant="contained" color="primary" fullWidth>
-                Update Profile
-              </Button>
-              <Button
-                variant="outlined"
-                color="warning"
-                fullWidth
-                onClick={() => setSnackbar({ open: true, message: 'Data export feature coming soon!', severity: 'info' })}
-              >
-                Export Data
-              </Button>
-              <Button variant="outlined" color="error" fullWidth onClick={logout}>
-                Sign Out
-              </Button>
-            </Box>
-          </Paper>
-
-          <Paper sx={{ p: 3, mt: 3, borderRadius: 2 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 2 }}>
-              System Information
-            </Typography>
-
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Typography variant="body2" color="text.secondary">
-                <strong>Version:</strong> 1.0.0
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                <strong>Last Updated:</strong> {new Date().toLocaleDateString()}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                <strong>Environment:</strong> Production
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
-    </Container>
-  );
-};
-
-const Dashboard = ({ darkMode, toggleDarkMode }) => {
-  const { logout } = useContext(AuthContext);
-  const isMobile = useMediaQuery((theme) => theme.breakpoints.down('md'));
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [filterDate, setFilterDate] = useState('');
   const [filterEmployee, setFilterEmployee] = useState('');
   const [filterProject, setFilterProject] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterReceivedBy, setFilterReceivedBy] = useState('');
   const [employees, setEmployees] = useState([]);
   const [employeeFormData, setEmployeeFormData] = useState({
     name: '',
     code: '',
     number: '',
   });
-  const [employeeOpen, setEmployeeOpen] = useState(false);
   const [editingEmployeeIndex, setEditingEmployeeIndex] = useState(null);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-  const [open, setOpen] = useState(false);
-  const [editingIndex, setEditingIndex] = useState(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeView, setActiveView] = useState('dashboard');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [passwordDialog, setPasswordDialog] = useState(false);
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
   const [formData, setFormData] = useState({
     date: '',
     unitNo: '',
@@ -262,18 +116,8 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
   }, []);
 
   useEffect(() => {
-    let filtered = data;
-    if (filterDate) {
-      filtered = filtered.filter(item => item.receiveDate === filterDate);
-    }
-    if (filterEmployee) {
-      filtered = filtered.filter(item => item.employee === filterEmployee);
-    }
-    if (filterProject) {
-      filtered = filtered.filter(item => item.projectName === filterProject);
-    }
-    setFilteredData(filtered);
-  }, [data, filterDate, filterEmployee, filterProject, employees]);
+    filterData();
+  }, [data, filterDate, filterEmployee, filterProject, filterStatus, filterReceivedBy]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -304,35 +148,30 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
     }
   };
 
-  const handleOpen = (index = null) => {
-    if (index !== null) {
-      setFormData(data.find(item => item._id === index));
-      setEditingIndex(index);
-    } else {
-      setFormData({
-        date: '',
-        unitNo: '',
-        projectName: '',
-        ownerName: '',
-        ownerNumber: '',
-        customerName: '',
-        customerNumber: '',
-        timePeriod: '',
-        basePrice: '',
-        ownerBro: '',
-        receiveDate: '',
-        customerBro: '',
-        customerReceiveDate: '',
-        employee: '',
-        commission: '',
-      });
-      setEditingIndex(null);
-    }
-    setOpen(true);
-  };
+  const filterData = () => {
+    let filtered = data;
 
-  const handleClose = () => {
-    setOpen(false);
+    if (filterDate) {
+      filtered = filtered.filter(item => item.receiveDate === filterDate);
+    }
+    if (filterEmployee) {
+      filtered = filtered.filter(item => item.employee === filterEmployee);
+    }
+    if (filterProject) {
+      filtered = filtered.filter(item => item.projectName === filterProject);
+    }
+    if (filterStatus) {
+      if (filterStatus === 'received') {
+        filtered = filtered.filter(item => item.receiveDate && item.customerReceiveDate);
+      } else if (filterStatus === 'pending') {
+        filtered = filtered.filter(item => !item.receiveDate || !item.customerReceiveDate);
+      }
+    }
+    if (filterReceivedBy) {
+      filtered = filtered.filter(item => item.employee === filterReceivedBy);
+    }
+
+    setFilteredData(filtered);
   };
 
   const handleSave = async () => {
@@ -342,18 +181,33 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
         await axios.put(`https://bavadiya-realty-backend.vercel.app/api/data/${editingIndex}`, formData, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setSnackbar({ open: true, message: 'Payment entry updated successfully!', severity: 'success' });
+        toast({
+          title: 'Entry updated successfully!',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
       } else {
         await axios.post('https://bavadiya-realty-backend.vercel.app/api/data', formData, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setSnackbar({ open: true, message: 'Payment entry added successfully!', severity: 'success' });
+        toast({
+          title: 'Entry added successfully!',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
       }
       fetchData();
-      handleClose();
+      onModalClose();
     } catch (error) {
       console.error('Error saving data:', error);
-      setSnackbar({ open: true, message: 'Error saving entry. Please try again.', severity: 'error' });
+      toast({
+        title: 'Error saving entry. Please try again.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
     }
   };
 
@@ -364,28 +218,45 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
         await axios.put(`https://bavadiya-realty-backend.vercel.app/api/employees/${editingEmployeeIndex}`, employeeFormData, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setSnackbar({ open: true, message: 'Employee updated successfully!', severity: 'success' });
+        toast({
+          title: 'Employee updated successfully!',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
       } else {
         await axios.post('https://bavadiya-realty-backend.vercel.app/api/employees', employeeFormData, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setSnackbar({ open: true, message: 'Employee added successfully!', severity: 'success' });
+        toast({
+          title: 'Employee added successfully!',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
       }
       fetchEmployees();
-      setEmployeeOpen(false);
+      onEmployeeModalClose();
       setEmployeeFormData({ name: '', code: '', number: '' });
       setEditingEmployeeIndex(null);
     } catch (error) {
       console.error('Error saving employee:', error);
-      setSnackbar({ open: true, message: 'Error saving employee. Please try again.', severity: 'error' });
+      toast({
+        title: 'Error saving employee. Please try again.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
     }
   };
 
-  const totalPayments = data.reduce((sum, item) => sum + (item.basePrice || 0), 0);
-  const receivedPayments = data.filter(item => item.receiveDate && item.customerReceiveDate).reduce((sum, item) => sum + (item.basePrice || 0), 0);
-  const pendingPayments = totalPayments - receivedPayments;
+  // Calculations
+  const totalPortfolio = data.reduce((sum, item) => sum + (item.basePrice || 0), 0);
+  const totalBrokerage = data.reduce((sum, item) => sum + (item.ownerBro || 0) + (item.customerBro || 0), 0);
   const totalOwnerBrok = data.reduce((sum, item) => sum + (item.ownerBro || 0), 0);
   const totalCustomerBrok = data.reduce((sum, item) => sum + (item.customerBro || 0), 0);
+  const paymentReceived = data.filter(item => item.receiveDate).reduce((sum, item) => sum + (item.ownerBro || 0) + (item.customerBro || 0), 0);
+  const outstandingAmount = totalBrokerage - paymentReceived;
 
   const employeeData = data.reduce((acc, item) => {
     const emp = employees.find(e => e.code === item.employee);
@@ -396,17 +267,17 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
   const chartData = Object.entries(employeeData).map(([name, value]) => ({ name, value }));
 
   const pieData = [
-    { name: 'Received', value: receivedPayments, color: '#059669' },
-    { name: 'Pending', value: pendingPayments, color: '#d97706' },
+    { name: 'Received', value: paymentReceived, color: '#059669' },
+    { name: 'Outstanding', value: outstandingAmount, color: '#d97706' },
   ];
 
-
   const menuItems = [
-    { text: 'Overview', icon: <DashboardIcon />, view: 'dashboard' },
-    { text: 'Reports & Analytics', icon: <BarChartIcon />, view: 'analytics' },
-    { text: 'Payment Records', icon: <TableChart />, view: 'table' },
-    { text: 'Employee Management', icon: <PersonIcon />, view: 'employees' },
-    { text: 'Account Settings', icon: <PersonIcon />, view: 'settings' },
+    { text: 'Dashboard', icon: DashboardIcon, view: 'dashboard' },
+    { text: 'Analytics Overview', icon: BarChartIcon, view: 'analytics' },
+    { text: 'Payment Records', icon: TableIcon, view: 'table' },
+    { text: 'Project Management', icon: ViewIcon, view: 'projects' },
+    { text: 'Employee Management', icon: PersonIcon, view: 'employees' },
+    { text: 'Account Settings', icon: PersonIcon, view: 'settings' },
   ];
 
   const renderView = () => {
@@ -414,611 +285,239 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
       case 'analytics':
         return <Analytics />;
       case 'table':
-        return <DataTable onEditEntry={(row) => handleOpen(data.indexOf(row))} />;
+        return <DataTable onEditEntry={(row) => {
+          setFormData(row);
+          setEditingIndex(row._id);
+          onModalOpen();
+        }} />;
       case 'employees':
         return (
-          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: 'primary.main', mb: 4 }}>
+          <Container maxW="container.xl">
+            <Heading size="lg" mb={6} color="blue.600">
               Employee Management
-            </Typography>
-            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end' }}>
-              <Button variant="contained" startIcon={<Add />} onClick={() => setEmployeeOpen(true)}>
+            </Heading>
+            <Flex justify="flex-end" mb={4}>
+              <Button colorScheme="blue" leftIcon={<AddIcon />} onClick={onEmployeeModalOpen}>
                 Add Employee
               </Button>
-            </Box>
-            <TableContainer component={Paper} sx={{ borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ bgcolor: 'primary.main', '& th': { color: 'white', fontWeight: 600 } }}>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Code</TableCell>
-                    <TableCell>Number</TableCell>
-                    <TableCell>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {employees.map((emp, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{emp.name}</TableCell>
-                      <TableCell>{emp.code}</TableCell>
-                      <TableCell>{emp.number}</TableCell>
-                      <TableCell>
-                        <IconButton onClick={() => { setEmployeeFormData(emp); setEditingEmployeeIndex(emp._id); setEmployeeOpen(true); }}>
-                          <Edit />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
+            </Flex>
+            <Card borderRadius="xl" shadow="md">
+              <CardBody p={0}>
+                <Table variant="simple">
+                  <Thead>
+                    <Tr bg="blue.500">
+                      <Th color="white">Name</Th>
+                      <Th color="white">Code</Th>
+                      <Th color="white">Number</Th>
+                      <Th color="white">Actions</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {employees.map((emp, index) => (
+                      <Tr key={index}>
+                        <Td>{emp.name}</Td>
+                        <Td>{emp.code}</Td>
+                        <Td>{emp.number}</Td>
+                        <Td>
+                          <IconButton
+                            icon={<EditIcon />}
+                            size="sm"
+                            colorScheme="blue"
+                            variant="ghost"
+                            onClick={() => {
+                              setEmployeeFormData(emp);
+                              setEditingEmployeeIndex(emp._id);
+                              onEmployeeModalOpen();
+                            }}
+                          />
+                        </Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+              </CardBody>
+            </Card>
           </Container>
         );
       case 'settings':
-        return <AccountSettings />;
+        return (
+          <Container maxW="container.xl">
+            <Heading size="lg" mb={6} color="blue.600">
+              Account Settings
+            </Heading>
+            <Text>Account settings coming soon...</Text>
+          </Container>
+        );
+      case 'projects':
+        return (
+          <Container maxW="container.xl">
+            <Heading size="lg" mb={6} color="blue.600">
+              Project Management
+            </Heading>
+            <Text>Project management coming soon...</Text>
+          </Container>
+        );
       case 'dashboard':
       default:
         return (
           <>
             {loading && (
-              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
-                <CircularProgress size={60} />
-              </Box>
+              <Flex justify="center" align="center" h="200px">
+                <Spinner size="xl" />
+              </Flex>
             )}
             {error && (
-              <Alert severity="error" sx={{ mb: 3 }}>
+              <Alert status="error" mb={4}>
+                <AlertIcon />
                 {error}
               </Alert>
             )}
             {!loading && !error && (
               <>
                 {/* Welcome Header */}
-                <Grow in={true} timeout={1000}>
-                  <Box sx={{ mb: { xs: 3, md: 4 } }}>
-                    <Typography
-                      variant="h4"
-                      sx={{
-                        fontWeight: 700,
-                        color: 'primary.main',
-                        mb: 1,
-                        fontSize: { xs: '1.5rem', sm: '2rem', md: '2.125rem' }
-                      }}
-                    >
-                      Welcome to Bavadiya Realty LLP
-                    </Typography>
-                    <Typography
-                      variant="subtitle1"
-                      color="text.secondary"
-                      sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
-                    >
-                      Real Estate Payment Management Dashboard
-                    </Typography>
-                  </Box>
-                </Grow>
+                <Box mb={6}>
+                  <Heading size="lg" color="blue.600" mb={2}>
+                    Welcome to Bavadiya Realty LLP
+                  </Heading>
+                  <Text color="gray.600">
+                    Real Estate Payment Management Dashboard
+                  </Text>
+                </Box>
 
-                {/* Key Performance Indicators */}
-                <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: { xs: 3, md: 4 } }}>
-                  <Grid item xs={6} sm={6} md={2}>
-                    <Card sx={{
-                      background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
-                      color: 'white',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      borderRadius: 3,
-                      boxShadow: '0 4px 16px rgba(30, 64, 175, 0.2)',
-                      minHeight: { xs: 120, sm: 140 },
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        width: { xs: '80px', sm: '120px' },
-                        height: { xs: '80px', sm: '120px' },
-                        background: 'rgba(255,255,255,0.1)',
-                        borderRadius: '50%',
-                        transform: 'translate(30px, -30px)',
-                      }
-                    }}>
-                      <CardContent sx={{
-                        position: 'relative',
-                        zIndex: 1,
-                        p: { xs: 1.5, sm: 2 },
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center'
-                      }}>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          Total Portfolio Value
-                        </Typography>
-                        <Typography
-                          variant="h5"
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          ₹{totalPayments.toLocaleString()}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            opacity: 0.8,
-                            fontSize: { xs: '0.65rem', sm: '0.75rem' }
-                          }}
-                        >
+                {/* Cards On Dashboard */}
+                <Grid templateColumns={{ base: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', lg: 'repeat(6, 1fr)' }} gap={4} mb={8}>
+                  <GridItem>
+                    <Card bg="blue.500" color="white" borderRadius="xl" shadow="lg">
+                      <CardBody textAlign="center">
+                        <Text fontSize="sm" fontWeight="bold" mb={1}>
+                          Total Portfolio (Base Price)
+                        </Text>
+                        <Text fontSize="2xl" fontWeight="bold">
+                          ₹{totalPortfolio.toLocaleString()}
+                        </Text>
+                        <Text fontSize="xs" opacity={0.8}>
                           All transactions
-                        </Typography>
-                      </CardContent>
+                        </Text>
+                      </CardBody>
                     </Card>
-                  </Grid>
-                  <Grid item xs={6} sm={6} md={2}>
-                    <Card sx={{
-                      background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-                      color: 'white',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      borderRadius: 3,
-                      boxShadow: '0 4px 16px rgba(5, 150, 105, 0.2)',
-                      minHeight: { xs: 120, sm: 140 },
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        width: { xs: '80px', sm: '120px' },
-                        height: { xs: '80px', sm: '120px' },
-                        background: 'rgba(255,255,255,0.1)',
-                        borderRadius: '50%',
-                        transform: 'translate(30px, -30px)',
-                      }
-                    }}>
-                      <CardContent sx={{
-                        position: 'relative',
-                        zIndex: 1,
-                        p: { xs: 1.5, sm: 2 },
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center'
-                      }}>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          Payments Received
-                        </Typography>
-                        <Typography
-                          variant="h5"
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          ₹{receivedPayments.toLocaleString()}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            opacity: 0.8,
-                            fontSize: { xs: '0.65rem', sm: '0.75rem' }
-                          }}
-                        >
-                          {((receivedPayments / totalPayments) * 100).toFixed(1)}% of total
-                        </Typography>
-                      </CardContent>
+                  </GridItem>
+                  <GridItem>
+                    <Card bg="green.500" color="white" borderRadius="xl" shadow="lg">
+                      <CardBody textAlign="center">
+                        <Text fontSize="sm" fontWeight="bold" mb={1}>
+                          Total Brokerage
+                        </Text>
+                        <Text fontSize="2xl" fontWeight="bold">
+                          ₹{totalBrokerage.toLocaleString()}
+                        </Text>
+                        <Text fontSize="xs" opacity={0.8}>
+                          Owner + Customer
+                        </Text>
+                      </CardBody>
                     </Card>
-                  </Grid>
-                  <Grid item xs={6} sm={6} md={2}>
-                    <Card sx={{
-                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                      color: 'white',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      borderRadius: 3,
-                      boxShadow: '0 4px 16px rgba(16, 185, 129, 0.2)',
-                      minHeight: { xs: 120, sm: 140 },
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        width: { xs: '80px', sm: '120px' },
-                        height: { xs: '80px', sm: '120px' },
-                        background: 'rgba(255,255,255,0.1)',
-                        borderRadius: '50%',
-                        transform: 'translate(30px, -30px)',
-                      }
-                    }}>
-                      <CardContent sx={{
-                        position: 'relative',
-                        zIndex: 1,
-                        p: { xs: 1.5, sm: 2 },
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center'
-                      }}>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          Total Owner Brokerage
-                        </Typography>
-                        <Typography
-                          variant="h5"
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
+                  </GridItem>
+                  <GridItem>
+                    <Card bg="teal.500" color="white" borderRadius="xl" shadow="lg">
+                      <CardBody textAlign="center">
+                        <Text fontSize="sm" fontWeight="bold" mb={1}>
+                          Owner Total Brokerage
+                        </Text>
+                        <Text fontSize="2xl" fontWeight="bold">
                           ₹{totalOwnerBrok.toLocaleString()}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            opacity: 0.8,
-                            fontSize: { xs: '0.65rem', sm: '0.75rem' }
-                          }}
-                        >
+                        </Text>
+                        <Text fontSize="xs" opacity={0.8}>
                           Owner commissions
-                        </Typography>
-                      </CardContent>
+                        </Text>
+                      </CardBody>
                     </Card>
-                  </Grid>
-                  <Grid item xs={6} sm={6} md={2}>
-                    <Card sx={{
-                      background: 'linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)',
-                      color: 'white',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      borderRadius: 3,
-                      boxShadow: '0 4px 16px rgba(59, 130, 246, 0.2)',
-                      minHeight: { xs: 120, sm: 140 },
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        width: { xs: '80px', sm: '120px' },
-                        height: { xs: '80px', sm: '120px' },
-                        background: 'rgba(255,255,255,0.1)',
-                        borderRadius: '50%',
-                        transform: 'translate(30px, -30px)',
-                      }
-                    }}>
-                      <CardContent sx={{
-                        position: 'relative',
-                        zIndex: 1,
-                        p: { xs: 1.5, sm: 2 },
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center'
-                      }}>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          Total Customer Brokerage
-                        </Typography>
-                        <Typography
-                          variant="h5"
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
+                  </GridItem>
+                  <GridItem>
+                    <Card bg="purple.500" color="white" borderRadius="xl" shadow="lg">
+                      <CardBody textAlign="center">
+                        <Text fontSize="sm" fontWeight="bold" mb={1}>
+                          Customer Total Brokerage
+                        </Text>
+                        <Text fontSize="2xl" fontWeight="bold">
                           ₹{totalCustomerBrok.toLocaleString()}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            opacity: 0.8,
-                            fontSize: { xs: '0.65rem', sm: '0.75rem' }
-                          }}
-                        >
+                        </Text>
+                        <Text fontSize="xs" opacity={0.8}>
                           Customer commissions
-                        </Typography>
-                      </CardContent>
+                        </Text>
+                      </CardBody>
                     </Card>
-                  </Grid>
-                  <Grid item xs={6} sm={6} md={2}>
-                    <Card sx={{
-                      background: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
-                      color: 'white',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      borderRadius: 3,
-                      boxShadow: '0 4px 16px rgba(217, 119, 6, 0.2)',
-                      minHeight: { xs: 120, sm: 140 },
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        width: { xs: '80px', sm: '120px' },
-                        height: { xs: '80px', sm: '120px' },
-                        background: 'rgba(255,255,255,0.1)',
-                        borderRadius: '50%',
-                        transform: 'translate(30px, -30px)',
-                      }
-                    }}>
-                      <CardContent sx={{
-                        position: 'relative',
-                        zIndex: 1,
-                        p: { xs: 1.5, sm: 2 },
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center'
-                      }}>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
+                  </GridItem>
+                  <GridItem>
+                    <Card bg="orange.500" color="white" borderRadius="xl" shadow="lg">
+                      <CardBody textAlign="center">
+                        <Text fontSize="sm" fontWeight="bold" mb={1}>
+                          Payment Received
+                        </Text>
+                        <Text fontSize="2xl" fontWeight="bold">
+                          ₹{paymentReceived.toLocaleString()}
+                        </Text>
+                        <Text fontSize="xs" opacity={0.8}>
+                          Based on receive date
+                        </Text>
+                      </CardBody>
+                    </Card>
+                  </GridItem>
+                  <GridItem>
+                    <Card bg="red.500" color="white" borderRadius="xl" shadow="lg">
+                      <CardBody textAlign="center">
+                        <Text fontSize="sm" fontWeight="bold" mb={1}>
                           Outstanding Amount
-                        </Typography>
-                        <Typography
-                          variant="h5"
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          ₹{pendingPayments.toLocaleString()}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            opacity: 0.8,
-                            fontSize: { xs: '0.65rem', sm: '0.75rem' }
-                          }}
-                        >
-                          Requires attention
-                        </Typography>
-                      </CardContent>
+                        </Text>
+                        <Text fontSize="2xl" fontWeight="bold">
+                          ₹{outstandingAmount.toLocaleString()}
+                        </Text>
+                        <Text fontSize="xs" opacity={0.8}>
+                          Based on receive date
+                        </Text>
+                      </CardBody>
                     </Card>
-                 </Grid>
-                 <Grid item xs={6} sm={6} md={2}>
-                   <Card sx={{
-                      background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
-                      color: 'white',
-                      position: 'relative',
-                      overflow: 'hidden',
-                      borderRadius: 3,
-                      boxShadow: '0 4px 16px rgba(124, 58, 237, 0.2)',
-                      minHeight: { xs: 120, sm: 140 },
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        width: { xs: '80px', sm: '120px' },
-                        height: { xs: '80px', sm: '120px' },
-                        background: 'rgba(255,255,255,0.1)',
-                        borderRadius: '50%',
-                        transform: 'translate(30px, -30px)',
-                      }
-                    }}>
-                      <CardContent sx={{
-                        position: 'relative',
-                        zIndex: 1,
-                        p: { xs: 1.5, sm: 2 },
-                        height: '100%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center'
-                      }}>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          Active Transactions
-                        </Typography>
-                        <Typography
-                          variant="h5"
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          {data.length}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            opacity: 0.8,
-                            fontSize: { xs: '0.65rem', sm: '0.75rem' }
-                          }}
-                        >
-                          Total records
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
+                  </GridItem>
                 </Grid>
 
-                {/* Analytics Charts - Inline Layout */}
-                <Box sx={{ mb: 4 }}>
-                  <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 3 }}>
-                    Analytics Overview
-                  </Typography>
-                  <Grid container spacing={{ xs: 2, md: 3 }}>
-                    <Grid item xs={12} md={6}>
-                      <Paper sx={{
-                        p: { xs: 1.5, sm: 2 },
-                        height: { xs: 280, sm: 320 },
-                        display: 'flex',
-                        flexDirection: 'column',
-                        background: 'linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)',
-                        border: '1px solid rgba(0,0,0,0.08)',
-                        borderRadius: 2,
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                      }}>
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            fontWeight: 600,
-                            color: 'text.primary',
-                            mb: 2,
-                            fontSize: { xs: '1rem', sm: '1.25rem' }
-                          }}
-                        >
-                          Payments by Employee
-                        </Typography>
-                        <Box sx={{ flexGrow: 1, minHeight: 0 }}>
-                          <ResponsiveContainer width="100%" height="100%" minHeight={200}>
-                            <BarChart
-                              data={chartData}
-                              margin={{
-                                top: 20,
-                                right: 20,
-                                left: 10,
-                                bottom: 60
-                              }}
-                              barCategoryGap="15%"
-                            >
-                              <CartesianGrid
-                                strokeDasharray="3 3"
-                                stroke="#e0e0e0"
-                                opacity={0.3}
-                                vertical={false}
-                              />
-                              <XAxis
-                                dataKey="name"
-                                tick={{
-                                  fontSize: 11,
-                                  fill: '#64748b'
-                                }}
-                                axisLine={false}
-                                tickLine={false}
-                                angle={-45}
-                                textAnchor="end"
-                                height={80}
-                                interval={0}
-                              />
-                              <YAxis
-                                tick={{
-                                  fontSize: 11,
-                                  fill: '#64748b'
-                                }}
-                                axisLine={false}
-                                tickLine={false}
-                                tickFormatter={(value) => `₹${(value / 100000).toFixed(0)}L`}
-                                width={50}
-                              />
-                              <Tooltip
-                                formatter={(value) => [`₹${value.toLocaleString()}`, 'Revenue']}
-                                labelFormatter={(label) => `${label}`}
-                                contentStyle={{
-                                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                                  border: 'none',
-                                  borderRadius: '8px',
-                                  boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-                                  fontSize: '13px',
-                                  fontWeight: 500
-                                }}
-                                cursor={{ fill: 'rgba(30, 64, 175, 0.1)' }}
-                              />
-                              <Bar
-                                dataKey="value"
-                                fill="#1e40af"
-                                radius={[4, 4, 0, 0]}
-                                animationBegin={0}
-                                animationDuration={1000}
-                                animationEasing="ease-out"
-                              />
+                {/* Analytics Overview */}
+                <Box mb={8}>
+                  <Heading size="md" mb={4} color="gray.700">
+                    Analytics Overview (All based on Total Brokerage)
+                  </Heading>
+                  <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={6}>
+                    <Card borderRadius="xl" shadow="md">
+                      <CardHeader>
+                        <Heading size="md">Payments by Employee</Heading>
+                      </CardHeader>
+                      <CardBody>
+                        <Box h="300px">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={chartData}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="name" />
+                              <YAxis tickFormatter={(value) => `₹${(value / 100000).toFixed(0)}L`} />
+                              <Tooltip formatter={(value) => [`₹${value.toLocaleString()}`, 'Revenue']} />
+                              <Bar dataKey="value" fill="blue.500" radius={[4, 4, 0, 0]} />
                             </BarChart>
                           </ResponsiveContainer>
                         </Box>
-                      </Paper>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Paper sx={{
-                        p: { xs: 1.5, sm: 2 },
-                        height: { xs: 280, sm: 320 },
-                        display: 'flex',
-                        flexDirection: 'column',
-                        background: 'linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)',
-                        border: '1px solid rgba(0,0,0,0.08)',
-                        borderRadius: 2,
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                      }}>
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            fontWeight: 600,
-                            color: 'text.primary',
-                            mb: 2,
-                            fontSize: { xs: '1rem', sm: '1.25rem' }
-                          }}
-                        >
-                          Payment Status Distribution
-                        </Typography>
-                        <Box sx={{
-                          flexGrow: 1,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          minHeight: 0
-                        }}>
+                      </CardBody>
+                    </Card>
+                    <Card borderRadius="xl" shadow="md">
+                      <CardHeader>
+                        <Heading size="md">Payment Status Distribution</Heading>
+                      </CardHeader>
+                      <CardBody>
+                        <Box h="300px" display="flex" alignItems="center" justifyContent="center">
                           <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                               <Pie
                                 data={pieData}
                                 cx="50%"
-                                cy="45%"
+                                cy="50%"
                                 labelLine={false}
                                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                outerRadius={{ xs: 65, sm: 85 }}
-                                innerRadius={{ xs: 30, sm: 40 }}
-                                fill="#8884d8"
+                                outerRadius={80}
+                                innerRadius={40}
                                 dataKey="value"
                                 stroke="#fff"
                                 strokeWidth={2}
@@ -1027,167 +526,157 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
                                   <Cell key={`cell-${index}`} fill={entry.color} />
                                 ))}
                               </Pie>
-                              <Tooltip
-                                formatter={(value) => [`₹${value.toLocaleString()}`, 'Amount']}
-                                contentStyle={{
-                                  backgroundColor: '#fff',
-                                  border: '1px solid #ddd',
-                                  borderRadius: '6px',
-                                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                  fontSize: { xs: '11px', sm: '12px' }
-                                }}
-                              />
+                              <Tooltip formatter={(value) => [`₹${value.toLocaleString()}`, 'Amount']} />
                             </PieChart>
                           </ResponsiveContainer>
                         </Box>
-                      </Paper>
-                    </Grid>
+                      </CardBody>
+                    </Card>
                   </Grid>
                 </Box>
-                <Box sx={{
-                  mt: { xs: 3, md: 4 },
-                  display: 'flex',
-                  flexDirection: { xs: 'column', sm: 'row' },
-                  justifyContent: 'space-between',
-                  alignItems: { xs: 'stretch', sm: 'center' },
-                  gap: { xs: 2, sm: 0 },
-                  mb: 3
-                }}>
-                  <Typography
-                    variant="h5"
-                    sx={{
-                      fontSize: { xs: '1.25rem', sm: '1.5rem' },
-                      fontWeight: 600
-                    }}
-                  >
+
+                {/* Payment Records */}
+                <Flex justify="space-between" align="center" mb={4} direction={{ base: 'column', md: 'row' }}>
+                  <Heading size="md" mb={{ base: 2, md: 0 }}>
                     Payment Records
-                  </Typography>
+                  </Heading>
                   <Button
-                    variant="contained"
-                    startIcon={<Add />}
-                    onClick={() => handleOpen()}
-                    sx={{
-                      bgcolor: 'primary.main',
-                      alignSelf: { xs: 'flex-start', sm: 'auto' },
-                      minWidth: { xs: '100%', sm: 'auto' }
-                    }}
-                    size="large"
+                    colorScheme="blue"
+                    leftIcon={<AddIcon />}
+                    onClick={onModalOpen}
+                    size="lg"
                   >
-                    Add New
+                    Add New Entry
                   </Button>
-                </Box>
-                <Box sx={{
-                  display: 'flex',
-                  flexDirection: { xs: 'column', sm: 'row' },
-                  gap: 2,
-                  mb: 3
-                }}>
-                  <TextField
-                    label="Filter by Receive Date"
-                    type="date"
-                    value={filterDate}
-                    onChange={(e) => setFilterDate(e.target.value)}
-                    InputLabelProps={{ shrink: true }}
-                    fullWidth
-                    size="small"
-                  />
-                  <FormControl sx={{ minWidth: { xs: '100%', sm: 120 } }} size="small">
-                    <InputLabel>Filter by Employee</InputLabel>
-                    <Select
-                      value={filterEmployee}
-                      label="Filter by Employee"
-                      onChange={(e) => setFilterEmployee(e.target.value)}
-                    >
-                      <MenuItem value="">All</MenuItem>
-                      {employees.map((emp, index) => (
-                        <MenuItem key={index} value={emp.code}>{emp.name}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                  <FormControl sx={{ minWidth: { xs: '100%', sm: 120 } }} size="small">
-                    <InputLabel>Filter by Project</InputLabel>
-                    <Select
-                      value={filterProject}
-                      label="Filter by Project"
-                      onChange={(e) => setFilterProject(e.target.value)}
-                    >
-                      <MenuItem value="">All</MenuItem>
-                      {[...new Set(data.map(item => item.projectName))].map(proj => (
-                        <MenuItem key={proj} value={proj}>{proj}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Box>
-                <TableContainer component={Paper} sx={{
-                  borderRadius: 2,
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                  overflow: 'auto',
-                  '& .MuiTable-root': {
-                    minWidth: { xs: 600, sm: 650 }
-                  }
-                }}>
-                  <Table>
-                    <TableHead>
-                      <TableRow sx={{
-                        bgcolor: 'primary.main',
-                        '& th': {
-                          color: 'white',
-                          fontWeight: 600,
-                          fontSize: '0.875rem',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.5px'
-                        }
-                      }}>
-                        <TableCell>Date</TableCell>
-                        <TableCell>Unit No</TableCell>
-                        <TableCell>Project</TableCell>
-                        <TableCell>Owner</TableCell>
-                        <TableCell>Customer</TableCell>
-                        <TableCell>Base Price</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell>Employee</TableCell>
-                        <TableCell>Commission (%)</TableCell>
-                        <TableCell>Actions</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {filteredData.map((row, index) => (
-                        <TableRow
-                          key={index}
-                          sx={{
-                            '&:nth-of-type(odd)': { bgcolor: 'action.hover' },
-                            '&:hover': { bgcolor: 'action.selected' },
-                            transition: 'background-color 0.2s ease'
-                          }}
+                </Flex>
+
+                {/* Filters */}
+                <Card borderRadius="xl" shadow="md" mb={4}>
+                  <CardBody>
+                    <Heading size="sm" mb={4}>
+                      Filters
+                    </Heading>
+                    <Grid templateColumns={{ base: '1fr', md: 'repeat(5, 1fr)' }} gap={4}>
+                      <FormControl>
+                        <FormLabel>Date Range</FormLabel>
+                        <Input
+                          type="date"
+                          value={filterDate}
+                          onChange={(e) => setFilterDate(e.target.value)}
+                        />
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>Employee Name</FormLabel>
+                        <Select
+                          value={filterEmployee}
+                          onChange={(e) => setFilterEmployee(e.target.value)}
                         >
-                          <TableCell sx={{ fontWeight: 500 }}>{row.date}</TableCell>
-                          <TableCell>{row.unitNo}</TableCell>
-                          <TableCell>{row.projectName}</TableCell>
-                          <TableCell>{row.ownerName}</TableCell>
-                          <TableCell>{row.customerName}</TableCell>
-                          <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
-                            ₹{row.basePrice?.toLocaleString()}
-                          </TableCell>
-                          <TableCell>
-                            <Chip
-                              label={row.receiveDate && row.customerReceiveDate ? 'Received' : row.customerReceiveDate ? 'Partial' : 'Pending'}
-                              color={row.receiveDate && row.customerReceiveDate ? 'success' : row.customerReceiveDate ? 'warning' : 'error'}
-                              size="small"
-                              variant="outlined"
-                            />
-                          </TableCell>
-                          <TableCell>{employees.find(e => e.code === row.employee)?.name || row.employee}</TableCell>
-                          <TableCell>{row.commission}%</TableCell>
-                          <TableCell>
-                            <IconButton onClick={() => handleOpen(row._id)}>
-                              <Edit />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                          <option value="">All</option>
+                          {employees.map((emp) => (
+                            <option key={emp.code} value={emp.code}>{emp.name}</option>
+                          ))}
+                        </Select>
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>Project</FormLabel>
+                        <Select
+                          value={filterProject}
+                          onChange={(e) => setFilterProject(e.target.value)}
+                        >
+                          <option value="">All</option>
+                          {[...new Set(data.map(item => item.projectName))].map(proj => (
+                            <option key={proj} value={proj}>{proj}</option>
+                          ))}
+                        </Select>
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>Status</FormLabel>
+                        <Select
+                          value={filterStatus}
+                          onChange={(e) => setFilterStatus(e.target.value)}
+                        >
+                          <option value="">All</option>
+                          <option value="received">Received</option>
+                          <option value="pending">Pending</option>
+                        </Select>
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel>Received By</FormLabel>
+                        <Select
+                          value={filterReceivedBy}
+                          onChange={(e) => setFilterReceivedBy(e.target.value)}
+                        >
+                          <option value="">All</option>
+                          {employees.map((emp) => (
+                            <option key={emp.code} value={emp.code}>{emp.name}</option>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                  </CardBody>
+                </Card>
+
+                {/* Table */}
+                <Card borderRadius="xl" shadow="md">
+                  <CardBody p={0}>
+                    <Table variant="simple">
+                      <Thead>
+                        <Tr bg="blue.500">
+                          <Th color="white">Date</Th>
+                          <Th color="white">Unit No</Th>
+                          <Th color="white">Project</Th>
+                          <Th color="white">Owner</Th>
+                          <Th color="white">Customer</Th>
+                          <Th color="white">Base Price</Th>
+                          <Th color="white">Status</Th>
+                          <Th color="white">Employee</Th>
+                          <Th color="white">Commission</Th>
+                          <Th color="white">Actions</Th>
+                        </Tr>
+                      </Thead>
+                      <Tbody>
+                        {filteredData.map((row, index) => (
+                          <Tr key={index} _hover={{ bg: 'gray.50' }}>
+                            <Td fontWeight="medium">{row.date}</Td>
+                            <Td>{row.unitNo}</Td>
+                            <Td>{row.projectName}</Td>
+                            <Td>{row.ownerName}</Td>
+                            <Td>{row.customerName}</Td>
+                            <Td fontWeight="bold" color="blue.600">
+                              ₹{row.basePrice?.toLocaleString()}
+                            </Td>
+                            <Td>
+                              <Badge
+                                colorScheme={
+                                  row.receiveDate && row.customerReceiveDate ? 'green' :
+                                  row.customerReceiveDate ? 'yellow' : 'red'
+                                }
+                              >
+                                {row.receiveDate && row.customerReceiveDate ? 'Received' :
+                                 row.customerReceiveDate ? 'Partial' : 'Pending'}
+                              </Badge>
+                            </Td>
+                            <Td>{employees.find(e => e.code === row.employee)?.name || row.employee}</Td>
+                            <Td>{row.commission}%</Td>
+                            <Td>
+                              <IconButton
+                                icon={<EditIcon />}
+                                size="sm"
+                                colorScheme="blue"
+                                variant="ghost"
+                                onClick={() => {
+                                  setFormData(row);
+                                  setEditingIndex(row._id);
+                                  onModalOpen();
+                                }}
+                              />
+                            </Td>
+                          </Tr>
+                        ))}
+                      </Tbody>
+                    </Table>
+                  </CardBody>
+                </Card>
               </>
             )}
           </>
@@ -1196,495 +685,300 @@ const Dashboard = ({ darkMode, toggleDarkMode }) => {
   };
 
   return (
-    <Box sx={{ display: 'flex' }}>
-      <AppBar position="fixed" sx={{
-        zIndex: (theme) => theme.zIndex.drawer + 1,
-        background: 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-      }}>
-        <Toolbar>
+    <Box minH="100vh" bg="gray.50">
+      {/* Header */}
+      <Flex
+        as="header"
+        bg="blue.500"
+        color="white"
+        p={4}
+        align="center"
+        justify="space-between"
+        shadow="lg"
+      >
+        <Flex align="center">
           {isMobile && (
             <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              onClick={toggleDrawer}
-              edge="start"
-              sx={{ mr: 2 }}
-            >
-              <Menu />
-            </IconButton>
+              icon={<HamburgerIcon />}
+              onClick={onDrawerOpen}
+              mr={4}
+              color="white"
+              variant="ghost"
+            />
           )}
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 600 }}>
-            Bavadiya Realty LLP
-          </Typography>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={darkMode}
-                onChange={toggleDarkMode}
-                icon={<Brightness7 />}
-                checkedIcon={<Brightness4 />}
-              />
-            }
-            label=""
+          <Heading size="md">Bavadiya Realty LLP</Heading>
+        </Flex>
+        <HStack>
+          <IconButton
+            icon={<LogoutIcon />}
+            onClick={logout}
+            color="white"
+            variant="ghost"
           />
-          <IconButton color="inherit" onClick={logout}>
-            <Logout />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
-      <Drawer
-        variant={isMobile ? 'temporary' : 'permanent'}
-        open={isMobile ? drawerOpen : true}
-        onClose={isMobile ? toggleDrawer : undefined}
-        sx={{
-          width: 240,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: 240,
-            boxSizing: 'border-box',
-            background: 'linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%)',
-            borderRight: '1px solid rgba(0,0,0,0.08)',
-            boxShadow: '2px 0 10px rgba(0,0,0,0.05)'
-          },
-        }}
-      >
-        <Toolbar />
-        <Box sx={{ overflow: 'auto', p: 1 }}>
-          <Box sx={{ p: 2, textAlign: 'center' }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
-              Dashboard
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Realty Management
-            </Typography>
-          </Box>
-          <Divider sx={{ mb: 2 }} />
-          <List>
-            {menuItems.map((item) => (
-              <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
-                <ListItemButton
-                  selected={activeView === item.view}
-                  onClick={() => {
-                    setActiveView(item.view);
-                    if (isMobile) setDrawerOpen(false);
-                  }}
-                  sx={{
-                    borderRadius: 2,
-                    '&.Mui-selected': {
-                      backgroundColor: 'primary.main',
-                      color: 'white',
-                      '&:hover': {
-                        backgroundColor: 'primary.dark',
-                      },
-                      '& .MuiListItemIcon-root': {
-                        color: 'white',
-                      }
-                    },
-                    '&:hover': {
-                      backgroundColor: 'rgba(0,0,0,0.04)',
-                    }
-                  }}
-                >
-                  <ListItemIcon sx={{ minWidth: 40 }}>
-                    {item.icon}
-                  </ListItemIcon>
-                  <ListItemText primary={item.text} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-          <Divider sx={{ my: 2 }} />
-        </Box>
-      </Drawer>
+        </HStack>
+      </Flex>
 
-      {/* Password Change Dialog */}
-      <Dialog open={passwordDialog} onClose={() => setPasswordDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Change Password</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="Current Password"
-            type="password"
-            value={passwordData.currentPassword}
-            onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-            sx={{ mt: 2 }}
-          />
-          <TextField
-            fullWidth
-            label="New Password"
-            type="password"
-            value={passwordData.newPassword}
-            onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-            sx={{ mt: 2 }}
-          />
-          <TextField
-            fullWidth
-            label="Confirm New Password"
-            type="password"
-            value={passwordData.confirmPassword}
-            onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-            sx={{ mt: 2 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setPasswordDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => {
-            if (passwordData.newPassword === passwordData.confirmPassword) {
-              // Here you would call an API to change password
-              alert('Password changed successfully!');
-              setPasswordDialog(false);
-              setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-            } else {
-              alert('Passwords do not match!');
-            }
-          }}>
-            Change Password
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Box component="main" sx={{
-        flexGrow: 1,
-        p: 0,
-        minHeight: 'calc(100vh - 64px)',
-        marginLeft: isMobile ? 0 : '240px'
-      }}>
-        <Toolbar />
-        <Box sx={{ p: 3, pb: 8 }}>
-          {renderView()}
-        </Box>
-        <Dialog
-          open={open}
-          onClose={handleClose}
-          maxWidth="lg"
-          fullWidth
-          sx={{
-            '& .MuiDialog-paper': {
-              borderRadius: 3,
-              boxShadow: '0 25px 50px rgba(0,0,0,0.25)',
-            }
-          }}
+      <Flex>
+        {/* Sidebar */}
+        <Drawer
+          isOpen={drawerOpen}
+          placement="left"
+          onClose={onDrawerClose}
+          size="xs"
         >
-          <DialogTitle sx={{
-            bgcolor: 'primary.main',
-            color: 'white',
-            fontWeight: 600,
-            fontSize: '1.25rem'
-          }}>
-            {editingIndex !== null ? 'Edit Payment Entry' : 'Add New Payment Entry'}
-          </DialogTitle>
-          <DialogContent sx={{ p: 3 }}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Fill in the details below to {editingIndex !== null ? 'update' : 'create'} a payment entry.
-            </Typography>
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Date"
-                  type="date"
-                  value={formData.date}
-                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Unit No"
-                  value={formData.unitNo}
-                  onChange={(e) => setFormData({ ...formData, unitNo: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Project Name"
-                  value={formData.projectName}
-                  onChange={(e) => setFormData({ ...formData, projectName: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Owner Name"
-                  value={formData.ownerName}
-                  onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Owner Number"
-                  value={formData.ownerNumber}
-                  onChange={(e) => setFormData({ ...formData, ownerNumber: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Customer Name"
-                  value={formData.customerName}
-                  onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Customer Number"
-                  value={formData.customerNumber}
-                  onChange={(e) => setFormData({ ...formData, customerNumber: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Time Period"
-                  value={formData.timePeriod}
-                  onChange={(e) => setFormData({ ...formData, timePeriod: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Base Price"
-                  type="number"
-                  value={formData.basePrice}
-                  onChange={(e) => setFormData({ ...formData, basePrice: parseFloat(e.target.value) || '' })}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Owner Brokerage"
-                  type="number"
-                  value={formData.ownerBro}
-                  onChange={(e) => setFormData({ ...formData, ownerBro: parseFloat(e.target.value) || '' })}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Receive Date"
-                  type="date"
-                  value={formData.receiveDate}
-                  onChange={(e) => setFormData({ ...formData, receiveDate: e.target.value })}
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Customer Brokerage"
-                  type="number"
-                  value={formData.customerBro}
-                  onChange={(e) => setFormData({ ...formData, customerBro: parseFloat(e.target.value) || '' })}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Customer Receive Date"
-                  type="date"
-                  value={formData.customerReceiveDate}
-                  onChange={(e) => setFormData({ ...formData, customerReceiveDate: e.target.value })}
-                  InputLabelProps={{ shrink: true }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <FormControl fullWidth>
-                  <InputLabel>Employee</InputLabel>
-                  <Select
-                    value={formData.employee}
-                    label="Employee"
-                    onChange={(e) => setFormData({ ...formData, employee: e.target.value })}
+          <DrawerOverlay />
+          <DrawerContent>
+            <DrawerHeader bg="blue.500" color="white">
+              <Heading size="md">Dashboard</Heading>
+              <Text fontSize="sm">Realty Management</Text>
+            </DrawerHeader>
+            <DrawerBody>
+              <VStack align="stretch" spacing={2}>
+                {menuItems.map((item) => (
+                  <Button
+                    key={item.text}
+                    leftIcon={React.createElement(item.icon)}
+                    variant={activeView === item.view ? 'solid' : 'ghost'}
+                    colorScheme={activeView === item.view ? 'blue' : 'gray'}
+                    justifyContent="flex-start"
+                    onClick={() => {
+                      setActiveView(item.view);
+                      onDrawerClose();
+                    }}
                   >
-                    <MenuItem value="">Select Employee</MenuItem>
-                    {employees.map((emp, index) => (
-                      <MenuItem key={index} value={emp.code}>{emp.name} ({emp.code})</MenuItem>
+                    {item.text}
+                  </Button>
+                ))}
+              </VStack>
+            </DrawerBody>
+          </DrawerContent>
+        </Drawer>
+
+        {/* Main Content */}
+        <Box flex="1" p={6}>
+          <Container maxW="container.xl">
+            {renderView()}
+          </Container>
+        </Box>
+      </Flex>
+
+      {/* Input Form Modal */}
+      <Modal isOpen={modalOpen} onClose={onModalClose} size="6xl">
+        <ModalOverlay />
+        <ModalContent borderRadius="2xl">
+          <ModalHeader bg="blue.500" color="white" borderTopRadius="2xl">
+            {editingIndex !== null ? 'Edit Payment Entry' : 'Add New Payment Entry'}
+          </ModalHeader>
+          <ModalCloseButton color="white" />
+          <ModalBody p={6}>
+            <Text mb={4} color="gray.600">
+              All fields are required except Receive Date and Owner/Customer Brokerage.
+            </Text>
+            <VStack spacing={4}>
+              <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)' }} gap={4} w="full">
+                <FormControl isRequired>
+                  <FormLabel>Date</FormLabel>
+                  <Input
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  />
+                </FormControl>
+                <FormControl isRequired>
+                  <FormLabel>Unit No</FormLabel>
+                  <Input
+                    value={formData.unitNo}
+                    onChange={(e) => setFormData({ ...formData, unitNo: e.target.value })}
+                  />
+                </FormControl>
+                <FormControl isRequired>
+                  <FormLabel>Project Name</FormLabel>
+                  <Select
+                    value={formData.projectName}
+                    onChange={(e) => setFormData({ ...formData, projectName: e.target.value })}
+                  >
+                    <option value="">Select Project</option>
+                    {[...new Set(data.map(item => item.projectName))].map(proj => (
+                      <option key={proj} value={proj}>{proj}</option>
                     ))}
                   </Select>
                 </FormControl>
+                <FormControl isRequired>
+                  <FormLabel>Owner Name</FormLabel>
+                  <Input
+                    value={formData.ownerName}
+                    onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
+                  />
+                </FormControl>
+                <FormControl isRequired>
+                  <FormLabel>Owner Number</FormLabel>
+                  <Input
+                    value={formData.ownerNumber}
+                    onChange={(e) => setFormData({ ...formData, ownerNumber: e.target.value })}
+                  />
+                </FormControl>
+                <FormControl isRequired>
+                  <FormLabel>Customer Name</FormLabel>
+                  <Input
+                    value={formData.customerName}
+                    onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
+                  />
+                </FormControl>
+                <FormControl isRequired>
+                  <FormLabel>Customer Number</FormLabel>
+                  <Input
+                    value={formData.customerNumber}
+                    onChange={(e) => setFormData({ ...formData, customerNumber: e.target.value })}
+                  />
+                </FormControl>
+                <FormControl isRequired>
+                  <FormLabel>Time Period</FormLabel>
+                  <Input
+                    value={formData.timePeriod}
+                    onChange={(e) => setFormData({ ...formData, timePeriod: e.target.value })}
+                  />
+                </FormControl>
+                <FormControl isRequired>
+                  <FormLabel>Base Price</FormLabel>
+                  <Input
+                    type="number"
+                    value={formData.basePrice}
+                    onChange={(e) => setFormData({ ...formData, basePrice: parseFloat(e.target.value) || '' })}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Owner Brokerage</FormLabel>
+                  <Input
+                    type="number"
+                    value={formData.ownerBro}
+                    onChange={(e) => setFormData({ ...formData, ownerBro: parseFloat(e.target.value) || '' })}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Receive Date</FormLabel>
+                  <Input
+                    type="date"
+                    value={formData.receiveDate}
+                    onChange={(e) => setFormData({ ...formData, receiveDate: e.target.value })}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Customer Brokerage</FormLabel>
+                  <Input
+                    type="number"
+                    value={formData.customerBro}
+                    onChange={(e) => setFormData({ ...formData, customerBro: parseFloat(e.target.value) || '' })}
+                  />
+                </FormControl>
+                <FormControl>
+                  <FormLabel>Customer Receive Date</FormLabel>
+                  <Input
+                    type="date"
+                    value={formData.customerReceiveDate}
+                    onChange={(e) => setFormData({ ...formData, customerReceiveDate: e.target.value })}
+                  />
+                </FormControl>
+                <FormControl isRequired>
+                  <FormLabel>Employee</FormLabel>
+                  <Select
+                    value={formData.employee}
+                    onChange={(e) => setFormData({ ...formData, employee: e.target.value })}
+                  >
+                    <option value="">Select Employee</option>
+                    {employees.map((emp) => (
+                      <option key={emp.code} value={emp.code}>{emp.name} ({emp.code})</option>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl isRequired>
+                  <FormLabel>Employee Commission (%)</FormLabel>
+                  <Input
+                    type="number"
+                    value={formData.commission}
+                    onChange={(e) => setFormData({ ...formData, commission: parseFloat(e.target.value) || '' })}
+                  />
+                </FormControl>
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Employee Commission (%)"
-                  type="number"
-                  value={formData.commission}
-                  onChange={(e) => setFormData({ ...formData, commission: parseFloat(e.target.value) || '' })}
-                />
-              </Grid>
-            </Grid>
-          </DialogContent>
-          <DialogActions sx={{ p: 3, pt: 0 }}>
-            <Button
-              onClick={handleClose}
-              variant="outlined"
-              sx={{
-                borderRadius: 2,
-                px: 3,
-                textTransform: 'none'
-              }}
-            >
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={onModalClose}>
               Cancel
             </Button>
-            <Button
-              onClick={handleSave}
-              variant="contained"
-              sx={{
-                borderRadius: 2,
-                px: 3,
-                textTransform: 'none',
-                fontWeight: 600,
-              }}
-            >
+            <Button colorScheme="blue" onClick={handleSave}>
               Save Entry
             </Button>
-          </DialogActions>
-        </Dialog>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
-        {/* Employee Dialog */}
-        <Dialog
-          open={employeeOpen}
-          onClose={() => setEmployeeOpen(false)}
-          maxWidth="sm"
-          fullWidth
-          sx={{
-            '& .MuiDialog-paper': {
-              borderRadius: 3,
-              boxShadow: '0 25px 50px rgba(0,0,0,0.25)',
-            }
-          }}
-        >
-          <DialogTitle sx={{
-            bgcolor: 'primary.main',
-            color: 'white',
-            fontWeight: 600,
-            fontSize: '1.25rem'
-          }}>
+      {/* Employee Modal */}
+      <Modal isOpen={employeeModalOpen} onClose={onEmployeeModalClose} size="lg">
+        <ModalOverlay />
+        <ModalContent borderRadius="2xl">
+          <ModalHeader bg="blue.500" color="white" borderTopRadius="2xl">
             {editingEmployeeIndex !== null ? 'Edit Employee' : 'Add New Employee'}
-          </DialogTitle>
-          <DialogContent sx={{ p: 3 }}>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Enter employee details below.
-            </Typography>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Employee Name"
+          </ModalHeader>
+          <ModalCloseButton color="white" />
+          <ModalBody p={6}>
+            <VStack spacing={4}>
+              <FormControl isRequired>
+                <FormLabel>Employee Name</FormLabel>
+                <Input
                   value={employeeFormData.name}
                   onChange={(e) => setEmployeeFormData({ ...employeeFormData, name: e.target.value })}
                 />
+              </FormControl>
+              <Grid templateColumns="repeat(2, 1fr)" gap={4} w="full">
+                <FormControl isRequired>
+                  <FormLabel>Employee Code</FormLabel>
+                  <Input
+                    value={employeeFormData.code}
+                    onChange={(e) => setEmployeeFormData({ ...employeeFormData, code: e.target.value })}
+                  />
+                </FormControl>
+                <FormControl isRequired>
+                  <FormLabel>Employee Number</FormLabel>
+                  <Input
+                    value={employeeFormData.number}
+                    onChange={(e) => setEmployeeFormData({ ...employeeFormData, number: e.target.value })}
+                  />
+                </FormControl>
               </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Employee Code"
-                  value={employeeFormData.code}
-                  onChange={(e) => setEmployeeFormData({ ...employeeFormData, code: e.target.value })}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Employee Number"
-                  value={employeeFormData.number}
-                  onChange={(e) => setEmployeeFormData({ ...employeeFormData, number: e.target.value })}
-                />
-              </Grid>
-            </Grid>
-          </DialogContent>
-          <DialogActions sx={{ p: 3, pt: 0 }}>
-            <Button
-              onClick={() => { setEmployeeOpen(false); setEmployeeFormData({ name: '', code: '', number: '' }); setEditingEmployeeIndex(null); }}
-              variant="outlined"
-              sx={{
-                borderRadius: 2,
-                px: 3,
-                textTransform: 'none'
-              }}
-            >
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={onEmployeeModalClose}>
               Cancel
             </Button>
-            <Button
-              onClick={handleEmployeeSave}
-              variant="contained"
-              sx={{
-                borderRadius: 2,
-                px: 3,
-                textTransform: 'none',
-                fontWeight: 600,
-              }}
-            >
+            <Button colorScheme="blue" onClick={handleEmployeeSave}>
               Save
             </Button>
-          </DialogActions>
-        </Dialog>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
-        {/* Footer */}
-        <Box
-          component="footer"
-          sx={{
-            py: 3,
-            px: 2,
-            mt: 'auto',
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'light'
-                ? theme.palette.grey[100]
-                : theme.palette.grey[900],
-            borderTop: '1px solid',
-            borderColor: 'divider',
-          }}
-        >
-          <Container maxWidth="lg">
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: 2,
-              }}
-            >
-              <Box>
-                <Typography variant="body2" color="text.secondary">
-                  © 2024 Bavadiya Realty LLP. All rights reserved.
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Real Estate Payment Management System
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', gap: 3 }}>
-                <Typography variant="caption" color="text.secondary">
-                  Version 1.0.0
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Last updated: {new Date().toLocaleDateString()}
-                </Typography>
-              </Box>
+      {/* Footer */}
+      <Box as="footer" bg="gray.100" p={4} mt={8}>
+        <Container maxW="container.xl">
+          <Flex justify="space-between" align="center" wrap="wrap">
+            <Box>
+              <Text fontSize="sm" color="gray.600">
+                © 2024 Bavadiya Realty LLP. All rights reserved.
+              </Text>
+              <Text fontSize="xs" color="gray.600">
+                Real Estate Payment Management System
+              </Text>
             </Box>
-          </Container>
-        </Box>
+            <HStack>
+              <Text fontSize="xs" color="gray.600">Version 1.0.0</Text>
+              <Text fontSize="xs" color="gray.600">
+                Last updated: {new Date().toLocaleDateString()}
+              </Text>
+            </HStack>
+          </Flex>
+        </Container>
       </Box>
-
-      {/* Snackbar for notifications */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-      >
-        <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };

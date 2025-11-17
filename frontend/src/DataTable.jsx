@@ -1,35 +1,37 @@
 import React, { useState, useEffect, useContext } from 'react';
 import {
   Container,
-  Typography,
+  Heading,
   Box,
   Button,
   Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  TextField,
-  Chip,
-  IconButton,
-  TablePagination,
-  InputAdornment,
-  FormControl,
-  InputLabel,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Input,
+  InputGroup,
+  InputLeftElement,
   Select,
-  MenuItem,
+  Badge,
+  IconButton,
   Grid,
+  GridItem,
   Card,
-  CardContent,
-} from '@mui/material';
-import { Search, FilterList, Edit, Add } from '@mui/icons-material';
+  CardBody,
+  useToast,
+  Spinner,
+  Alert,
+  AlertIcon,
+} from '@chakra-ui/react';
+import { SearchIcon, EditIcon, AddIcon } from '@chakra-ui/icons';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
 
 const DataTable = ({ onEditEntry }) => {
   const { logout } = useContext(AuthContext);
+  const toast = useToast();
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,6 +62,13 @@ const DataTable = ({ onEditEntry }) => {
     } catch (error) {
       console.error('Error fetching data:', error);
       setError('Failed to load data. Please try again.');
+      toast({
+        title: 'Error loading data',
+        description: 'Failed to load data. Please try again.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
     } finally {
       setLoading(false);
     }
@@ -118,9 +127,9 @@ const DataTable = ({ onEditEntry }) => {
 
   if (loading) {
     return (
-      <Container maxWidth="xl" sx={{ mt: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-          <Typography variant="h6">Loading data table...</Typography>
+      <Container maxW="container.xl" mt={4}>
+        <Box display="flex" justifyContent="center" alignItems="center" h="400px">
+          <Spinner size="xl" />
         </Box>
       </Container>
     );
@@ -128,214 +137,170 @@ const DataTable = ({ onEditEntry }) => {
 
   if (error) {
     return (
-      <Container maxWidth="xl" sx={{ mt: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-          <Typography variant="h6" color="error">{error}</Typography>
+      <Container maxW="container.xl" mt={4}>
+        <Box display="flex" justifyContent="center" alignItems="center" h="400px">
+          <Alert status="error">
+            <AlertIcon />
+            {error}
+          </Alert>
         </Box>
       </Container>
     );
   }
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main', mb: 4 }}>
-        Data Table
-      </Typography>
+    <Container maxW="container.xl" mt={4} mb={4}>
+      <Heading size="lg" mb={6} color="blue.600">
+        Payment Records
+      </Heading>
 
       {/* Summary Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" color="text.secondary">Total Entries</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                {totalEntries}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" color="text.secondary">Total Value</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'success.main' }}>
-                ₹{totalValue.toLocaleString()}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" color="text.secondary">Received</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'info.main' }}>
-                ₹{receivedValue.toLocaleString()}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" color="text.secondary">Pending</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'warning.main' }}>
-                ₹{pendingValue.toLocaleString()}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+      <Grid templateColumns={{ base: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }} gap={4} mb={8}>
+        <Card borderRadius="xl" shadow="md">
+          <CardBody textAlign="center">
+            <Heading size="sm" mb={2} color="gray.600">Total Entries</Heading>
+            <Text fontSize="2xl" fontWeight="bold" color="blue.600">
+              {totalEntries}
+            </Text>
+          </CardBody>
+        </Card>
+        <Card borderRadius="xl" shadow="md">
+          <CardBody textAlign="center">
+            <Heading size="sm" mb={2} color="gray.600">Total Value</Heading>
+            <Text fontSize="2xl" fontWeight="bold" color="green.600">
+              ₹{totalValue.toLocaleString()}
+            </Text>
+          </CardBody>
+        </Card>
+        <Card borderRadius="xl" shadow="md">
+          <CardBody textAlign="center">
+            <Heading size="sm" mb={2} color="gray.600">Received</Heading>
+            <Text fontSize="2xl" fontWeight="bold" color="blue.600">
+              ₹{receivedValue.toLocaleString()}
+            </Text>
+          </CardBody>
+        </Card>
+        <Card borderRadius="xl" shadow="md">
+          <CardBody textAlign="center">
+            <Heading size="sm" mb={2} color="gray.600">Pending</Heading>
+            <Text fontSize="2xl" fontWeight="bold" color="orange.600">
+              ₹{pendingValue.toLocaleString()}
+            </Text>
+          </CardBody>
+        </Card>
       </Grid>
 
       {/* Filters */}
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-          Filters & Search
-        </Typography>
-        <Grid container spacing={3} alignItems="center">
-          <Grid item xs={12} md={4}>
-            <TextField
-              fullWidth
-              label="Search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search />
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <FormControl fullWidth>
-              <InputLabel>Status</InputLabel>
+      <Card borderRadius="xl" shadow="md" mb={6}>
+        <CardBody>
+          <Heading size="sm" mb={4}>
+            Filters & Search
+          </Heading>
+          <Grid templateColumns={{ base: '1fr', md: 'repeat(4, 1fr)' }} gap={4} alignItems="end">
+            <Box>
+              <InputGroup>
+                <InputLeftElement>
+                  <SearchIcon />
+                </InputLeftElement>
+                <Input
+                  placeholder="Search"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </InputGroup>
+            </Box>
+            <Box>
               <Select
+                placeholder="Status"
                 value={statusFilter}
-                label="Status"
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
-                <MenuItem value="all">All Status</MenuItem>
-                <MenuItem value="received">Received</MenuItem>
-                <MenuItem value="pending">Pending</MenuItem>
+                <option value="all">All Status</option>
+                <option value="received">Received</option>
+                <option value="pending">Pending</option>
               </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} md={3}>
-            <FormControl fullWidth>
-              <InputLabel>Employee</InputLabel>
+            </Box>
+            <Box>
               <Select
+                placeholder="Employee"
                 value={employeeFilter}
-                label="Employee"
                 onChange={(e) => setEmployeeFilter(e.target.value)}
               >
-                <MenuItem value="all">All Employees</MenuItem>
+                <option value="all">All Employees</option>
                 {employees.map(emp => (
-                  <MenuItem key={emp} value={emp}>{emp}</MenuItem>
+                  <option key={emp} value={emp}>{emp}</option>
                 ))}
               </Select>
-            </FormControl>
+            </Box>
+            <Box>
+              <Button
+                leftIcon={<SearchIcon />}
+                variant="outline"
+                w="full"
+                onClick={() => {
+                  setSearchTerm('');
+                  setStatusFilter('all');
+                  setEmployeeFilter('all');
+                }}
+              >
+                Clear
+              </Button>
+            </Box>
           </Grid>
-          <Grid item xs={12} md={2}>
-            <Button
-              fullWidth
-              variant="outlined"
-              startIcon={<FilterList />}
-              onClick={() => {
-                setSearchTerm('');
-                setStatusFilter('all');
-                setEmployeeFilter('all');
-              }}
-            >
-              Clear
-            </Button>
-          </Grid>
-        </Grid>
-      </Paper>
+        </CardBody>
+      </Card>
 
       {/* Data Table */}
-      <Paper sx={{ borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow sx={{
-                bgcolor: 'primary.main',
-                '& th': {
-                  color: 'white',
-                  fontWeight: 600,
-                  fontSize: '0.875rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }
-              }}>
-                <TableCell>Date</TableCell>
-                <TableCell>Unit No</TableCell>
-                <TableCell>Project</TableCell>
-                <TableCell>Owner</TableCell>
-                <TableCell>Customer</TableCell>
-                <TableCell>Base Price</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Employee</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
+      <Card borderRadius="xl" shadow="md">
+        <CardBody p={0}>
+          <Table variant="simple">
+            <Thead>
+              <Tr bg="blue.500">
+                <Th color="white">Date</Th>
+                <Th color="white">Unit No</Th>
+                <Th color="white">Project</Th>
+                <Th color="white">Owner</Th>
+                <Th color="white">Customer</Th>
+                <Th color="white">Base Price</Th>
+                <Th color="white">Status</Th>
+                <Th color="white">Employee</Th>
+                <Th color="white">Actions</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
               {paginatedData.map((row, index) => (
-                <TableRow
-                  key={row.id || index}
-                  sx={{
-                    '&:nth-of-type(odd)': { bgcolor: 'action.hover' },
-                    '&:hover': { bgcolor: 'action.selected' },
-                    transition: 'background-color 0.2s ease'
-                  }}
-                >
-                  <TableCell sx={{ fontWeight: 500 }}>{row.date}</TableCell>
-                  <TableCell>{row.unitNo}</TableCell>
-                  <TableCell>{row.projectName}</TableCell>
-                  <TableCell>{row.ownerName}</TableCell>
-                  <TableCell>{row.customerName}</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
+                <Tr key={row.id || index} _hover={{ bg: 'gray.50' }}>
+                  <Td fontWeight="medium">{row.date}</Td>
+                  <Td>{row.unitNo}</Td>
+                  <Td>{row.projectName}</Td>
+                  <Td>{row.ownerName}</Td>
+                  <Td>{row.customerName}</Td>
+                  <Td fontWeight="bold" color="blue.600">
                     ₹{row.basePrice?.toLocaleString()}
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={row.receiveDate ? 'Received' : 'Pending'}
-                      color={row.receiveDate ? 'success' : 'warning'}
-                      size="small"
-                      variant="outlined"
-                    />
-                  </TableCell>
-                  <TableCell>{row.employee}</TableCell>
-                  <TableCell>
-                    <IconButton
-                      onClick={() => onEditEntry && onEditEntry(row)}
-                      sx={{
-                        color: 'primary.main',
-                        '&:hover': {
-                          bgcolor: 'primary.light',
-                          color: 'white'
-                        }
-                      }}
+                  </Td>
+                  <Td>
+                    <Badge
+                      colorScheme={row.receiveDate ? 'green' : 'orange'}
                     >
-                      <Edit />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
+                      {row.receiveDate ? 'Received' : 'Pending'}
+                    </Badge>
+                  </Td>
+                  <Td>{row.employee}</Td>
+                  <Td>
+                    <IconButton
+                      icon={<EditIcon />}
+                      size="sm"
+                      colorScheme="blue"
+                      variant="ghost"
+                      onClick={() => onEditEntry && onEditEntry(row)}
+                    />
+                  </Td>
+                </Tr>
               ))}
-            </TableBody>
+            </Tbody>
           </Table>
-        </TableContainer>
-
-        <TablePagination
-          component="div"
-          count={filteredData.length}
-          page={page}
-          onPageChange={handleChangePage}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          rowsPerPageOptions={[5, 10, 25, 50]}
-        />
-      </Paper>
+        </CardBody>
+      </Card>
     </Container>
   );
 };
