@@ -615,12 +615,12 @@ const Dashboard = () => {
                 <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: { xs: 3, md: 4 } }}>
                   <Grid item xs={6} sm={6} md={2}>
                     <Card sx={{
-                      background: 'linear-gradient(135deg, #007AFF 0%, #5856D6 100%)',
+                      background: 'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)',
                       color: 'white',
                       position: 'relative',
                       overflow: 'hidden',
-                      borderRadius: 4,
-                      boxShadow: '0 4px 16px rgba(0, 122, 255, 0.2)',
+                      borderRadius: 3,
+                      boxShadow: '0 4px 16px rgba(30, 64, 175, 0.2)',
                       minHeight: { xs: 120, sm: 140 },
                       '&::before': {
                         content: '""',
@@ -685,12 +685,12 @@ const Dashboard = () => {
                   </Grid>
                   <Grid item xs={6} sm={6} md={2}>
                     <Card sx={{
-                      background: 'linear-gradient(135deg, #34C759 0%, #30D158 100%)',
+                      background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
                       color: 'white',
                       position: 'relative',
                       overflow: 'hidden',
-                      borderRadius: 4,
-                      boxShadow: '0 4px 16px rgba(52, 199, 89, 0.2)',
+                      borderRadius: 3,
+                      boxShadow: '0 4px 16px rgba(5, 150, 105, 0.2)',
                       minHeight: { xs: 120, sm: 140 },
                       '&::before': {
                         content: '""',
@@ -755,12 +755,12 @@ const Dashboard = () => {
                   </Grid>
                   <Grid item xs={6} sm={6} md={2}>
                     <Card sx={{
-                      background: 'linear-gradient(135deg, #FF9500 0%, #FF9F0A 100%)',
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                       color: 'white',
                       position: 'relative',
                       overflow: 'hidden',
-                      borderRadius: 4,
-                      boxShadow: '0 4px 16px rgba(255, 149, 0, 0.2)',
+                      borderRadius: 3,
+                      boxShadow: '0 4px 16px rgba(16, 185, 129, 0.2)',
                       minHeight: { xs: 120, sm: 140 },
                       '&::before': {
                         content: '""',
@@ -825,12 +825,12 @@ const Dashboard = () => {
                   </Grid>
                   <Grid item xs={6} sm={6} md={2}>
                     <Card sx={{
-                      background: 'linear-gradient(135deg, #AF52DE 0%, #BF5AF2 100%)',
+                      background: 'linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)',
                       color: 'white',
                       position: 'relative',
                       overflow: 'hidden',
-                      borderRadius: 4,
-                      boxShadow: '0 4px 16px rgba(175, 82, 222, 0.2)',
+                      borderRadius: 3,
+                      boxShadow: '0 4px 16px rgba(59, 130, 246, 0.2)',
                       minHeight: { xs: 120, sm: 140 },
                       '&::before': {
                         content: '""',
@@ -895,12 +895,12 @@ const Dashboard = () => {
                   </Grid>
                   <Grid item xs={6} sm={6} md={2}>
                     <Card sx={{
-                      background: 'linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%)',
+                      background: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
                       color: 'white',
                       position: 'relative',
                       overflow: 'hidden',
-                      borderRadius: 4,
-                      boxShadow: '0 4px 16px rgba(0, 122, 255, 0.2)',
+                      borderRadius: 3,
+                      boxShadow: '0 4px 16px rgba(217, 119, 6, 0.2)',
                       minHeight: { xs: 120, sm: 140 },
                       '&::before': {
                         content: '""',
@@ -965,12 +965,12 @@ const Dashboard = () => {
                   </Grid>
                   <Grid item xs={6} sm={6} md={2}>
                     <Card sx={{
-                      background: 'linear-gradient(135deg, #FF3B30 0%, #FF453A 100%)',
+                      background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
                       color: 'white',
                       position: 'relative',
                       overflow: 'hidden',
-                      borderRadius: 4,
-                      boxShadow: '0 4px 16px rgba(255, 59, 48, 0.2)',
+                      borderRadius: 3,
+                      boxShadow: '0 4px 16px rgba(220, 38, 38, 0.2)',
                       minHeight: { xs: 120, sm: 140 },
                       '&::before': {
                         content: '""',
@@ -1363,7 +1363,17 @@ const Dashboard = () => {
                           <TableCell>{employees.find(e => e.code === row.employee)?.name || row.employee}</TableCell>
                           <TableCell>{row.commission}%</TableCell>
                           <TableCell>
-                            <IconButton onClick={() => handleOpen(row._id)} sx={{ borderRadius: 2 }}>
+                            <IconButton
+                              onClick={() => {
+                                const itemToEdit = data.find(item => item._id === row._id);
+                                if (itemToEdit) {
+                                  setFormData(itemToEdit);
+                                  setEditingIndex(row._id);
+                                  setOpen(true);
+                                }
+                              }}
+                              sx={{ borderRadius: 2 }}
+                            >
                               <Edit />
                             </IconButton>
                           </TableCell>
