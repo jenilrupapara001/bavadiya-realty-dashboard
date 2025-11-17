@@ -1,16 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
 import {
   Container,
-  Heading,
+  Typography,
   Box,
+  Paper,
   Grid,
-  GridItem,
   Card,
-  CardBody,
-  CardHeader,
-  Spinner,
+  CardContent,
   Alert,
-} from '@chakra-ui/react';
+} from '@mui/material';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
 import {
@@ -89,9 +87,9 @@ const Analytics = () => {
   // ---- UI ----
   if (loading) {
     return (
-      <Container maxW="container.xl" mt={4}>
-        <Box display="flex" justifyContent="center" alignItems="center" h="400px">
-          <Spinner size="xl" />
+      <Container maxWidth="xl" sx={{ mt: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
+          <Typography variant="h6">Loading analytics...</Typography>
         </Box>
       </Container>
     );
@@ -99,9 +97,9 @@ const Analytics = () => {
 
   if (error) {
     return (
-      <Container maxW="container.xl" mt={4}>
-        <Box display="flex" justifyContent="center" alignItems="center" h="400px">
-          <Alert status="error">
+      <Container maxWidth="xl" sx={{ mt: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
+          <Alert severity="error">
             {error}
           </Alert>
         </Box>
@@ -110,123 +108,119 @@ const Analytics = () => {
   }
 
   return (
-    <Container maxW="container.xl">
-      <Heading size="lg" mb={6} color="blue.600">
+    <Container maxWidth="xl">
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main', mb: 4 }}>
         Reports & Analytics
-      </Heading>
+      </Typography>
 
       {/* Key Metrics */}
-      <Grid templateColumns={{ base: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }} gap={4} mb={8}>
-        <Card bg="blue.500" color="white" borderRadius="xl" shadow="lg">
-          <CardBody textAlign="center">
-            <Heading size="sm" mb={2}>Total Revenue</Heading>
-            <Text fontSize="2xl" fontWeight="bold">
-              ₹{totalPayments.toLocaleString()}
-            </Text>
-          </CardBody>
-        </Card>
-        <Card bg="green.500" color="white" borderRadius="xl" shadow="lg">
-          <CardBody textAlign="center">
-            <Heading size="sm" mb={2}>Received</Heading>
-            <Text fontSize="2xl" fontWeight="bold">
-              ₹{receivedPayments.toLocaleString()}
-            </Text>
-          </CardBody>
-        </Card>
-        <Card bg="orange.500" color="white" borderRadius="xl" shadow="lg">
-          <CardBody textAlign="center">
-            <Heading size="sm" mb={2}>Pending</Heading>
-            <Text fontSize="2xl" fontWeight="bold">
-              ₹{pendingPayments.toLocaleString()}
-            </Text>
-          </CardBody>
-        </Card>
-        <Card bg="purple.500" color="white" borderRadius="xl" shadow="lg">
-          <CardBody textAlign="center">
-            <Heading size="sm" mb={2}>Total Deals</Heading>
-            <Text fontSize="2xl" fontWeight="bold">
-              {data.length}
-            </Text>
-          </CardBody>
-        </Card>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} md={3}>
+          <Card sx={{ background: 'linear-gradient(135deg, #1a365d 0%, #3b82f6 100%)', color: 'white', borderRadius: 3 }}>
+            <CardContent>
+              <Typography variant="h6" sx={{ fontWeight: 500 }}>Total Revenue</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                ₹{totalPayments.toLocaleString()}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={3}>
+          <Card sx={{ background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)', color: 'white', borderRadius: 3 }}>
+            <CardContent>
+              <Typography variant="h6" sx={{ fontWeight: 500 }}>Received</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                ₹{receivedPayments.toLocaleString()}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={3}>
+          <Card sx={{ background: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)', color: 'white', borderRadius: 3 }}>
+            <CardContent>
+              <Typography variant="h6" sx={{ fontWeight: 500 }}>Pending</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                ₹{pendingPayments.toLocaleString()}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={3}>
+          <Card sx={{ background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)', color: 'white', borderRadius: 3 }}>
+            <CardContent>
+              <Typography variant="h6" sx={{ fontWeight: 500 }}>Total Deals</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                {data.length}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
       </Grid>
 
       {/* Charts */}
-      <Grid templateColumns={{ base: '1fr', md: 'repeat(3, 1fr)' }} gap={6}>
+      <Grid container spacing={3}>
         {/* Monthly Trends */}
-        <GridItem colSpan={{ base: 1, md: 2 }}>
-          <Card borderRadius="xl" shadow="md">
-            <CardHeader>
-              <Heading size="md">Monthly Revenue Trends</Heading>
-            </CardHeader>
-            <CardBody>
-              <Box h="300px">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={monthlyChartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => [`₹${value.toLocaleString()}`, 'Amount']} />
-                    <Line type="monotone" dataKey="total" stroke="#1a365d" strokeWidth={3} name="Total" />
-                    <Line type="monotone" dataKey="received" stroke="#059669" strokeWidth={3} name="Received" />
-                  </LineChart>
-                </ResponsiveContainer>
-              </Box>
-            </CardBody>
-          </Card>
-        </GridItem>
+        <Grid item xs={12} md={8}>
+          <Paper sx={{ p: 3, height: '100%', borderRadius: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              Monthly Revenue Trends
+            </Typography>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={monthlyChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip formatter={(value) => [`₹${value.toLocaleString()}`, 'Amount']} />
+                <Line type="monotone" dataKey="total" stroke="#1a365d" strokeWidth={3} name="Total" />
+                <Line type="monotone" dataKey="received" stroke="#059669" strokeWidth={3} name="Received" />
+              </LineChart>
+            </ResponsiveContainer>
+          </Paper>
+        </Grid>
 
         {/* Project Distribution */}
-        <GridItem>
-          <Card borderRadius="xl" shadow="md">
-            <CardHeader>
-              <Heading size="md">Revenue by Project</Heading>
-            </CardHeader>
-            <CardBody>
-              <Box h="300px" display="flex" alignItems="center" justifyContent="center">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={projectChartData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      dataKey="value"
-                      label={({ name, percent }) => `${name.substring(0, 10)}... ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {projectChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </Box>
-            </CardBody>
-          </Card>
-        </GridItem>
+        <Grid item xs={12} md={4}>
+          <Paper sx={{ p: 3, height: '100%', borderRadius: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              Revenue by Project
+            </Typography>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={projectChartData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  dataKey="value"
+                  label={({ name, percent }) => `${name.substring(0, 10)}... ${(percent * 100).toFixed(0)}%`}
+                >
+                  {projectChartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
+              </PieChart>
+            </ResponsiveContainer>
+          </Paper>
+        </Grid>
 
         {/* Employee Performance */}
-        <GridItem colSpan={3}>
-          <Card borderRadius="xl" shadow="md">
-            <CardHeader>
-              <Heading size="md">Employee Performance</Heading>
-            </CardHeader>
-            <CardBody>
-              <Box h="300px">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={employeeChartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => [`₹${value.toLocaleString()}`, 'Revenue']} />
-                    <Bar dataKey="revenue" fill="blue.500" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </Box>
-            </CardBody>
-          </Card>
-        </GridItem>
+        <Grid item xs={12}>
+          <Paper sx={{ p: 3, borderRadius: 3 }}>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              Employee Performance
+            </Typography>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={employeeChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip formatter={(value) => [`₹${value.toLocaleString()}`, 'Revenue']} />
+                <Bar dataKey="revenue" fill="#1a365d" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </Paper>
+        </Grid>
       </Grid>
     </Container>
   );

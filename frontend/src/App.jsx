@@ -3,52 +3,75 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, AuthContext } from './AuthContext';
 import Login from './Login';
 import Dashboard from './Dashboard';
-import { ChakraProvider, extendTheme } from '@chakra-ui/react';
+import { CssBaseline, ThemeProvider } from '@mui/material';
+import { createTheme } from '@mui/material/styles';
 
 // iOS-inspired theme
-const theme = extendTheme({
-  config: {
-    initialColorMode: 'light',
-    useSystemColorMode: false,
-  },
-  colors: {
-    brand: {
-      50: '#e6f3ff',
-      100: '#b3d9ff',
-      200: '#80bfff',
-      300: '#4da6ff',
-      400: '#1a8cff',
-      500: '#0070f3', // iOS blue
-      600: '#005bc2',
-      700: '#004591',
-      800: '#003061',
-      900: '#001b30',
+const theme = createTheme({
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#007AFF', // iOS blue
+    },
+    secondary: {
+      main: '#FF3B30', // iOS red
+    },
+    background: {
+      default: '#F2F2F7', // iOS light gray
+      paper: '#FFFFFF',
     },
   },
-  fonts: {
-    heading: '"SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    body: '"SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  typography: {
+    fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    h4: {
+      fontWeight: 700,
+    },
+    h5: {
+      fontWeight: 600,
+    },
+    h6: {
+      fontWeight: 600,
+    },
+  },
+  shape: {
+    borderRadius: 12, // iOS rounded corners
   },
   components: {
-    Button: {
-      baseStyle: {
-        borderRadius: '12px',
-        fontWeight: '600',
-      },
-    },
-    Card: {
-      baseStyle: {
-        container: {
-          borderRadius: '16px',
+    MuiCard: {
+      styleOverrides: {
+        root: {
           boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          borderRadius: 16,
+          transition: 'all 0.2s ease-in-out',
+          '&:hover': {
+            boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+            transform: 'translateY(-1px)',
+          },
         },
       },
     },
-  },
-  styles: {
-    global: {
-      body: {
-        bg: 'gray.50',
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12,
+          textTransform: 'none',
+          fontWeight: 600,
+          transition: 'all 0.2s ease-in-out',
+        },
+        contained: {
+          boxShadow: '0 2px 8px rgba(0,122,255,0.3)',
+          '&:hover': {
+            boxShadow: '0 4px 16px rgba(0,122,255,0.4)',
+          },
+        },
+      },
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          borderRadius: 16,
+          boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
+        },
       },
     },
   },
@@ -78,12 +101,13 @@ function MainApp() {
 
 export default function App() {
   return (
-    <ChakraProvider theme={theme}>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
       <Router>
         <AuthProvider>
           <MainApp />
         </AuthProvider>
       </Router>
-    </ChakraProvider>
+    </ThemeProvider>
   );
 }
