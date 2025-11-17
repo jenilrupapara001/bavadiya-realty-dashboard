@@ -66,7 +66,6 @@ const Dashboard = () => {
   });
   const [employeeOpen, setEmployeeOpen] = useState(false);
   const [editingEmployeeIndex, setEditingEmployeeIndex] = useState(null);
-  const [projects, setProjects] = useState([]);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [open, setOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState(null);
@@ -97,7 +96,6 @@ const Dashboard = () => {
   useEffect(() => {
     fetchData();
     fetchEmployees();
-    fetchProjects();
   }, []);
 
   useEffect(() => {
@@ -161,17 +159,6 @@ const Dashboard = () => {
     }
   };
 
-  const fetchProjects = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get('https://bavadiya-realty-backend.vercel.app/api/projects', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setProjects(response.data);
-    } catch (error) {
-      console.error('Error fetching projects:', error);
-    }
-  };
 
   const handleOpen = (index = null) => {
     if (index !== null) {
@@ -1259,8 +1246,8 @@ const Dashboard = () => {
                     sx={{ borderRadius: 2 }}
                   >
                     <MenuItem value="">Select Project</MenuItem>
-                    {projects.map(proj => (
-                      <MenuItem key={proj._id} value={proj.name}>{proj.name}</MenuItem>
+                    {[...new Set(data.map(item => item.projectName))].map(proj => (
+                      <MenuItem key={proj} value={proj}>{proj}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
