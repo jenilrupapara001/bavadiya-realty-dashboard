@@ -52,8 +52,17 @@ const employeeSchema = new mongoose.Schema({
   number: String,
 });
 
+const projectSchema = new mongoose.Schema({
+  name: String,
+  description: String,
+  location: String,
+  status: { type: String, default: 'Active' },
+  createdAt: { type: Date, default: Date.now },
+});
+
 const Data = mongoose.model('Data', dataSchema);
 const Employee = mongoose.model('Employee', employeeSchema);
+const Project = mongoose.model('Project', projectSchema);
 
 // ---- Admin Credentials ----
 const defaultUsername = process.env.DEFAULT_ADMIN_USERNAME || 'DharmeshBavadiya';
@@ -146,12 +155,50 @@ app.put('/api/employees/:id', authenticateToken, async (req, res) => {
 });
 
 app.delete('/api/employees/:id', authenticateToken, async (req, res) => {
-   try {
-     await Employee.findByIdAndDelete(req.params.id);
-     res.json({ success: true });
-   } catch (error) {
-     res.status(500).json({ error: 'Failed to delete employee' });
-   }
+    try {
+      await Employee.findByIdAndDelete(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete employee' });
+    }
+});
+
+// ---- PROJECT ENDPOINTS ------------------------
+app.get('/api/projects', authenticateToken, async (req, res) => {
+    try {
+      const projects = await Project.find();
+      res.json(projects);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch projects' });
+    }
+});
+
+app.post('/api/projects', authenticateToken, async (req, res) => {
+    try {
+      const newProject = new Project(req.body);
+      await newProject.save();
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to save project' });
+    }
+});
+
+app.put('/api/projects/:id', authenticateToken, async (req, res) => {
+    try {
+      await Project.findByIdAndUpdate(req.params.id, req.body);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to update project' });
+    }
+});
+
+app.delete('/api/projects/:id', authenticateToken, async (req, res) => {
+    try {
+      await Project.findByIdAndDelete(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete project' });
+    }
 });
 
 app.listen(PORT, () => console.log(`✅ API running on port ${PORT}`));
