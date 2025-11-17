@@ -42,7 +42,7 @@ import {
   Fade,
   Grow,
 } from '@mui/material';
-import { Logout, Add, Edit, Dashboard as DashboardIcon, BarChart as BarChartIcon, TableChart, Menu, Person as PersonIcon } from '@mui/icons-material';
+import { Logout, Add, Edit, Delete, Dashboard as DashboardIcon, BarChart as BarChartIcon, TableChart, Menu, Person as PersonIcon } from '@mui/icons-material';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
@@ -170,7 +170,32 @@ const Dashboard = () => {
     setOpen(false);
   };
 
+  const validateForm = () => {
+    const requiredFields = [
+      'date', 'unitNo', 'projectName', 'ownerName', 'ownerNumber',
+      'customerName', 'customerNumber', 'timePeriod', 'basePrice',
+      'employee', 'commission'
+    ];
+
+    for (const field of requiredFields) {
+      if (!formData[field] || formData[field] === '') {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const convertPercentageToAmount = (percentage, basePrice) => {
+    if (!percentage || !basePrice) return 0;
+    return (parseFloat(percentage) / 100) * parseFloat(basePrice);
+  };
+
   const handleSave = async () => {
+    if (!validateForm()) {
+      setSnackbar({ open: true, message: 'Please fill all required fields!', severity: 'error' });
+      return;
+    }
+
     try {
       const token = localStorage.getItem('token');
       if (editingIndex !== null) {
@@ -189,6 +214,22 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Error saving data:', error);
       setSnackbar({ open: true, message: 'Error saving entry. Please try again.', severity: 'error' });
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this entry?')) {
+      try {
+        const token = localStorage.getItem('token');
+        await axios.delete(`https://bavadiya-realty-backend.vercel.app/api/data/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setSnackbar({ open: true, message: 'Entry deleted successfully!', severity: 'success' });
+        fetchData();
+      } catch (error) {
+        console.error('Error deleting entry:', error);
+        setSnackbar({ open: true, message: 'Error deleting entry. Please try again.', severity: 'error' });
+      }
     }
   };
 
@@ -220,13 +261,23 @@ const Dashboard = () => {
   const totalBrokerage = data.reduce((sum, item) => sum + (item.ownerBro || 0) + (item.customerBro || 0), 0);
   const totalOwnerBrok = data.reduce((sum, item) => sum + (item.ownerBro || 0), 0);
   const totalCustomerBrok = data.reduce((sum, item) => sum + (item.customerBro || 0), 0);
-  const paymentReceived = data.filter(item => item.receiveDate).reduce((sum, item) => sum + (item.ownerBro || 0) + (item.customerBro || 0), 0);
+
+  // Payment received logic: based on receive dates
+  const paymentReceived = data.reduce((sum, item) => {
+    let amount = 0;
+    if (item.receiveDate) amount += (item.ownerBro || 0); // Owner brokerage if owner receive date filled
+    if (item.customerReceiveDate) amount += (item.customerBro || 0); // Customer brokerage if customer receive date filled
+    return sum + amount;
+  }, 0);
+
   const outstandingAmount = totalBrokerage - paymentReceived;
 
   const employeeData = data.reduce((acc, item) => {
     const emp = employees.find(e => e.code === item.employee);
     const empName = emp ? emp.name : item.employee;
-    acc[empName] = (acc[empName] || 0) + (item.basePrice || 0);
+    // Calculate commission amount: (commission % * basePrice) / 100
+    const commissionAmount = ((item.commission || 0) * (item.basePrice || 0)) / 100;
+    acc[empName] = (acc[empName] || 0) + commissionAmount;
     return acc;
   }, {});
   const chartData = Object.entries(employeeData).map(([name, value]) => ({ name, value }));
@@ -240,6 +291,7 @@ const Dashboard = () => {
     { text: 'Dashboard', icon: <DashboardIcon />, view: 'dashboard' },
     { text: 'Analytics Overview', icon: <BarChartIcon />, view: 'analytics' },
     { text: 'Payment Records', icon: <TableChart />, view: 'table' },
+    { text: 'Project Management', icon: <TableChart />, view: 'projects' },
     { text: 'Employee Management', icon: <PersonIcon />, view: 'employees' },
     { text: 'Account Settings', icon: <PersonIcon />, view: 'settings' },
   ];
@@ -289,13 +341,132 @@ const Dashboard = () => {
             </TableContainer>
           </Container>
         );
+      case 'projects':
+        return (
+          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+            <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: 'primary.main', mb: 4 }}>
+              Project Management
+            </Typography>
+            <Paper sx={{ p: 3, borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+                Projects Overview
+              </Typography>
+              <TableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow sx={{ bgcolor: 'primary.main', '& th': { color: 'white', fontWeight: 600 } }}>
+                      <TableCell>Project Name</TableCell>
+                      <TableCell>Total Deals</TableCell>
+                      <TableCell>Total Value</TableCell>
+                      <TableCell>Status</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {Object.entries(data.reduce((acc, item) => {
+                      const project = item.projectName || 'Unknown';
+                      if (!acc[project]) acc[project] = { name: project, deals: 0, value: 0 };
+                      acc[project].deals += 1;
+                      acc[project].value += item.basePrice || 0;
+                      return acc;
+                    }, {})).map(([key, project]) => (
+                      <TableRow key={key}>
+                        <TableCell sx={{ fontWeight: 500 }}>{project.name}</TableCell>
+                        <TableCell>{project.deals}</TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
+                          ₹{project.value.toLocaleString()}
+                        </TableCell>
+                        <TableCell>
+                          <Chip label="Active" color="success" size="small" variant="outlined" />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Paper>
+          </Container>
+        );
       case 'settings':
         return (
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
             <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: 'primary.main', mb: 4 }}>
               Account Settings
             </Typography>
-            <Typography>Account settings coming soon...</Typography>
+            <Grid container spacing={4}>
+              <Grid item xs={12} md={8}>
+                <Paper sx={{ p: 3, borderRadius: 3 }}>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+                    Profile Information
+                  </Typography>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label="Username"
+                        defaultValue="admin"
+                        InputProps={{ readOnly: true }}
+                        variant="outlined"
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label="Role"
+                        defaultValue="Administrator"
+                        InputProps={{ readOnly: true }}
+                        variant="outlined"
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label="Account Created"
+                        defaultValue="2024-01-15"
+                        InputProps={{ readOnly: true }}
+                        variant="outlined"
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                      <TextField
+                        fullWidth
+                        label="Last Login"
+                        defaultValue={new Date().toLocaleString()}
+                        InputProps={{ readOnly: true }}
+                        variant="outlined"
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                      />
+                    </Grid>
+                  </Grid>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Paper sx={{ p: 3, borderRadius: 3 }}>
+                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+                    Account Actions
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                    <Button variant="contained" color="primary" fullWidth sx={{ borderRadius: 2 }}>
+                      Update Profile
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="warning"
+                      fullWidth
+                      sx={{ borderRadius: 2 }}
+                      onClick={() => setSnackbar({ open: true, message: 'Data export feature coming soon!', severity: 'info' })}
+                    >
+                      Export Data
+                    </Button>
+                    <Button variant="outlined" color="error" fullWidth onClick={logout} sx={{ borderRadius: 2 }}>
+                      Sign Out
+                    </Button>
+                  </Box>
+                </Paper>
+              </Grid>
+            </Grid>
           </Container>
         );
       case 'dashboard':
@@ -364,42 +535,48 @@ const Dashboard = () => {
                       <CardContent sx={{
                         position: 'relative',
                         zIndex: 1,
-                        p: { xs: 1.5, sm: 2 },
+                        p: { xs: 2, sm: 3 },
                         height: '100%',
                         display: 'flex',
                         flexDirection: 'column',
-                        justifyContent: 'center'
+                        justifyContent: 'space-between'
                       }}>
-                        <Typography
-                          variant="subtitle2"
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: { xs: '0.75rem', sm: '0.85rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          Total Portfolio (Base Price)
-                        </Typography>
-                        <Typography
-                          variant="h5"
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: { xs: '1.1rem', sm: '1.25rem' },
-                            mb: 0.5,
-                            lineHeight: 1.2
-                          }}
-                        >
-                          ₹{totalPortfolio.toLocaleString()}
-                        </Typography>
+                        <Box>
+                          <Typography
+                            variant="subtitle2"
+                            sx={{
+                              fontWeight: 600,
+                              fontSize: { xs: '0.75rem', sm: '0.85rem' },
+                              mb: 1,
+                              lineHeight: 1.2,
+                              textAlign: 'left'
+                            }}
+                          >
+                            Total Portfolio
+                          </Typography>
+                          <Typography
+                            variant="h4"
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: { xs: '1.5rem', sm: '1.75rem' },
+                              mb: 0.5,
+                              lineHeight: 1.2,
+                              textAlign: 'left'
+                            }}
+                          >
+                            ₹{totalPortfolio.toLocaleString()}
+                          </Typography>
+                        </Box>
                         <Typography
                           variant="caption"
                           sx={{
                             opacity: 0.8,
-                            fontSize: { xs: '0.65rem', sm: '0.75rem' }
+                            fontSize: { xs: '0.65rem', sm: '0.75rem' },
+                            textAlign: 'left',
+                            alignSelf: 'flex-start'
                           }}
                         >
-                          All transactions
+                          Base Price • All transactions
                         </Typography>
                       </CardContent>
                     </Card>
@@ -1018,6 +1195,7 @@ const Dashboard = () => {
                         <TableCell>Employee</TableCell>
                         <TableCell>Commission (%)</TableCell>
                         <TableCell>Actions</TableCell>
+                        <TableCell>Delete</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -1052,6 +1230,36 @@ const Dashboard = () => {
                           <TableCell>
                             <IconButton onClick={() => handleOpen(row._id)} sx={{ borderRadius: 2 }}>
                               <Edit />
+                            </IconButton>
+                          </TableCell>
+                          <TableCell>
+                            <IconButton
+                              onClick={() => handleDelete(row._id)}
+                              sx={{
+                                borderRadius: 2,
+                                color: 'error.main',
+                                '&:hover': {
+                                  bgcolor: 'error.light',
+                                  color: 'white'
+                                }
+                              }}
+                            >
+                              <Delete />
+                            </IconButton>
+                          </TableCell>
+                          <TableCell>
+                            <IconButton
+                              onClick={() => handleDelete(row._id)}
+                              sx={{
+                                borderRadius: 2,
+                                color: 'error.main',
+                                '&:hover': {
+                                  bgcolor: 'error.light',
+                                  color: 'white'
+                                }
+                              }}
+                            >
+                              <Delete />
                             </IconButton>
                           </TableCell>
                         </TableRow>
@@ -1202,6 +1410,7 @@ const Dashboard = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
+                  required
                   label="Date"
                   type="date"
                   value={formData.date}
@@ -1213,6 +1422,7 @@ const Dashboard = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
+                  required
                   label="Unit No"
                   value={formData.unitNo}
                   onChange={(e) => setFormData({ ...formData, unitNo: e.target.value })}
@@ -1223,6 +1433,7 @@ const Dashboard = () => {
                 <FormControl fullWidth>
                   <InputLabel>Project Name</InputLabel>
                   <Select
+                    required
                     value={formData.projectName}
                     label="Project Name"
                     onChange={(e) => setFormData({ ...formData, projectName: e.target.value })}
@@ -1238,6 +1449,7 @@ const Dashboard = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
+                  required
                   label="Owner Name"
                   value={formData.ownerName}
                   onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
@@ -1247,6 +1459,7 @@ const Dashboard = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
+                  required
                   label="Owner Number"
                   value={formData.ownerNumber}
                   onChange={(e) => setFormData({ ...formData, ownerNumber: e.target.value })}
@@ -1256,6 +1469,7 @@ const Dashboard = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
+                  required
                   label="Customer Name"
                   value={formData.customerName}
                   onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
@@ -1265,6 +1479,7 @@ const Dashboard = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
+                  required
                   label="Customer Number"
                   value={formData.customerNumber}
                   onChange={(e) => setFormData({ ...formData, customerNumber: e.target.value })}
@@ -1274,6 +1489,7 @@ const Dashboard = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
+                  required
                   label="Time Period"
                   value={formData.timePeriod}
                   onChange={(e) => setFormData({ ...formData, timePeriod: e.target.value })}
@@ -1283,6 +1499,7 @@ const Dashboard = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
+                  required
                   label="Base Price"
                   type="number"
                   value={formData.basePrice}
@@ -1291,14 +1508,30 @@ const Dashboard = () => {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Owner Brokerage"
-                  type="number"
-                  value={formData.ownerBro}
-                  onChange={(e) => setFormData({ ...formData, ownerBro: parseFloat(e.target.value) || '' })}
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                />
+                <Box>
+                  <TextField
+                    fullWidth
+                    label="Owner Brokerage (%)"
+                    type="number"
+                    value={formData.ownerBro || ''}
+                    onChange={(e) => setFormData({ ...formData, ownerBro: parseFloat(e.target.value) || '' })}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    InputProps={{
+                      endAdornment: (
+                        <Button
+                          size="small"
+                          onClick={() => {
+                            const amount = convertPercentageToAmount(formData.ownerBro, formData.basePrice);
+                            setFormData({ ...formData, ownerBro: amount });
+                          }}
+                          sx={{ minWidth: 'auto', px: 1, fontSize: '0.75rem' }}
+                        >
+                          %
+                        </Button>
+                      ),
+                    }}
+                  />
+                </Box>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -1312,14 +1545,30 @@ const Dashboard = () => {
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  label="Customer Brokerage"
-                  type="number"
-                  value={formData.customerBro}
-                  onChange={(e) => setFormData({ ...formData, customerBro: parseFloat(e.target.value) || '' })}
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                />
+                <Box>
+                  <TextField
+                    fullWidth
+                    label="Customer Brokerage (%)"
+                    type="number"
+                    value={formData.customerBro || ''}
+                    onChange={(e) => setFormData({ ...formData, customerBro: parseFloat(e.target.value) || '' })}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    InputProps={{
+                      endAdornment: (
+                        <Button
+                          size="small"
+                          onClick={() => {
+                            const amount = convertPercentageToAmount(formData.customerBro, formData.basePrice);
+                            setFormData({ ...formData, customerBro: amount });
+                          }}
+                          sx={{ minWidth: 'auto', px: 1, fontSize: '0.75rem' }}
+                        >
+                          %
+                        </Button>
+                      ),
+                    }}
+                  />
+                </Box>
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
@@ -1336,6 +1585,7 @@ const Dashboard = () => {
                 <FormControl fullWidth>
                   <InputLabel>Employee</InputLabel>
                   <Select
+                    required
                     value={formData.employee}
                     label="Employee"
                     onChange={(e) => setFormData({ ...formData, employee: e.target.value })}
@@ -1351,6 +1601,7 @@ const Dashboard = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
+                  required
                   label="Employee Commission (%)"
                   type="number"
                   value={formData.commission}
