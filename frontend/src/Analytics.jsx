@@ -10,7 +10,6 @@ import {
   CardHeader,
   Spinner,
   Alert,
-  AlertIcon,
 } from '@chakra-ui/react';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
@@ -103,7 +102,6 @@ const Analytics = () => {
       <Container maxW="container.xl" mt={4}>
         <Box display="flex" justifyContent="center" alignItems="center" h="400px">
           <Alert status="error">
-            <AlertIcon />
             {error}
           </Alert>
         </Box>

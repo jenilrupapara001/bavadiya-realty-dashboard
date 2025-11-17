@@ -23,7 +23,6 @@ import {
   useToast,
   Spinner,
   Alert,
-  AlertIcon,
 } from '@chakra-ui/react';
 import { SearchIcon, EditIcon, AddIcon } from '@chakra-ui/icons';
 import { AuthContext } from './AuthContext';
@@ -140,7 +139,6 @@ const DataTable = ({ onEditEntry }) => {
       <Container maxW="container.xl" mt={4}>
         <Box display="flex" justifyContent="center" alignItems="center" h="400px">
           <Alert status="error">
-            <AlertIcon />
             {error}
           </Alert>
         </Box>

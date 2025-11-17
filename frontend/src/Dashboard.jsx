@@ -45,7 +45,6 @@ import {
   useToast,
   Spinner,
   Alert,
-  AlertIcon,
   IconButton,
   useBreakpointValue,
 } from '@chakra-ui/react';
@@ -368,7 +367,6 @@ const Dashboard = () => {
             )}
             {error && (
               <Alert status="error" mb={4}>
-                <AlertIcon />
                 {error}
               </Alert>
             )}
