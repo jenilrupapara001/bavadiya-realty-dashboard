@@ -96,9 +96,9 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
     // Status filter
     if (statusFilter !== 'all') {
       if (statusFilter === 'received') {
-        filtered = filtered.filter(item => item.receiveDate);
+        filtered = filtered.filter(item => item.receiveDate && item.customerReceiveDate);
       } else if (statusFilter === 'pending') {
-        filtered = filtered.filter(item => !item.receiveDate);
+        filtered = filtered.filter(item => !item.receiveDate || !item.customerReceiveDate);
       }
     }
 
@@ -325,8 +325,8 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={row.receiveDate ? 'Received' : 'Pending'}
-                      color={row.receiveDate ? 'success' : 'error'}
+                      label={row.receiveDate && row.customerReceiveDate ? 'Received' : 'Pending'}
+                      color={row.receiveDate && row.customerReceiveDate ? 'success' : 'error'}
                       size="small"
                       variant="outlined"
                       sx={{

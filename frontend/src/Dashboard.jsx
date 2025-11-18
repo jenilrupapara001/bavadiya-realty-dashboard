@@ -765,7 +765,7 @@ const Dashboard = () => {
                 {/* Analytics Overview */}
                 <Box sx={{ mb: 4 }}>
                   <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 3 }}>
-                    Analytics Overview - Total Brokerage: ₹{totalBrokerage.toLocaleString()}
+                    Analytics Overview - Total Brokerage: {formatINR(totalBrokerage)}
                   </Typography>
                   <Grid container spacing={{ xs: 2, md: 3 }}>
                     <Grid item xs={12} md={6}>
@@ -1109,8 +1109,8 @@ const Dashboard = () => {
                           </TableCell>
                           <TableCell>
                             <Chip
-                              label={row.receiveDate && row.customerReceiveDate ? 'Received' : row.customerReceiveDate ? 'Partial' : 'Pending'}
-                              color={row.receiveDate && row.customerReceiveDate ? 'success' : row.customerReceiveDate ? 'warning' : 'error'}
+                              label={row.receiveDate && row.customerReceiveDate ? 'Received' : 'Pending'}
+                              color={row.receiveDate && row.customerReceiveDate ? 'success' : 'error'}
                               size="small"
                               variant="outlined"
                               sx={{
