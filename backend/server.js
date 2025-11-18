@@ -24,7 +24,11 @@ app.use(bodyParser.json());
 // ---- MongoDB Connection ----
 const mongoURI = process.env.MONGO_URI || 'mongodb+srv://jenilrupapara340_db_user:gPaASk6ZOa4Wa44L@sample-data.vyal4lo.mongodb.net/bavadiya-realty?appName=Sample-Data';
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('✅ MongoDB connected'))
+  .then(async () => {
+    console.log('✅ MongoDB connected');
+    // Initialize default admin if no users exist
+    await initializeDefaultAdmin();
+  })
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
 // ---- Schemas ----
@@ -86,6 +90,39 @@ const Data = mongoose.model('Data', dataSchema);
 const Employee = mongoose.model('Employee', employeeSchema);
 const Project = mongoose.model('Project', projectSchema);
 const User = mongoose.model('User', userSchema);
+
+// ---- INITIALIZATION: Create default admin if no users exist ----
+async function initializeDefaultAdmin() {
+  try {
+    const userCount = await User.countDocuments({ isActive: true });
+    
+    if (userCount === 0) {
+      const defaultUsername = process.env.DEFAULT_ADMIN_USERNAME || 'DharmeshBavadiya';
+      const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'BavadiyaRealtyAdmin!2024';
+      const defaultEmail = process.env.DEFAULT_ADMIN_EMAIL || 'admin@bavadiyarealty.com';
+      
+      const hashedPassword = bcrypt.hashSync(defaultPassword, parseInt(process.env.BCRYPT_ROUNDS) || 8);
+      
+      const defaultAdmin = new User({
+        username: defaultUsername,
+        password: hashedPassword,
+        fullName: 'Dharmesh Bavadiya',
+        email: defaultEmail,
+        phone: '+91-9876543210',
+        role: 'Admin'
+      });
+      
+      await defaultAdmin.save();
+      console.log(`✅ Default admin user created: ${defaultUsername}`);
+      console.log(`📝 Default password: ${defaultPassword}`);
+      console.log(`⚠️  Please change this password after first login!`);
+    } else {
+      console.log(`✅ Found ${userCount} existing user(s) in database`);
+    }
+  } catch (error) {
+    console.error('❌ Error initializing default admin:', error);
+  }
+}
 
 // ---- AUTH ------------------------
 app.post('/api/login', async (req, res) => {
