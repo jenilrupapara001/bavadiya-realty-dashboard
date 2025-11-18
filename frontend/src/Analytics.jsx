@@ -54,6 +54,16 @@ const Analytics = () => {
     if (!percentage || !basePrice) return 0;
     return (parseFloat(percentage) / 100) * parseFloat(basePrice);
   };
+
+  const formatINR = (amount) => {
+    if (!amount) return '0';
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount).replace('₹', '₹');
+  };
   
   const totalBrokerage = data.reduce((sum, item) => {
     const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
@@ -147,7 +157,7 @@ const Analytics = () => {
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 500 }}>Total Brokerage</Typography>
               <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                ₹{totalBrokerage.toLocaleString()}
+                {formatINR(totalBrokerage)}
               </Typography>
             </CardContent>
           </Card>
@@ -157,7 +167,7 @@ const Analytics = () => {
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 500 }}>Received</Typography>
               <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                ₹{paymentReceived.toLocaleString()}
+                {formatINR(paymentReceived)}
               </Typography>
             </CardContent>
           </Card>
@@ -167,7 +177,7 @@ const Analytics = () => {
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 500 }}>Outstanding</Typography>
               <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                ₹{outstandingAmount.toLocaleString()}
+                {formatINR(outstandingAmount)}
               </Typography>
             </CardContent>
           </Card>

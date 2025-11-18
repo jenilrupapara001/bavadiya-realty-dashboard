@@ -65,6 +65,21 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
     }
   };
 
+  const convertPercentageToAmount = (percentage, basePrice) => {
+    if (!percentage || !basePrice) return 0;
+    return (parseFloat(percentage) / 100) * parseFloat(basePrice);
+  };
+
+  const formatINR = (amount) => {
+    if (!amount) return '0';
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount).replace('₹', '₹');
+  };
+
   const filterData = () => {
     let filtered = data;
 
@@ -110,11 +125,6 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
   const totalValue = filteredData.reduce((sum, item) => sum + (item.basePrice || 0), 0);
   
   // Calculate brokerage breakdown
-  const convertPercentageToAmount = (percentage, basePrice) => {
-    if (!percentage || !basePrice) return 0;
-    return (parseFloat(percentage) / 100) * parseFloat(basePrice);
-  };
-  
   const totalBrokerage = filteredData.reduce((sum, item) => {
     const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
     const customerBrok = typeof item.customerBro === 'number' ? item.customerBro : convertPercentageToAmount(item.customerBro, item.basePrice);
@@ -178,7 +188,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
             <CardContent>
               <Typography variant="h6" color="text.secondary">Total Brokerage</Typography>
               <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                ₹{totalBrokerage.toLocaleString()}
+                {formatINR(totalBrokerage)}
               </Typography>
             </CardContent>
           </Card>
@@ -188,7 +198,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
             <CardContent>
               <Typography variant="h6" color="text.secondary">Received</Typography>
               <Typography variant="h4" sx={{ fontWeight: 700, color: '#22c55e' }}>
-                ₹{paymentReceived.toLocaleString()}
+                {formatINR(paymentReceived)}
               </Typography>
             </CardContent>
           </Card>
@@ -198,7 +208,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
             <CardContent>
               <Typography variant="h6" color="text.secondary">Outstanding</Typography>
               <Typography variant="h4" sx={{ fontWeight: 700, color: '#ef4444' }}>
-                ₹{outstandingAmount.toLocaleString()}
+                {formatINR(outstandingAmount)}
               </Typography>
             </CardContent>
           </Card>
@@ -321,7 +331,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
                   <TableCell>{row.ownerName}</TableCell>
                   <TableCell>{row.customerName}</TableCell>
                   <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
-                    ₹{row.basePrice?.toLocaleString()}
+                    {formatINR(row.basePrice || 0)}
                   </TableCell>
                   <TableCell>
                     <Chip
@@ -352,7 +362,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
                       const ownerBrok = typeof row.ownerBro === 'number' ? row.ownerBro : convertPercentageToAmount(row.ownerBro, row.basePrice);
                       const customerBrok = typeof row.customerBro === 'number' ? row.customerBro : convertPercentageToAmount(row.customerBro, row.basePrice);
                       const totalBrok = ownerBrok + customerBrok;
-                      return `₹${(((row.commission || 0) * totalBrok) / 100).toLocaleString()}`;
+                      return formatINR(((row.commission || 0) * totalBrok) / 100);
                     })()}
                   </TableCell>
                   <TableCell>

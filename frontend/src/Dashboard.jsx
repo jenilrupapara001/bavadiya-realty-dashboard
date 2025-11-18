@@ -254,6 +254,16 @@ const Dashboard = () => {
     return (parseFloat(percentage) / 100) * parseFloat(basePrice);
   };
 
+  const formatINR = (amount) => {
+    if (!amount) return '0';
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount).replace('₹', '₹');
+  };
+
   const handleSave = async () => {
     if (!validateForm()) {
       setSnackbar({ open: true, message: 'Please fill all required fields!', severity: 'error' });
@@ -659,92 +669,92 @@ const Dashboard = () => {
                 </Grow>
 
                 {/* Cards On Dashboard */}
-                <Grid container spacing={2} sx={{ mb: 4 }}>
+                <Grid container spacing={{ xs: 1, sm: 2, md: 3 }} sx={{ mb: 4 }}>
                   <Grid item xs={6} sm={4} md={3} lg={2}>
-                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%' }}>
-                      <CardContent sx={{ p: 2 }}>
-                        <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
+                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 120 }}>
+                      <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
                           Total Portfolio
                         </Typography>
-                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 0.5, fontSize: '1.1rem' }}>
-                          ₹{totalPortfolio.toLocaleString()}
+                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 0.5, fontSize: { xs: '0.9rem', sm: '1.1rem' } }}>
+                          {formatINR(totalPortfolio)}
                         </Typography>
-                        <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>
+                        <Typography sx={{ fontSize: { xs: 8, sm: 10 }, color: 'text.secondary' }}>
                           Base Price • All transactions
                         </Typography>
                       </CardContent>
                     </Card>
                   </Grid>
                   <Grid item xs={6} sm={4} md={3} lg={2}>
-                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%' }}>
-                      <CardContent sx={{ p: 2 }}>
-                        <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
+                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 120 }}>
+                      <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
                           Total Brokerage
                         </Typography>
-                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: 'success.main', mb: 0.5, fontSize: '1.1rem' }}>
-                          ₹{totalBrokerage.toLocaleString()}
+                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: 'success.main', mb: 0.5, fontSize: { xs: '0.9rem', sm: '1.1rem' } }}>
+                          {formatINR(totalBrokerage)}
                         </Typography>
-                        <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>
+                        <Typography sx={{ fontSize: { xs: 8, sm: 10 }, color: 'text.secondary' }}>
                           Owner + Customer commissions
                         </Typography>
                       </CardContent>
                     </Card>
                   </Grid>
                   <Grid item xs={6} sm={4} md={3} lg={2}>
-                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%' }}>
-                      <CardContent sx={{ p: 2 }}>
-                        <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
+                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 120 }}>
+                      <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
                           Owner Brokerage
                         </Typography>
-                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: 'info.main', mb: 0.5, fontSize: '1.1rem' }}>
-                          ₹{totalOwnerBrok.toLocaleString()}
+                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: 'info.main', mb: 0.5, fontSize: { xs: '0.9rem', sm: '1.1rem' } }}>
+                          {formatINR(totalOwnerBrok)}
                         </Typography>
-                        <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>
+                        <Typography sx={{ fontSize: { xs: 8, sm: 10 }, color: 'text.secondary' }}>
                           Owner commissions
                         </Typography>
                       </CardContent>
                     </Card>
                   </Grid>
                   <Grid item xs={6} sm={4} md={3} lg={2}>
-                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%' }}>
-                      <CardContent sx={{ p: 2 }}>
-                        <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
+                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 120 }}>
+                      <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
                           Customer Brokerage
                         </Typography>
-                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: 'secondary.main', mb: 0.5, fontSize: '1.1rem' }}>
-                          ₹{totalCustomerBrok.toLocaleString()}
+                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: 'secondary.main', mb: 0.5, fontSize: { xs: '0.9rem', sm: '1.1rem' } }}>
+                          {formatINR(totalCustomerBrok)}
                         </Typography>
-                        <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>
+                        <Typography sx={{ fontSize: { xs: 8, sm: 10 }, color: 'text.secondary' }}>
                           Customer commissions
                         </Typography>
                       </CardContent>
                     </Card>
                   </Grid>
                   <Grid item xs={6} sm={4} md={3} lg={2}>
-                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', border: '2px solid #22c55e20' }}>
-                      <CardContent sx={{ p: 2 }}>
-                        <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
+                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 120, border: '2px solid #22c55e20' }}>
+                      <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
                           Payment Received
                         </Typography>
-                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: '#22c55e', mb: 0.5, fontSize: '1.1rem' }}>
-                          ₹{paymentReceived.toLocaleString()}
+                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: '#22c55e', mb: 0.5, fontSize: { xs: '0.9rem', sm: '1.1rem' } }}>
+                          {formatINR(paymentReceived)}
                         </Typography>
-                        <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>
+                        <Typography sx={{ fontSize: { xs: 8, sm: 10 }, color: 'text.secondary' }}>
                           Based on receive dates
                         </Typography>
                       </CardContent>
                     </Card>
                   </Grid>
                   <Grid item xs={6} sm={4} md={3} lg={2}>
-                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', border: '2px solid #ef444420' }}>
-                      <CardContent sx={{ p: 2 }}>
-                        <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
+                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 120, border: '2px solid #ef444420' }}>
+                      <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
                           Outstanding Amount
                         </Typography>
-                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: '#ef4444', mb: 0.5, fontSize: '1.1rem' }}>
-                          ₹{outstandingAmount.toLocaleString()}
+                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: '#ef4444', mb: 0.5, fontSize: { xs: '0.9rem', sm: '1.1rem' } }}>
+                          {formatINR(outstandingAmount)}
                         </Typography>
-                        <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>
+                        <Typography sx={{ fontSize: { xs: 8, sm: 10 }, color: 'text.secondary' }}>
                           Pending payments
                         </Typography>
                       </CardContent>
@@ -1095,7 +1105,7 @@ const Dashboard = () => {
                           <TableCell>{row.ownerName}</TableCell>
                           <TableCell>{row.customerName}</TableCell>
                           <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
-                            ₹{row.basePrice?.toLocaleString()}
+                            {formatINR(row.basePrice || 0)}
                           </TableCell>
                           <TableCell>
                             <Chip
@@ -1126,7 +1136,7 @@ const Dashboard = () => {
                               const ownerBrok = typeof row.ownerBro === 'number' ? row.ownerBro : convertPercentageToAmount(row.ownerBro, row.basePrice);
                               const customerBrok = typeof row.customerBro === 'number' ? row.customerBro : convertPercentageToAmount(row.customerBro, row.basePrice);
                               const totalBrok = ownerBrok + customerBrok;
-                              return `₹${(((row.commission || 0) * totalBrok) / 100).toLocaleString()}`;
+                              return formatINR(((row.commission || 0) * totalBrok) / 100);
                             })()}
                           </TableCell>
                           <TableCell>
@@ -1552,7 +1562,7 @@ const Dashboard = () => {
                       const ownerBrok = typeof formData.ownerBro === 'number' ? formData.ownerBro : convertPercentageToAmount(formData.ownerBro, formData.basePrice);
                       const customerBrok = typeof formData.customerBro === 'number' ? formData.customerBro : convertPercentageToAmount(formData.customerBro, formData.basePrice);
                       const totalBrok = ownerBrok + customerBrok;
-                      return `₹${(((formData.commission || 0) * totalBrok) / 100).toLocaleString()}`;
+                      return formatINR(((formData.commission || 0) * totalBrok) / 100);
                     })()}
                   </Typography>
                 </Box>
