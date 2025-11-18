@@ -115,10 +115,13 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
   const filterData = () => {
     let filtered = data;
 
+    // Hide payments where both payments are received
+    filtered = filtered.filter(item => !(item.receiveDate && item.customerReceiveDate));
+
     // Date filters
     if (filterDateFrom || filterDateTo) {
       filtered = filtered.filter(item => {
-        const itemDate = new Date(item.receiveDate);
+        const itemDate = new Date(item.date); // Use date field like Dashboard
         const fromDate = filterDateFrom ? new Date(filterDateFrom) : null;
         const toDate = filterDateTo ? new Date(filterDateTo) : null;
 
@@ -138,7 +141,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
       );
     }
 
-    // Employee filter
+    // Employee filter - match Dashboard logic
     if (filterEmployee) {
       filtered = filtered.filter(item => item.employee === filterEmployee);
     }
@@ -159,7 +162,9 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
 
     // Received By filter
     if (filterReceivedBy) {
-      filtered = filtered.filter(item => item.receivedBy === filterReceivedBy);
+      filtered = filtered.filter(item =>
+        item.ownerReceivedBy === filterReceivedBy || item.customerReceivedBy === filterReceivedBy
+      );
     }
 
     setFilteredData(filtered);
@@ -258,30 +263,70 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
         </Grid>
       </Grid>
 
-      {/* Filters */}
+      {/* Filters - Match Dashboard */}
       <Paper sx={{ p: 3, mb: 3, borderRadius: 3 }}>
         <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-          Filters & Search
+          Filters
         </Typography>
         <Grid container spacing={3} alignItems="center">
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={2}>
             <TextField
+              label="From Date"
+              type="date"
+              value={filterDateFrom}
+              onChange={(e) => setFilterDateFrom(e.target.value)}
+              InputLabelProps={{ shrink: true }}
               fullWidth
-              label="Search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <Search />
-                  </InputAdornment>
-                ),
-              }}
+              size="small"
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
           </Grid>
-          <Grid item xs={12} md={3}>
-            <FormControl fullWidth size="small">
+          <Grid item xs={12} md={2}>
+            <TextField
+              label="To Date"
+              type="date"
+              value={filterDateTo}
+              onChange={(e) => setFilterDateTo(e.target.value)}
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+              size="small"
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+            />
+          </Grid>
+          <Grid item xs={12} md={2}>
+            <FormControl sx={{ minWidth: { xs: '100%', sm: 120 } }} size="small" fullWidth>
+              <InputLabel>Employee Name</InputLabel>
+              <Select
+                value={filterEmployee}
+                label="Employee Name"
+                onChange={(e) => setFilterEmployee(e.target.value)}
+                sx={{ borderRadius: 2 }}
+              >
+                <MenuItem value="">All</MenuItem>
+                {employees.map((emp, index) => (
+                  <MenuItem key={index} value={emp.code}>{emp.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={2}>
+            <FormControl sx={{ minWidth: { xs: '100%', sm: 120 } }} size="small" fullWidth>
+              <InputLabel>Project</InputLabel>
+              <Select
+                value={filterProject}
+                label="Project"
+                onChange={(e) => setFilterProject(e.target.value)}
+                sx={{ borderRadius: 2 }}
+              >
+                <MenuItem value="">All</MenuItem>
+                {projects.map((project) => (
+                  <MenuItem key={project._id} value={project.name}>{project.name}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={2}>
+            <FormControl sx={{ minWidth: { xs: '100%', sm: 120 } }} size="small" fullWidth>
               <InputLabel>Status</InputLabel>
               <Select
                 value={filterStatus}
@@ -289,42 +334,27 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
                 onChange={(e) => setFilterStatus(e.target.value)}
                 sx={{ borderRadius: 2 }}
               >
-                <MenuItem value="">All Status</MenuItem>
+                <MenuItem value="">All</MenuItem>
                 <MenuItem value="received">Received</MenuItem>
                 <MenuItem value="pending">Pending</MenuItem>
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} md={3}>
-            <FormControl fullWidth size="small">
-              <InputLabel>Employee</InputLabel>
+          <Grid item xs={12} md={2}>
+            <FormControl sx={{ minWidth: { xs: '100%', sm: 120 } }} size="small" fullWidth>
+              <InputLabel>Received By</InputLabel>
               <Select
-                value={filterEmployee}
-                label="Employee"
-                onChange={(e) => setFilterEmployee(e.target.value)}
+                value={filterReceivedBy}
+                label="Received By"
+                onChange={(e) => setFilterReceivedBy(e.target.value)}
                 sx={{ borderRadius: 2 }}
               >
-                <MenuItem value="">All Employees</MenuItem>
-                {employees.map(emp => (
-                  <MenuItem key={emp} value={emp}>{emp}</MenuItem>
-                ))}
+                <MenuItem value="">All</MenuItem>
+                <MenuItem value="Dharmesh Bavadiya">Dharmesh Bavadiya</MenuItem>
+                <MenuItem value="Yogesh Bavadiya">Yogesh Bavadiya</MenuItem>
+                <MenuItem value="Bavadiya Realty LLP">Bavadiya Realty LLP</MenuItem>
               </Select>
             </FormControl>
-          </Grid>
-          <Grid item xs={12} md={2}>
-            <Button
-              fullWidth
-              variant="outlined"
-              startIcon={<FilterList />}
-              onClick={() => {
-                setSearchTerm('');
-                setFilterStatus('');
-                setFilterEmployee('');
-              }}
-              sx={{ borderRadius: 2 }}
-            >
-              Clear
-            </Button>
           </Grid>
         </Grid>
       </Paper>
