@@ -45,10 +45,10 @@ const Analytics = () => {
       const response = await axios.get(`${API_BASE_URL}/api/data`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setData(response.data);
+      setData(response.data || []);
     } catch (error) {
-      console.error('Error fetching data:', error);
-      setError('Failed to load analytics data. Please try again.');
+      console.error('Error fetching analytics data:', error);
+      setError(`Failed to load analytics data: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -163,6 +163,11 @@ const Analytics = () => {
 
   const COLORS = ['#1a365d', '#3b82f6', '#059669', '#d97706', '#7c3aed', '#dc2626', '#ea580c', '#0891b2'];
 
+  // Ensure we have valid data arrays to prevent crashes
+  const safeProjectChartData = Array.isArray(projectChartData) ? projectChartData : [];
+  const safeEmployeeChartData = Array.isArray(employeeChartData) ? employeeChartData : [];
+  const safeReceivedByData = Array.isArray(receivedByData) ? receivedByData : [];
+
   // ---- UI ----
   if (loading) {
     return (
@@ -241,37 +246,45 @@ const Analytics = () => {
         Received By Analytics
       </Typography>
       <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
-        {receivedByData.map((person, index) => (
-          <Grid item xs={12} sm={6} md={4} key={person.name}>
-            <Card sx={{ 
-              background: `linear-gradient(135deg, ${COLORS[index]} 0%, ${COLORS[index]}dd 100%)`, 
-              color: 'white', 
-              borderRadius: 3, 
-              minHeight: 160 
-            }}>
-              <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '1rem', sm: '1.25rem' }, mb: 1 }}>
-                  {person.name}
-                </Typography>
-                <Typography variant="h5" sx={{ fontWeight: 700, fontSize: { xs: '1.25rem', sm: '1.75rem' }, mb: 1 }}>
-                  {formatINR(person.amount)}
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                  <Chip 
-                    label={`Owner: ${person.ownerReceived}`} 
-                    size="small" 
-                    sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 500 }} 
-                  />
-                  <Chip 
-                    label={`Customer: ${person.customerReceived}`} 
-                    size="small" 
-                    sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 500 }} 
-                  />
-                </Box>
-              </CardContent>
-            </Card>
+        {safeReceivedByData.length === 0 ? (
+          <Grid item xs={12}>
+            <Alert severity="info">
+              No payment records with received amounts found. Add payment records to see analytics.
+            </Alert>
           </Grid>
-        ))}
+        ) : (
+          safeReceivedByData.map((person, index) => (
+            <Grid item xs={12} sm={6} md={4} key={person.name}>
+              <Card sx={{
+                background: `linear-gradient(135deg, ${COLORS[index % COLORS.length]} 0%, ${COLORS[index % COLORS.length]}dd 100%)`,
+                color: 'white',
+                borderRadius: 3,
+                minHeight: 160
+              }}>
+                <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                  <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '1rem', sm: '1.25rem' }, mb: 1 }}>
+                    {person.name}
+                  </Typography>
+                  <Typography variant="h5" sx={{ fontWeight: 700, fontSize: { xs: '1.25rem', sm: '1.75rem' }, mb: 1 }}>
+                    {formatINR(person.amount)}
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                    <Chip
+                      label={`Owner: ${person.ownerReceived}`}
+                      size="small"
+                      sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 500 }}
+                    />
+                    <Chip
+                      label={`Customer: ${person.customerReceived}`}
+                      size="small"
+                      sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 500 }}
+                    />
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))
+        )}
       </Grid>
 
       {/* Charts */}
@@ -285,7 +298,7 @@ const Analytics = () => {
             <ResponsiveContainer width="100%" height={350}>
               <PieChart>
                 <Pie
-                  data={projectChartData}
+                  data={safeProjectChartData}
                   cx="50%"
                   cy="50%"
                   outerRadius={120}
@@ -293,7 +306,7 @@ const Analytics = () => {
                   paddingAngle={2}
                   dataKey="value"
                 >
-                  {projectChartData.map((entry, index) => (
+                  {safeProjectChartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
@@ -309,20 +322,26 @@ const Analytics = () => {
               </PieChart>
             </ResponsiveContainer>
             <Box sx={{ mt: 2 }}>
-              {projectChartData.slice(0, 8).map((entry, index) => (
-                <Box key={entry.name} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Box sx={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: '50%',
-                    bgcolor: COLORS[index % COLORS.length],
-                    mr: 1
-                  }} />
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {entry.name}: {formatINR(entry.value)}
-                  </Typography>
-                </Box>
-              ))}
+              {safeProjectChartData.length === 0 ? (
+                <Typography variant="body2" color="text.secondary">
+                  No project data available
+                </Typography>
+              ) : (
+                safeProjectChartData.slice(0, 8).map((entry, index) => (
+                  <Box key={entry.name} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Box sx={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: '50%',
+                      bgcolor: COLORS[index % COLORS.length],
+                      mr: 1
+                    }} />
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      {entry.name}: {formatINR(entry.value)}
+                    </Typography>
+                  </Box>
+                ))
+              )}
             </Box>
           </Paper>
         </Grid>
@@ -333,28 +352,36 @@ const Analytics = () => {
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
               Employee Performance (Revenue & Commission)
             </Typography>
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={employeeChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="name" stroke="#6b7280" />
-                <YAxis stroke="#6b7280" tickFormatter={(value) => `₹${(value / 100000).toFixed(1)}L`} />
-                <Tooltip 
-                  formatter={(value, name) => [
-                    `₹${formatINRNumber(value)}`,
-                    name === 'revenue' ? 'Total Revenue' : 'Commission Earned'
-                  ]}
-                  labelStyle={{ color: '#374151' }}
-                  contentStyle={{ 
-                    backgroundColor: '#ffffff', 
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                  }}
-                />
-                <Bar dataKey="revenue" fill="#1a365d" name="Revenue" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="commission" fill="#22c55e" name="Commission" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {safeEmployeeChartData.length === 0 ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+                <Typography variant="body2" color="text.secondary">
+                  No employee performance data available
+                </Typography>
+              </Box>
+            ) : (
+              <ResponsiveContainer width="100%" height={350}>
+                <BarChart data={safeEmployeeChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="name" stroke="#6b7280" />
+                  <YAxis stroke="#6b7280" tickFormatter={(value) => `₹${(value / 100000).toFixed(1)}L`} />
+                  <Tooltip
+                    formatter={(value, name) => [
+                      `₹${formatINRNumber(value)}`,
+                      name === 'revenue' ? 'Total Revenue' : 'Commission Earned'
+                    ]}
+                    labelStyle={{ color: '#374151' }}
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                  <Bar dataKey="revenue" fill="#1a365d" name="Revenue" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="commission" fill="#22c55e" name="Commission" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
           </Paper>
         </Grid>
       </Grid>
