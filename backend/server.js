@@ -40,8 +40,10 @@ const dataSchema = new mongoose.Schema({
   basePrice: Number,
   ownerBro: Number,
   receiveDate: String,
+  ownerReceivedBy: String,
   customerBro: Number,
   customerReceiveDate: String,
+  customerReceivedBy: String,
   employee: String,
   commission: Number,
 });
@@ -123,6 +125,15 @@ app.put('/api/data/:id', authenticateToken, async (req, res) => {
    } catch (error) {
      res.status(500).json({ error: 'Failed to update data' });
    }
+});
+
+app.delete('/api/data/:id', authenticateToken, async (req, res) => {
+    try {
+      await Data.findByIdAndDelete(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete data' });
+    }
 });
 
 // ---- EMPLOYEE ENDPOINTS ------------------------

@@ -135,8 +135,10 @@ const Dashboard = () => {
         filtered = filtered.filter(item => !item.receiveDate || !item.customerReceiveDate);
       }
     }
-    if (filterReceivedBy) {
-      filtered = filtered.filter(item => item.receivedBy === filterReceivedBy);
+if (filterReceivedBy) {
+      filtered = filtered.filter(item =>
+        item.ownerReceivedBy === filterReceivedBy || item.customerReceivedBy === filterReceivedBy
+      );
     }
     setFilteredData(filtered);
   }, [data, filterDateFrom, filterDateTo, filterEmployee, filterProject, filterStatus, filterReceivedBy, employees]);
@@ -188,7 +190,7 @@ const Dashboard = () => {
       setFormData(data.find(item => item._id === index));
       setEditingIndex(index);
     } else {
-      setFormData({
+setFormData({
         date: '',
         unitNo: '',
         projectName: '',
@@ -200,8 +202,10 @@ const Dashboard = () => {
         basePrice: '',
         ownerBro: '',
         receiveDate: '',
+        ownerReceivedBy: '',
         customerBro: '',
         customerReceiveDate: '',
+        customerReceivedBy: '',
         employee: '',
         commission: '',
       });
