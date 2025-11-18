@@ -62,27 +62,66 @@ const projectSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+const userSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  fullName: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  phone: { type: String },
+  role: { type: String, default: 'User', enum: ['Admin', 'Manager', 'User'] },
+  avatar: { type: String },
+  isActive: { type: Boolean, default: true },
+  lastLogin: { type: Date },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+// Update timestamp before saving
+userSchema.pre('save', function(next) {
+  this.updatedAt = new Date();
+  next();
+});
+
 const Data = mongoose.model('Data', dataSchema);
 const Employee = mongoose.model('Employee', employeeSchema);
 const Project = mongoose.model('Project', projectSchema);
-
-// ---- Admin Credentials ----
-const defaultUsername = process.env.DEFAULT_ADMIN_USERNAME || 'DharmeshBavadiya';
-const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'BavadiyaRealtyAdmin!2024';
-
-const users = [
-  { username: defaultUsername, password: bcrypt.hashSync(defaultPassword, parseInt(process.env.BCRYPT_ROUNDS) || 8) }
-];
+const User = mongoose.model('User', userSchema);
 
 // ---- AUTH ------------------------
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
-  const user = users.find(u => u.username === username);
-  if (user && bcrypt.compareSync(password, user.password)) {
-    const token = jwt.sign({ username }, SECRET, { expiresIn: '2h' });
-    res.json({ token });
-  } else {
+  
+  try {
+    // Check database users only
+    const dbUser = await User.findOne({ username, isActive: true });
+    if (dbUser && bcrypt.compareSync(password, dbUser.password)) {
+      // Update last login
+      dbUser.lastLogin = new Date();
+      await dbUser.save();
+      
+      // Create JWT token with expiration
+      const token = jwt.sign({
+        username: dbUser.username,
+        id: dbUser._id,
+        role: dbUser.role
+      }, SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '24h' });
+      
+      const userResponse = dbUser.toObject();
+      delete userResponse.password;
+      
+      console.log(`✅ User ${dbUser.username} logged in successfully`);
+      
+      res.json({
+        token,
+        user: userResponse
+      });
+      return;
+    }
+    
     res.status(401).json({ error: 'Invalid credentials' });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Login failed' });
   }
 });
 
@@ -209,6 +248,131 @@ app.delete('/api/projects/:id', authenticateToken, async (req, res) => {
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: 'Failed to delete project' });
+    }
+});
+
+// ---- USER ENDPOINTS ------------------------
+app.get('/api/users', authenticateToken, async (req, res) => {
+    try {
+      const users = await User.find({ isActive: true }).select('-password');
+      res.json(users);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch users' });
+    }
+});
+
+app.get('/api/users/profile', authenticateToken, async (req, res) => {
+    try {
+      const user = await User.findById(req.user.id).select('-password');
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      res.json(user);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch user profile' });
+    }
+});
+
+app.post('/api/users', authenticateToken, async (req, res) => {
+    try {
+      const { username, password, fullName, email, phone, role } = req.body;
+      
+      // Check if user already exists
+      const existingUser = await User.findOne({
+        $or: [{ username }, { email }]
+      });
+      
+      if (existingUser) {
+        return res.status(400).json({ error: 'Username or email already exists' });
+      }
+
+      const hashedPassword = bcrypt.hashSync(password, parseInt(process.env.BCRYPT_ROUNDS) || 8);
+      const newUser = new User({
+        username,
+        password: hashedPassword,
+        fullName,
+        email,
+        phone,
+        role: role || 'User'
+      });
+      
+      await newUser.save();
+      const userResponse = newUser.toObject();
+      delete userResponse.password;
+      
+      res.json({ success: true, user: userResponse });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to create user' });
+    }
+});
+
+app.put('/api/users/:id', authenticateToken, async (req, res) => {
+    try {
+      const { fullName, email, phone, role, isActive } = req.body;
+      
+      const updateData = {};
+      if (fullName) updateData.fullName = fullName;
+      if (email) updateData.email = email;
+      if (phone) updateData.phone = phone;
+      if (role) updateData.role = role;
+      if (isActive !== undefined) updateData.isActive = isActive;
+      
+      const user = await User.findByIdAndUpdate(
+        req.params.id,
+        updateData,
+        { new: true, runValidators: true }
+      ).select('-password');
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      res.json({ success: true, user });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to update user' });
+    }
+});
+
+app.put('/api/users/:id/password', authenticateToken, async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      
+      const user = await User.findById(req.params.id);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      // Verify current password
+      if (!bcrypt.compareSync(currentPassword, user.password)) {
+        return res.status(400).json({ error: 'Current password is incorrect' });
+      }
+      
+      // Hash new password
+      const hashedNewPassword = bcrypt.hashSync(newPassword, parseInt(process.env.BCRYPT_ROUNDS) || 8);
+      user.password = hashedNewPassword;
+      await user.save();
+      
+      res.json({ success: true, message: 'Password updated successfully' });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to update password' });
+    }
+});
+
+app.delete('/api/users/:id', authenticateToken, async (req, res) => {
+    try {
+      const user = await User.findByIdAndUpdate(
+        req.params.id,
+        { isActive: false },
+        { new: true }
+      ).select('-password');
+      
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      res.json({ success: true, message: 'User deactivated successfully' });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete user' });
     }
 });
 

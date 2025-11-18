@@ -47,6 +47,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { useMediaQuery } from '@mui/material';
 import Analytics from './Analytics';
 import DataTable from './DataTable';
+import UserSettings from './UserSettings';
 
 const Dashboard = () => {
   const { logout } = useContext(AuthContext);
@@ -432,12 +433,13 @@ setFormData({
     { name: 'Outstanding', value: outstandingAmount, color: '#ef4444' }, // Red for outstanding
   ];
 
-  const menuItems = [
+const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, view: 'dashboard' },
     { text: 'Analytics Overview', icon: <BarChartIcon />, view: 'analytics' },
     { text: 'Payment Records', icon: <TableChart />, view: 'table' },
     { text: 'Project Management', icon: <TableChart />, view: 'projects' },
     { text: 'Employee Management', icon: <PersonIcon />, view: 'employees' },
+    { text: 'User Settings', icon: <PersonIcon />, view: 'user-settings' },
     { text: 'Account Settings', icon: <PersonIcon />, view: 'settings' },
   ];
 
@@ -570,6 +572,8 @@ setFormData({
             </Paper>
           </Container>
         );
+case 'user-settings':
+        return <UserSettings />;
       case 'settings':
         return (
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
