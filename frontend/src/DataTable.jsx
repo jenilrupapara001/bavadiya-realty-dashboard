@@ -172,43 +172,33 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
       </Typography>
 
       {/* Summary Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={3}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent>
-              <Typography variant="h6" color="text.secondary">Total Entries</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                {totalEntries}
+      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={4}>
+          <Card sx={{ borderRadius: 3, minHeight: 140 }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+              <Typography variant="h6" color="text.secondary" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>Total Portfolio</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main', fontSize: { xs: '1.5rem', sm: '2rem' } }}>
+                {formatINR(totalValue)}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} md={3}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent>
-              <Typography variant="h6" color="text.secondary">Total Brokerage</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
+        <Grid item xs={12} sm={6} md={4}>
+          <Card sx={{ borderRadius: 3, minHeight: 140 }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+              <Typography variant="h6" color="text.secondary" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>Total Brokerage</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: 'success.main', fontSize: { xs: '1.5rem', sm: '2rem' } }}>
                 {formatINR(totalBrokerage)}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} md={3}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent>
-              <Typography variant="h6" color="text.secondary">Received</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: '#22c55e' }}>
+        <Grid item xs={12} sm={6} md={4}>
+          <Card sx={{ borderRadius: 3, minHeight: 140 }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+              <Typography variant="h6" color="text.secondary" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>Payment Received</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: '#22c55e', fontSize: { xs: '1.5rem', sm: '2rem' } }}>
                 {formatINR(paymentReceived)}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Card sx={{ borderRadius: 3 }}>
-            <CardContent>
-              <Typography variant="h6" color="text.secondary">Outstanding</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: '#ef4444' }}>
-                {formatINR(outstandingAmount)}
               </Typography>
             </CardContent>
           </Card>
