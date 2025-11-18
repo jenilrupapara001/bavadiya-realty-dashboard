@@ -35,18 +35,26 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [employeeFilter, setEmployeeFilter] = useState('all');
+  const [filterDateFrom, setFilterDateFrom] = useState('');
+  const [filterDateTo, setFilterDateTo] = useState('');
+  const [filterEmployee, setFilterEmployee] = useState('');
+  const [filterProject, setFilterProject] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterReceivedBy, setFilterReceivedBy] = useState('');
+  const [employees, setEmployees] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
     fetchData();
+    fetchEmployees();
+    fetchProjects();
   }, []);
 
   useEffect(() => {
     filterData();
-  }, [data, searchTerm, statusFilter, employeeFilter]);
+  }, [data, searchTerm, filterDateFrom, filterDateTo, filterEmployee, filterProject, statusFilter, filterReceivedBy]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -62,6 +70,30 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
       setError('Failed to load data. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchEmployees = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('https://bavadiya-realty-backend.vercel.app/api/employees', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setEmployees(response.data);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+    }
+  };
+
+  const fetchProjects = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('https://bavadiya-realty-backend.vercel.app/api/projects', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProjects(response.data);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
     }
   };
 
@@ -83,6 +115,19 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
   const filterData = () => {
     let filtered = data;
 
+    // Date filters
+    if (filterDateFrom || filterDateTo) {
+      filtered = filtered.filter(item => {
+        const itemDate = new Date(item.receiveDate);
+        const fromDate = filterDateFrom ? new Date(filterDateFrom) : null;
+        const toDate = filterDateTo ? new Date(filterDateTo) : null;
+
+        if (fromDate && itemDate < fromDate) return false;
+        if (toDate && itemDate > toDate) return false;
+        return true;
+      });
+    }
+
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(item =>
@@ -93,8 +138,18 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
       );
     }
 
+    // Employee filter
+    if (filterEmployee) {
+      filtered = filtered.filter(item => item.employee === filterEmployee);
+    }
+
+    // Project filter
+    if (filterProject) {
+      filtered = filtered.filter(item => item.projectName === filterProject);
+    }
+
     // Status filter
-    if (statusFilter !== 'all') {
+    if (statusFilter) {
       if (statusFilter === 'received') {
         filtered = filtered.filter(item => item.receiveDate && item.customerReceiveDate);
       } else if (statusFilter === 'pending') {
@@ -102,9 +157,9 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
       }
     }
 
-    // Employee filter
-    if (employeeFilter !== 'all') {
-      filtered = filtered.filter(item => item.employee === employeeFilter);
+    // Received By filter
+    if (filterReceivedBy) {
+      filtered = filtered.filter(item => item.receivedBy === filterReceivedBy);
     }
 
     setFilteredData(filtered);
@@ -142,8 +197,6 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
   const outstandingAmount = totalBrokerage - paymentReceived;
 
   const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-
-  const employees = [...new Set(data.map(item => item.employee).filter(Boolean))];
 
   if (loading) {
     return (
