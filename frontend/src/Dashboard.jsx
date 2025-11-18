@@ -295,14 +295,16 @@ const Dashboard = () => {
     if (window.confirm('Are you sure you want to delete this entry?')) {
       try {
         const token = localStorage.getItem('token');
-        await axios.delete(`https://bavadiya-realty-backend.vercel.app/api/data/${id}`, {
+        const response = await axios.delete(`https://bavadiya-realty-backend.vercel.app/api/data/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        console.log('Delete response:', response.data);
         setSnackbar({ open: true, message: 'Entry deleted successfully!', severity: 'success' });
         fetchData();
       } catch (error) {
         console.error('Error deleting entry:', error);
-        setSnackbar({ open: true, message: 'Error deleting entry. Please try again.', severity: 'error' });
+        const errorMessage = error.response?.data?.message || 'Error deleting entry. Please try again.';
+        setSnackbar({ open: true, message: errorMessage, severity: 'error' });
       }
     }
   };
