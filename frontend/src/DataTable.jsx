@@ -108,9 +108,28 @@ const DataTable = ({ onEditEntry }) => {
   // Calculate summary statistics
   const totalEntries = filteredData.length;
   const totalValue = filteredData.reduce((sum, item) => sum + (item.basePrice || 0), 0);
-  const receivedCount = filteredData.filter(item => item.receiveDate).length;
-  const receivedValue = filteredData.filter(item => item.receiveDate).reduce((sum, item) => sum + (item.basePrice || 0), 0);
-  const pendingValue = totalValue - receivedValue;
+  
+  // Calculate brokerage breakdown
+  const convertPercentageToAmount = (percentage, basePrice) => {
+    if (!percentage || !basePrice) return 0;
+    return (parseFloat(percentage) / 100) * parseFloat(basePrice);
+  };
+  
+  const totalBrokerage = filteredData.reduce((sum, item) => {
+    const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
+    const customerBrok = typeof item.customerBro === 'number' ? item.customerBro : convertPercentageToAmount(item.customerBro, item.basePrice);
+    return sum + ownerBrok + customerBrok;
+  }, 0);
+
+  // Payment received based on receive dates
+  const paymentReceived = filteredData.reduce((sum, item) => {
+    let amount = 0;
+    if (item.receiveDate) amount += (typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice));
+    if (item.customerReceiveDate) amount += (typeof item.customerBro === 'number' ? item.customerBro : convertPercentageToAmount(item.customerBro, item.basePrice));
+    return sum + amount;
+  }, 0);
+
+  const outstandingAmount = totalBrokerage - paymentReceived;
 
   const paginatedData = filteredData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
@@ -157,9 +176,9 @@ const DataTable = ({ onEditEntry }) => {
         <Grid item xs={12} md={3}>
           <Card sx={{ borderRadius: 3 }}>
             <CardContent>
-              <Typography variant="h6" color="text.secondary">Total Value</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'success.main' }}>
-                ₹{totalValue.toLocaleString()}
+              <Typography variant="h6" color="text.secondary">Total Brokerage</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                ₹{totalBrokerage.toLocaleString()}
               </Typography>
             </CardContent>
           </Card>
@@ -168,8 +187,8 @@ const DataTable = ({ onEditEntry }) => {
           <Card sx={{ borderRadius: 3 }}>
             <CardContent>
               <Typography variant="h6" color="text.secondary">Received</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'info.main' }}>
-                ₹{receivedValue.toLocaleString()}
+              <Typography variant="h4" sx={{ fontWeight: 700, color: '#22c55e' }}>
+                ₹{paymentReceived.toLocaleString()}
               </Typography>
             </CardContent>
           </Card>
@@ -177,9 +196,9 @@ const DataTable = ({ onEditEntry }) => {
         <Grid item xs={12} md={3}>
           <Card sx={{ borderRadius: 3 }}>
             <CardContent>
-              <Typography variant="h6" color="text.secondary">Pending</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'warning.main' }}>
-                ₹{pendingValue.toLocaleString()}
+              <Typography variant="h6" color="text.secondary">Outstanding</Typography>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: '#ef4444' }}>
+                ₹{outstandingAmount.toLocaleString()}
               </Typography>
             </CardContent>
           </Card>
@@ -280,6 +299,8 @@ const DataTable = ({ onEditEntry }) => {
                 <TableCell>Base Price</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell>Employee</TableCell>
+                <TableCell>Commission (%)</TableCell>
+                <TableCell>Commission Amount (₹)</TableCell>
                 <TableCell>Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -304,13 +325,29 @@ const DataTable = ({ onEditEntry }) => {
                   <TableCell>
                     <Chip
                       label={row.receiveDate ? 'Received' : 'Pending'}
-                      color={row.receiveDate ? 'success' : 'warning'}
+                      color={row.receiveDate ? 'success' : 'error'}
                       size="small"
                       variant="outlined"
-                      sx={{ borderRadius: 2 }}
+                      sx={{
+                        borderRadius: 2,
+                        '&.MuiChip-colorSuccess': {
+                          bgcolor: '#22c55e20',
+                          color: '#22c55e',
+                          borderColor: '#22c55e40'
+                        },
+                        '&.MuiChip-colorError': {
+                          bgcolor: '#ef444420',
+                          color: '#ef4444',
+                          borderColor: '#ef444440'
+                        }
+                      }}
                     />
                   </TableCell>
                   <TableCell>{row.employee}</TableCell>
+                  <TableCell>{row.commission || 0}%</TableCell>
+                  <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
+                    ₹{((row.commission || 0) * (row.basePrice || 0) / 100).toLocaleString()}
+                  </TableCell>
                   <TableCell>
                     <IconButton
                       onClick={() => onEditEntry && onEditEntry(row)}

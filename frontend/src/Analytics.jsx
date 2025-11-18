@@ -48,10 +48,28 @@ const Analytics = () => {
 
   // ---- ANALYTICS CALCULATIONS ----
   const totalPayments = data.reduce((sum, item) => sum + (item.basePrice || 0), 0);
-  const receivedPayments = data
-    .filter(item => item.receiveDate)
-    .reduce((sum, item) => sum + (item.basePrice || 0), 0);
-  const pendingPayments = totalPayments - receivedPayments;
+  
+  // Calculate total brokerage (owner + customer)
+  const convertPercentageToAmount = (percentage, basePrice) => {
+    if (!percentage || !basePrice) return 0;
+    return (parseFloat(percentage) / 100) * parseFloat(basePrice);
+  };
+  
+  const totalBrokerage = data.reduce((sum, item) => {
+    const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
+    const customerBrok = typeof item.customerBro === 'number' ? item.customerBro : convertPercentageToAmount(item.customerBro, item.basePrice);
+    return sum + ownerBrok + customerBrok;
+  }, 0);
+
+  // Payment received based on receive dates
+  const paymentReceived = data.reduce((sum, item) => {
+    let amount = 0;
+    if (item.receiveDate) amount += (typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice));
+    if (item.customerReceiveDate) amount += (typeof item.customerBro === 'number' ? item.customerBro : convertPercentageToAmount(item.customerBro, item.basePrice));
+    return sum + amount;
+  }, 0);
+
+  const outstandingAmount = totalBrokerage - paymentReceived;
 
   // Monthly trends (last 6 months)
   const monthlyData = data.reduce((acc, item) => {
@@ -64,11 +82,13 @@ const Analytics = () => {
 
   const monthlyChartData = Object.values(monthlyData).slice(-6);
 
-  // Employee performance
+  // Employee performance with commission calculations
   const employeeData = data.reduce((acc, item) => {
-    if (!acc[item.employee]) acc[item.employee] = { name: item.employee, deals: 0, revenue: 0 };
-    acc[item.employee].deals += 1;
-    acc[item.employee].revenue += item.basePrice || 0;
+    const empName = item.employee || 'Unknown';
+    if (!acc[empName]) acc[empName] = { name: empName, deals: 0, revenue: 0, commission: 0 };
+    acc[empName].deals += 1;
+    acc[empName].revenue += item.basePrice || 0;
+    acc[empName].commission += ((item.commission || 0) * (item.basePrice || 0) / 100);
     return acc;
   }, {});
   const employeeChartData = Object.values(employeeData).sort((a, b) => b.revenue - a.revenue);
@@ -118,29 +138,29 @@ const Analytics = () => {
         <Grid item xs={12} md={3}>
           <Card sx={{ background: 'linear-gradient(135deg, #1a365d 0%, #3b82f6 100%)', color: 'white', borderRadius: 3 }}>
             <CardContent>
-              <Typography variant="h6" sx={{ fontWeight: 500 }}>Total Revenue</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 500 }}>Total Brokerage</Typography>
               <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                ₹{totalPayments.toLocaleString()}
+                ₹{totalBrokerage.toLocaleString()}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={12} md={3}>
-          <Card sx={{ background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)', color: 'white', borderRadius: 3 }}>
+          <Card sx={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)', color: 'white', borderRadius: 3 }}>
             <CardContent>
               <Typography variant="h6" sx={{ fontWeight: 500 }}>Received</Typography>
               <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                ₹{receivedPayments.toLocaleString()}
+                ₹{paymentReceived.toLocaleString()}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
         <Grid item xs={12} md={3}>
-          <Card sx={{ background: 'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)', color: 'white', borderRadius: 3 }}>
+          <Card sx={{ background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', color: 'white', borderRadius: 3 }}>
             <CardContent>
-              <Typography variant="h6" sx={{ fontWeight: 500 }}>Pending</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 500 }}>Outstanding</Typography>
               <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                ₹{pendingPayments.toLocaleString()}
+                ₹{outstandingAmount.toLocaleString()}
               </Typography>
             </CardContent>
           </Card>
@@ -208,15 +228,21 @@ const Analytics = () => {
         <Grid item xs={12}>
           <Paper sx={{ p: 3, borderRadius: 3 }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-              Employee Performance
+              Employee Performance (Revenue & Commission)
             </Typography>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={employeeChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
                 <YAxis />
-                <Tooltip formatter={(value) => [`₹${value.toLocaleString()}`, 'Revenue']} />
-                <Bar dataKey="revenue" fill="#1a365d" radius={[4, 4, 0, 0]} />
+                <Tooltip
+                  formatter={(value, name) => [
+                    `₹${value.toLocaleString()}`,
+                    name === 'revenue' ? 'Total Revenue' : 'Commission'
+                  ]}
+                />
+                <Bar dataKey="revenue" fill="#1a365d" name="Revenue" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="commission" fill="#22c55e" name="Commission" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </Paper>

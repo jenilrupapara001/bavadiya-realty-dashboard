@@ -369,8 +369,8 @@ const Dashboard = () => {
   // Payment received logic: based on receive dates
   const paymentReceived = data.reduce((sum, item) => {
     let amount = 0;
-    if (item.receiveDate) amount += (item.ownerBro || 0); // Owner brokerage if owner receive date filled
-    if (item.customerReceiveDate) amount += (item.customerBro || 0); // Customer brokerage if customer receive date filled
+    if (item.receiveDate) amount += (typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice)); // Owner brokerage if owner receive date filled
+    if (item.customerReceiveDate) amount += (typeof item.customerBro === 'number' ? item.customerBro : convertPercentageToAmount(item.customerBro, item.basePrice)); // Customer brokerage if customer receive date filled
     return sum + amount;
   }, 0);
 
@@ -387,8 +387,8 @@ const Dashboard = () => {
   const chartData = Object.entries(employeeData).map(([name, value]) => ({ name, value }));
 
   const pieData = [
-    { name: 'Received', value: paymentReceived, color: '#059669' },
-    { name: 'Outstanding', value: outstandingAmount, color: '#d97706' },
+    { name: 'Received', value: paymentReceived, color: '#22c55e' }, // Green for received
+    { name: 'Outstanding', value: outstandingAmount, color: '#ef4444' }, // Red for outstanding
   ];
 
   const menuItems = [
@@ -715,12 +715,12 @@ const Dashboard = () => {
                     </Card>
                   </Grid>
                   <Grid item xs={6} sm={4} md={3} lg={2}>
-                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%' }}>
+                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', border: '2px solid #22c55e20' }}>
                       <CardContent sx={{ p: 2 }}>
                         <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
                           Payment Received
                         </Typography>
-                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: 'warning.main', mb: 0.5, fontSize: '1.1rem' }}>
+                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: '#22c55e', mb: 0.5, fontSize: '1.1rem' }}>
                           ₹{paymentReceived.toLocaleString()}
                         </Typography>
                         <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>
@@ -730,12 +730,12 @@ const Dashboard = () => {
                     </Card>
                   </Grid>
                   <Grid item xs={6} sm={4} md={3} lg={2}>
-                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%' }}>
+                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', border: '2px solid #ef444420' }}>
                       <CardContent sx={{ p: 2 }}>
                         <Typography sx={{ fontSize: 12, color: 'text.secondary', mb: 0.5, fontWeight: 500 }}>
                           Outstanding Amount
                         </Typography>
-                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: 'error.main', mb: 0.5, fontSize: '1.1rem' }}>
+                        <Typography variant="h6" component="div" sx={{ fontWeight: 'bold', color: '#ef4444', mb: 0.5, fontSize: '1.1rem' }}>
                           ₹{outstandingAmount.toLocaleString()}
                         </Typography>
                         <Typography sx={{ fontSize: 10, color: 'text.secondary' }}>
@@ -749,7 +749,7 @@ const Dashboard = () => {
                 {/* Analytics Overview */}
                 <Box sx={{ mb: 4 }}>
                   <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 3 }}>
-                    Analytics Overview (All based on Total Brokerage)
+                    Analytics Overview - Total Brokerage: ₹{totalBrokerage.toLocaleString()}
                   </Typography>
                   <Grid container spacing={{ xs: 2, md: 3 }}>
                     <Grid item xs={12} md={6}>
@@ -1068,6 +1068,7 @@ const Dashboard = () => {
                         <TableCell>Status</TableCell>
                         <TableCell>Employee</TableCell>
                         <TableCell>Commission (%)</TableCell>
+                        <TableCell>Commission Amount (₹)</TableCell>
                         <TableCell>Actions</TableCell>
                         <TableCell>Delete</TableCell>
                       </TableRow>
@@ -1096,11 +1097,26 @@ const Dashboard = () => {
                               color={row.receiveDate && row.customerReceiveDate ? 'success' : row.customerReceiveDate ? 'warning' : 'error'}
                               size="small"
                               variant="outlined"
-                              sx={{ borderRadius: 2 }}
+                              sx={{
+                                borderRadius: 2,
+                                '&.MuiChip-colorSuccess': {
+                                  bgcolor: '#22c55e20',
+                                  color: '#22c55e',
+                                  borderColor: '#22c55e40'
+                                },
+                                '&.MuiChip-colorError': {
+                                  bgcolor: '#ef444420',
+                                  color: '#ef4444',
+                                  borderColor: '#ef444440'
+                                }
+                              }}
                             />
                           </TableCell>
                           <TableCell>{employees.find(e => e.code === row.employee)?.name || row.employee}</TableCell>
                           <TableCell>{row.commission}%</TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
+                            ₹{((row.commission || 0) * (row.basePrice || 0) / 100).toLocaleString()}
+                          </TableCell>
                           <TableCell>
                             <IconButton
                               onClick={() => {
@@ -1509,15 +1525,20 @@ const Dashboard = () => {
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  fullWidth
-                  required
-                  label="Employee Commission (%)"
-                  type="number"
-                  value={formData.commission}
-                  onChange={(e) => setFormData({ ...formData, commission: parseFloat(e.target.value) || '' })}
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                />
+                <Box>
+                  <TextField
+                    fullWidth
+                    required
+                    label="Employee Commission (%)"
+                    type="number"
+                    value={formData.commission}
+                    onChange={(e) => setFormData({ ...formData, commission: parseFloat(e.target.value) || '' })}
+                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                  />
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                    Commission Amount: ₹{((formData.commission || 0) * (formData.basePrice || 0) / 100).toLocaleString()}
+                  </Typography>
+                </Box>
               </Grid>
             </Grid>
           </DialogContent>
