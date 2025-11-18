@@ -61,13 +61,31 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
     setError(null);
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Authentication required. Please login again.');
+        return;
+      }
+
       const response = await axios.get('https://bavadiya-realty-backend.vercel.app/api/data', {
         headers: { Authorization: `Bearer ${token}` },
+        timeout: 10000,
       });
-      setData(response.data);
+      
+      if (response.data && Array.isArray(response.data)) {
+        setData(response.data);
+      } else {
+        setData([]);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
-      setError('Failed to load data. Please try again.');
+      
+      if (error.response?.status === 401) {
+        setError('Session expired. Please login again.');
+      } else if (error.code === 'ECONNABORTED') {
+        setError('Request timed out. Please check your connection.');
+      } else {
+        setError('Failed to load data. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -264,12 +282,12 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
       </Grid>
 
       {/* Filters - Match Dashboard */}
-      <Paper sx={{ p: 3, mb: 3, borderRadius: 3 }}>
-        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+      <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3, borderRadius: 3 }}>
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
           Filters
         </Typography>
-        <Grid container spacing={3} alignItems="center">
-          <Grid item xs={12} md={2}>
+        <Grid container spacing={{ xs: 2, sm: 3 }} alignItems="center">
+          <Grid item xs={12} sm={6} md={2}>
             <TextField
               label="From Date"
               type="date"
@@ -281,7 +299,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
           </Grid>
-          <Grid item xs={12} md={2}>
+          <Grid item xs={12} sm={6} md={2}>
             <TextField
               label="To Date"
               type="date"
@@ -293,8 +311,8 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             />
           </Grid>
-          <Grid item xs={12} md={2}>
-            <FormControl sx={{ minWidth: { xs: '100%', sm: 120 } }} size="small" fullWidth>
+          <Grid item xs={12} sm={6} md={2}>
+            <FormControl size="small" fullWidth>
               <InputLabel>Employee Name</InputLabel>
               <Select
                 value={filterEmployee}
@@ -309,8 +327,8 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} md={2}>
-            <FormControl sx={{ minWidth: { xs: '100%', sm: 120 } }} size="small" fullWidth>
+          <Grid item xs={12} sm={6} md={2}>
+            <FormControl size="small" fullWidth>
               <InputLabel>Project</InputLabel>
               <Select
                 value={filterProject}
@@ -325,8 +343,8 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} md={2}>
-            <FormControl sx={{ minWidth: { xs: '100%', sm: 120 } }} size="small" fullWidth>
+          <Grid item xs={12} sm={6} md={2}>
+            <FormControl size="small" fullWidth>
               <InputLabel>Status</InputLabel>
               <Select
                 value={filterStatus}
@@ -340,8 +358,8 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} md={2}>
-            <FormControl sx={{ minWidth: { xs: '100%', sm: 120 } }} size="small" fullWidth>
+          <Grid item xs={12} sm={6} md={2}>
+            <FormControl size="small" fullWidth>
               <InputLabel>Received By</InputLabel>
               <Select
                 value={filterReceivedBy}
@@ -359,12 +377,19 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
         </Grid>
       </Paper>
 
-      {/* Data Table */}
-      <Paper sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)', overflow: 'auto' }}>
+{/* Data Table */}
+      <Paper sx={{
+        borderRadius: 3,
+        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        overflow: 'auto',
+        '& .MuiTable-root': {
+          minWidth: { xs: '800px', sm: '900px', md: '100%' }
+        }
+      }}>
         <TableContainer>
           <Table>
             <TableHead>
-              <TableRow sx={{
+<TableRow sx={{
                 bgcolor: 'primary.main',
                 '& th': {
                   color: 'white',
@@ -380,6 +405,8 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
                 <TableCell>Owner</TableCell>
                 <TableCell>Customer</TableCell>
                 <TableCell>Base Price</TableCell>
+                <TableCell>Owner Received By</TableCell>
+                <TableCell>Customer Received By</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell>Employee</TableCell>
                 <TableCell>Commission (%)</TableCell>
@@ -389,27 +416,45 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginatedData.map((row, index) => (
+{paginatedData.map((row, index) => (
                 <TableRow
-                  key={row.id || index}
+                  key={row._id || index}
                   sx={{
                     '&:nth-of-type(odd)': { bgcolor: 'action.hover' },
                     '&:hover': { bgcolor: 'action.selected' },
                     transition: 'background-color 0.2s ease'
                   }}
                 >
-                  <TableCell sx={{ fontWeight: 500 }}>{row.date}</TableCell>
-                  <TableCell>{row.unitNo}</TableCell>
-                  <TableCell>{row.projectName}</TableCell>
-                  <TableCell>{row.ownerName}</TableCell>
-                  <TableCell>{row.customerName}</TableCell>
+                  <TableCell sx={{ fontWeight: 500 }}>{row.date || '-'}</TableCell>
+                  <TableCell>{row.unitNo || '-'}</TableCell>
+                  <TableCell>{row.projectName || '-'}</TableCell>
+                  <TableCell>{row.ownerName || '-'}</TableCell>
+                  <TableCell>{row.customerName || '-'}</TableCell>
                   <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
                     {formatINR(row.basePrice || 0)}
                   </TableCell>
                   <TableCell>
+                    <Typography variant="body2" sx={{
+                      fontWeight: 500,
+                      color: row.ownerReceivedBy ? 'success.main' : 'text.secondary',
+                      fontSize: '0.875rem'
+                    }}>
+                      {row.ownerReceivedBy || '-'}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" sx={{
+                      fontWeight: 500,
+                      color: row.customerReceivedBy ? 'success.main' : 'text.secondary',
+                      fontSize: '0.875rem'
+                    }}>
+                      {row.customerReceivedBy || '-'}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
                     <Chip
-                      label={row.receiveDate && row.customerReceiveDate ? 'Received' : 'Pending'}
-                      color={row.receiveDate && row.customerReceiveDate ? 'success' : 'error'}
+                      label={(row.receiveDate && row.customerReceiveDate) ? 'Received' : 'Pending'}
+                      color={(row.receiveDate && row.customerReceiveDate) ? 'success' : 'error'}
                       size="small"
                       variant="outlined"
                       sx={{
@@ -427,7 +472,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
                       }}
                     />
                   </TableCell>
-                  <TableCell>{row.employee}</TableCell>
+                  <TableCell>{row.employee || '-'}</TableCell>
                   <TableCell>{row.commission || 0}%</TableCell>
                   <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
                     {/* Calculate commission based on total brokerage */}
