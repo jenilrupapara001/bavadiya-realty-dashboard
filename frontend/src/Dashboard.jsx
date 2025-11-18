@@ -1547,25 +1547,38 @@ const Dashboard = () => {
                 </FormControl>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Box>
-                  <TextField
-                    fullWidth
-                    required
-                    label="Employee Commission (%)"
-                    type="number"
-                    value={formData.commission}
-                    onChange={(e) => setFormData({ ...formData, commission: parseFloat(e.target.value) || '' })}
-                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                  />
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                    Commission Amount: {(() => {
-                      const ownerBrok = typeof formData.ownerBro === 'number' ? formData.ownerBro : convertPercentageToAmount(formData.ownerBro, formData.basePrice);
-                      const customerBrok = typeof formData.customerBro === 'number' ? formData.customerBro : convertPercentageToAmount(formData.customerBro, formData.basePrice);
-                      const totalBrok = ownerBrok + customerBrok;
-                      return formatINR(((formData.commission || 0) * totalBrok) / 100);
-                    })()}
-                  </Typography>
-                </Box>
+                <TextField
+                  fullWidth
+                  required
+                  label="Employee Commission (%)"
+                  type="number"
+                  value={formData.commission}
+                  onChange={(e) => setFormData({ ...formData, commission: parseFloat(e.target.value) || '' })}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  label="Commission Amount (₹)"
+                  value={(() => {
+                    const ownerBrok = typeof formData.ownerBro === 'number' ? formData.ownerBro : convertPercentageToAmount(formData.ownerBro, formData.basePrice);
+                    const customerBrok = typeof formData.customerBro === 'number' ? formData.customerBro : convertPercentageToAmount(formData.customerBro, formData.basePrice);
+                    const totalBrok = ownerBrok + customerBrok;
+                    return formatINR(((formData.commission || 0) * totalBrok) / 100);
+                  })()}
+                  InputProps={{
+                    readOnly: true,
+                    sx: {
+                      borderRadius: 2,
+                      bgcolor: 'grey.50',
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: 'grey.300'
+                      }
+                    }
+                  }}
+                  helperText="Auto-calculated based on total brokerage"
+                />
               </Grid>
             </Grid>
           </DialogContent>
