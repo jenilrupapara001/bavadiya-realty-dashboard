@@ -54,7 +54,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
 
   useEffect(() => {
     filterData();
-  }, [data, searchTerm, filterDateFrom, filterDateTo, filterEmployee, filterProject, statusFilter, filterReceivedBy]);
+  }, [data, searchTerm, filterDateFrom, filterDateTo, filterEmployee, filterProject, filterStatus, filterReceivedBy]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -149,10 +149,10 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
     }
 
     // Status filter
-    if (statusFilter) {
-      if (statusFilter === 'received') {
+    if (filterStatus) {
+      if (filterStatus === 'received') {
         filtered = filtered.filter(item => item.receiveDate && item.customerReceiveDate);
-      } else if (statusFilter === 'pending') {
+      } else if (filterStatus === 'pending') {
         filtered = filtered.filter(item => !item.receiveDate || !item.customerReceiveDate);
       }
     }
@@ -284,12 +284,12 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
             <FormControl fullWidth size="small">
               <InputLabel>Status</InputLabel>
               <Select
-                value={statusFilter}
+                value={filterStatus}
                 label="Status"
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={(e) => setFilterStatus(e.target.value)}
                 sx={{ borderRadius: 2 }}
               >
-                <MenuItem value="all">All Status</MenuItem>
+                <MenuItem value="">All Status</MenuItem>
                 <MenuItem value="received">Received</MenuItem>
                 <MenuItem value="pending">Pending</MenuItem>
               </Select>
@@ -299,12 +299,12 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
             <FormControl fullWidth size="small">
               <InputLabel>Employee</InputLabel>
               <Select
-                value={employeeFilter}
+                value={filterEmployee}
                 label="Employee"
-                onChange={(e) => setEmployeeFilter(e.target.value)}
+                onChange={(e) => setFilterEmployee(e.target.value)}
                 sx={{ borderRadius: 2 }}
               >
-                <MenuItem value="all">All Employees</MenuItem>
+                <MenuItem value="">All Employees</MenuItem>
                 {employees.map(emp => (
                   <MenuItem key={emp} value={emp}>{emp}</MenuItem>
                 ))}
@@ -318,8 +318,8 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
               startIcon={<FilterList />}
               onClick={() => {
                 setSearchTerm('');
-                setStatusFilter('all');
-                setEmployeeFilter('all');
+                setFilterStatus('');
+                setFilterEmployee('');
               }}
               sx={{ borderRadius: 2 }}
             >
