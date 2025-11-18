@@ -24,11 +24,11 @@ import {
   Card,
   CardContent,
 } from '@mui/material';
-import { Search, FilterList, Edit, Add } from '@mui/icons-material';
+import { Search, FilterList, Edit, Add, Delete } from '@mui/icons-material';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
 
-const DataTable = ({ onEditEntry }) => {
+const DataTable = ({ onEditEntry, onDeleteEntry }) => {
   const { logout } = useContext(AuthContext);
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -302,6 +302,7 @@ const DataTable = ({ onEditEntry }) => {
                 <TableCell>Commission (%)</TableCell>
                 <TableCell>Commission Amount (₹)</TableCell>
                 <TableCell>Actions</TableCell>
+                <TableCell>Delete</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -346,7 +347,13 @@ const DataTable = ({ onEditEntry }) => {
                   <TableCell>{row.employee}</TableCell>
                   <TableCell>{row.commission || 0}%</TableCell>
                   <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
-                    ₹{((row.commission || 0) * (row.basePrice || 0) / 100).toLocaleString()}
+                    {/* Calculate commission based on total brokerage */}
+                    {(() => {
+                      const ownerBrok = typeof row.ownerBro === 'number' ? row.ownerBro : convertPercentageToAmount(row.ownerBro, row.basePrice);
+                      const customerBrok = typeof row.customerBro === 'number' ? row.customerBro : convertPercentageToAmount(row.customerBro, row.basePrice);
+                      const totalBrok = ownerBrok + customerBrok;
+                      return `₹${(((row.commission || 0) * totalBrok) / 100).toLocaleString()}`;
+                    })()}
                   </TableCell>
                   <TableCell>
                     <IconButton
@@ -361,6 +368,21 @@ const DataTable = ({ onEditEntry }) => {
                       }}
                     >
                       <Edit />
+                    </IconButton>
+                  </TableCell>
+                  <TableCell>
+                    <IconButton
+                      onClick={() => onDeleteEntry && onDeleteEntry(row._id)}
+                      sx={{
+                        color: 'error.main',
+                        '&:hover': {
+                          bgcolor: 'error.light',
+                          color: 'white'
+                        },
+                        borderRadius: 2
+                      }}
+                    >
+                      <Delete />
                     </IconButton>
                   </TableCell>
                 </TableRow>

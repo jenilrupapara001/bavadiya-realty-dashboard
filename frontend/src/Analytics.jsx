@@ -88,7 +88,14 @@ const Analytics = () => {
     if (!acc[empName]) acc[empName] = { name: empName, deals: 0, revenue: 0, commission: 0 };
     acc[empName].deals += 1;
     acc[empName].revenue += item.basePrice || 0;
-    acc[empName].commission += ((item.commission || 0) * (item.basePrice || 0) / 100);
+    
+    // Calculate total brokerage for this entry
+    const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
+    const customerBrok = typeof item.customerBro === 'number' ? item.customerBro : convertPercentageToAmount(item.customerBro, item.basePrice);
+    const totalBrok = ownerBrok + customerBrok;
+    
+    // Calculate commission based on total brokerage
+    acc[empName].commission += ((item.commission || 0) * totalBrok / 100);
     return acc;
   }, {});
   const employeeChartData = Object.values(employeeData).sort((a, b) => b.revenue - a.revenue);

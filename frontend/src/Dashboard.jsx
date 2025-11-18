@@ -379,8 +379,14 @@ const Dashboard = () => {
   const employeeData = data.reduce((acc, item) => {
     const emp = employees.find(e => e.code === item.employee);
     const empName = emp ? emp.name : item.employee;
-    // Calculate commission amount: (commission % * basePrice) / 100
-    const commissionAmount = ((item.commission || 0) * (item.basePrice || 0)) / 100;
+    
+    // Calculate total brokerage for this entry
+    const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
+    const customerBrok = typeof item.customerBro === 'number' ? item.customerBro : convertPercentageToAmount(item.customerBro, item.basePrice);
+    const totalBrok = ownerBrok + customerBrok;
+    
+    // Calculate commission amount: (commission % * total brokerage) / 100
+    const commissionAmount = ((item.commission || 0) * totalBrok) / 100;
     acc[empName] = (acc[empName] || 0) + commissionAmount;
     return acc;
   }, {});
@@ -412,7 +418,7 @@ const Dashboard = () => {
             setEditingIndex(row._id);
             setOpen(true);
           }
-        }} />;
+        }} onDeleteEntry={handleDelete} />;
       case 'employees':
         return (
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -1115,7 +1121,13 @@ const Dashboard = () => {
                           <TableCell>{employees.find(e => e.code === row.employee)?.name || row.employee}</TableCell>
                           <TableCell>{row.commission}%</TableCell>
                           <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
-                            ₹{((row.commission || 0) * (row.basePrice || 0) / 100).toLocaleString()}
+                            {/* Calculate commission based on total brokerage */}
+                            {(() => {
+                              const ownerBrok = typeof row.ownerBro === 'number' ? row.ownerBro : convertPercentageToAmount(row.ownerBro, row.basePrice);
+                              const customerBrok = typeof row.customerBro === 'number' ? row.customerBro : convertPercentageToAmount(row.customerBro, row.basePrice);
+                              const totalBrok = ownerBrok + customerBrok;
+                              return `₹${(((row.commission || 0) * totalBrok) / 100).toLocaleString()}`;
+                            })()}
                           </TableCell>
                           <TableCell>
                             <IconButton
@@ -1536,7 +1548,12 @@ const Dashboard = () => {
                     sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                   />
                   <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                    Commission Amount: ₹{((formData.commission || 0) * (formData.basePrice || 0) / 100).toLocaleString()}
+                    Commission Amount: {(() => {
+                      const ownerBrok = typeof formData.ownerBro === 'number' ? formData.ownerBro : convertPercentageToAmount(formData.ownerBro, formData.basePrice);
+                      const customerBrok = typeof formData.customerBro === 'number' ? formData.customerBro : convertPercentageToAmount(formData.customerBro, formData.basePrice);
+                      const totalBrok = ownerBrok + customerBrok;
+                      return `₹${(((formData.commission || 0) * totalBrok) / 100).toLocaleString()}`;
+                    })()}
                   </Typography>
                 </Box>
               </Grid>
