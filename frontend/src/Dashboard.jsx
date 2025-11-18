@@ -670,7 +670,7 @@ const Dashboard = () => {
 
                 {/* Cards On Dashboard */}
                 <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
-                  <Grid item xs={12} sm={6} md={4}>
+                  <Grid item xs={12} sm={6} md={3}>
                     <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 140 }}>
                       <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                         <Typography sx={{ fontSize: { xs: 12, sm: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
@@ -685,7 +685,7 @@ const Dashboard = () => {
                       </CardContent>
                     </Card>
                   </Grid>
-                  <Grid item xs={12} sm={6} md={4}>
+                  <Grid item xs={12} sm={6} md={3}>
                     <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 140 }}>
                       <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                         <Typography sx={{ fontSize: { xs: 12, sm: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
@@ -700,7 +700,7 @@ const Dashboard = () => {
                       </CardContent>
                     </Card>
                   </Grid>
-                  <Grid item xs={12} sm={6} md={4}>
+                  <Grid item xs={12} sm={6} md={3}>
                     <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 140 }}>
                       <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
                         <Typography sx={{ fontSize: { xs: 12, sm: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
@@ -711,6 +711,51 @@ const Dashboard = () => {
                         </Typography>
                         <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
                           Based on receive dates
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 140 }}>
+                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                        <Typography sx={{ fontSize: { xs: 12, sm: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
+                          Outstanding Amount
+                        </Typography>
+                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: '#ef4444', mb: 1, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+                          {formatINR(outstandingAmount)}
+                        </Typography>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
+                          Pending payments
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 140 }}>
+                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                        <Typography sx={{ fontSize: { xs: 12, sm: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
+                          Owner Brokerage
+                        </Typography>
+                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: '#f59e0b', mb: 1, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+                          {formatINR(totalOwnerBrok)}
+                        </Typography>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
+                          Owner commissions
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 140 }}>
+                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                        <Typography sx={{ fontSize: { xs: 12, sm: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
+                          Customer Brokerage
+                        </Typography>
+                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: '#8b5cf6', mb: 1, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+                          {formatINR(totalCustomerBrok)}
+                        </Typography>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
+                          Customer commissions
                         </Typography>
                       </CardContent>
                     </Card>
@@ -969,8 +1014,8 @@ const Dashboard = () => {
                           sx={{ borderRadius: 2 }}
                         >
                           <MenuItem value="">All</MenuItem>
-                          {[...new Set(data.map(item => item.projectName))].map(proj => (
-                            <MenuItem key={proj} value={proj}>{proj}</MenuItem>
+                          {projects.map((project) => (
+                            <MenuItem key={project._id} value={project.name}>{project.name}</MenuItem>
                           ))}
                         </Select>
                       </FormControl>
@@ -1309,8 +1354,8 @@ const Dashboard = () => {
                     sx={{ borderRadius: 2 }}
                   >
                     <MenuItem value="">Select Project</MenuItem>
-                    {[...new Set(data.map(item => item.projectName))].map(proj => (
-                      <MenuItem key={proj} value={proj}>{proj}</MenuItem>
+                    {projects.map((project) => (
+                      <MenuItem key={project._id} value={project.name}>{project.name}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>
