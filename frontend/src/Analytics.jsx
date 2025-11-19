@@ -313,14 +313,14 @@ const Analytics = () => {
     const entry = payload[0].payload;
     const percentage = totalForMetric ? ((entry.value / totalForMetric) * 100).toFixed(1) : 0;
     return (
-      <Box
+      <Paper
+        elevation={3}
         sx={{
-          p: 1.5,
-          borderRadius: 2,
-          border: '1px solid',
-          borderColor: 'grey.200',
-          boxShadow: '0px 8px 20px rgba(15, 23, 42, 0.12)',
-          bgcolor: 'background.paper',
+          p: 2,
+          borderRadius: 3,
+          border: '1px solid #e5e7eb',
+          bgcolor: 'white',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
           minWidth: 200
         }}
       >
@@ -344,10 +344,10 @@ const Analytics = () => {
             Received: {formatINR(entry.receivedAmount)}
           </Typography>
         )}
-        <Typography variant="body2" sx={{ mt: 0.5, fontWeight: 600, color: 'text.primary' }}>
+        <Typography variant="body2" sx={{ mt: 0.5, fontWeight: 600, color: 'primary.main' }}>
           {percentage}% of total
         </Typography>
-      </Box>
+      </Paper>
     );
   };
 
@@ -385,46 +385,34 @@ const Analytics = () => {
   // ---- UI ----
   if (loading) {
     return (
-      <Container
-        maxWidth="xl"
-        disableGutters
-        sx={{ px: { xs: 2, sm: 3, md: 3 }, py: { xs: 2, sm: 3, md: 4 } }}
-      >
+      <Box sx={{ width: '100%', maxWidth: '100%', px: { xs: 2, sm: 3 } }}>
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
           <Typography variant="h6">Loading analytics...</Typography>
         </Box>
-      </Container>
+      </Box>
     );
   }
 
   if (error) {
     return (
-      <Container
-        maxWidth="xl"
-        disableGutters
-        sx={{ px: { xs: 2, sm: 3, md: 3 }, py: { xs: 2, sm: 3, md: 4 } }}
-      >
+      <Box sx={{ width: '100%', maxWidth: '100%', px: { xs: 2, sm: 3 } }}>
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
           <Alert severity="error">
             {error}
           </Alert>
         </Box>
-      </Container>
+      </Box>
     );
   }
 
   return (
-    <Container
-      maxWidth="xl"
-      disableGutters
-      sx={{ px: { xs: 2, sm: 3, md: 3 }, py: { xs: 2, sm: 3, md: 4 } }}
-    >
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main', mb: 4 }}>
+    <Box sx={{ width: '100%', maxWidth: '100%' }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main', mb: 4, px: { xs: 2, sm: 3 } }}>
         Reports & Analytics
       </Typography>
 
       {/* Key Metrics */}
-      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
+      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4, px: { xs: 2, sm: 3 } }}>
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ background: 'linear-gradient(135deg, #1a365d 0%, #3b82f6 100%)', color: 'white', borderRadius: 3, minHeight: 140 }}>
             <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
@@ -488,10 +476,10 @@ const Analytics = () => {
       </Grid>
 
       {/* Payment Status Cards */}
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 3 }}>
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 3, px: { xs: 2, sm: 3 } }}>
         Payment Status Analytics
       </Typography>
-      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
+      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4, px: { xs: 2, sm: 3 } }}>
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)', color: 'white', borderRadius: 3, minHeight: 140 }}>
             <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
@@ -579,10 +567,10 @@ const Analytics = () => {
       </Grid>
 
       {/* Received By Cards */}
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 3 }}>
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 3, px: { xs: 2, sm: 3 } }}>
         Received By Analytics
       </Typography>
-      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
+      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4, px: { xs: 2, sm: 3 } }}>
         {safeReceivedByData.length === 0 ? (
           <Grid item xs={12}>
             <Alert severity="info">
@@ -631,7 +619,7 @@ const Analytics = () => {
       </Grid>
 
       {/* Charts */}
-      <Grid container spacing={3}>
+      <Grid container spacing={3} sx={{ px: { xs: 2, sm: 3 } }}>
         {/* Project Distribution - Enhanced Horizontal Bar Chart */}
         <Grid item xs={12} lg={12}>
           <Paper sx={{ p: 3, height: '100%', borderRadius: 3 }}>
@@ -922,7 +910,7 @@ const Analytics = () => {
           </Paper>
         </Grid>
       </Grid>
-    </Container>
+    </Box>
   );
 };
 

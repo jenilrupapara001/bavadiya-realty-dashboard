@@ -223,32 +223,30 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
 
   if (loading) {
     return (
-      <Container maxWidth="xl" sx={{ mt: 4 }}>
+      <Box sx={{ width: '100%', maxWidth: '100%', px: { xs: 2, sm: 3 } }}>
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
           <Typography variant="h6">Loading data table...</Typography>
         </Box>
-      </Container>
+      </Box>
     );
   }
 
   if (error) {
     return (
-      <Container maxWidth="xl" sx={{ mt: 4 }}>
+      <Box sx={{ width: '100%', maxWidth: '100%', px: { xs: 2, sm: 3 } }}>
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
           <Typography variant="h6" color="error">{error}</Typography>
         </Box>
-      </Container>
+      </Box>
     );
   }
 
   return (
-    <Container
-      maxWidth={false}
-      disableGutters
+    <Box
       sx={{
-        mt: { xs: 2, sm: 3, md: 4 },
-        mb: 4,
-        px: { xs: 2, sm: 3, md: 3 }
+        width: '100%',
+        maxWidth: '100%',
+        px: { xs: 2, sm: 3 }
       }}
     >
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main', mb: { xs: 2, sm: 3, md: 4 }, fontSize: { xs: '1.5rem', sm: '2rem' } }}>
@@ -773,7 +771,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
           />
         </Box>
       </Paper>
-    </Container>
+    </Box>
   );
 };
 

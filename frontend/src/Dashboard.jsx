@@ -1413,9 +1413,7 @@ case 'user-settings':
             width: '100%',
             maxWidth: '100%',
             pt: { xs: 2, sm: 3, md: 4 },
-            pb: 8,
-            px: { xs: 2, sm: 3, md: 4 },
-            mx: 'auto'
+            pb: 8
           }}
         >
           {renderView()}
