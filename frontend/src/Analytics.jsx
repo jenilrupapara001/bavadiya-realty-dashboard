@@ -14,7 +14,7 @@ import { AuthContext } from './AuthContext';
 import axios from 'axios';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, PieChart, Pie, Cell
+  ResponsiveContainer, Cell
 } from 'recharts';
 
 const Analytics = () => {
@@ -406,63 +406,123 @@ const Analytics = () => {
 
       {/* Charts */}
       <Grid container spacing={3}>
-        {/* Project Distribution - Donut Chart */}
+        {/* Project Distribution - Horizontal Bar Chart */}
         <Grid item xs={12} lg={12}>
           <Paper sx={{ p: 3, height: '100%', borderRadius: 3 }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
               Revenue by Project
             </Typography>
-            <ResponsiveContainer width="100%" height={350}>
-              <PieChart>
-                <Pie
-                  data={safeProjectChartData}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={120}
-                  innerRadius={60}
-                  paddingAngle={2}
-                  dataKey="value"
-                  label={({ name, value, percent }) => `${name}: ${formatINR(value)} (${(percent * 100).toFixed(0)}%)`}
-                  labelLine={false}
-                >
-                  {safeProjectChartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(value, name) => [formatINR(value), 'Revenue']}
-                  labelFormatter={(label) => `Project: ${label}`}
-                  contentStyle={{
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-            <Box sx={{ mt: 2 }}>
-              {safeProjectChartData.length === 0 ? (
+            {safeProjectChartData.length === 0 ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
                 <Typography variant="body2" color="text.secondary">
                   No project data available
                 </Typography>
-              ) : (
-                safeProjectChartData.slice(0, 8).map((entry, index) => (
-                  <Box key={entry.name} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Box sx={{
-                      width: 12,
-                      height: 12,
-                      borderRadius: '50%',
-                      bgcolor: COLORS[index % COLORS.length],
-                      mr: 1
-                    }} />
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      {entry.name}: {formatINR(entry.value)}
-                    </Typography>
-                  </Box>
-                ))
-              )}
-            </Box>
+              </Box>
+            ) : (
+              <ResponsiveContainer width="100%" height={Math.max(350, safeProjectChartData.length * 60)}>
+                <BarChart 
+                  data={safeProjectChartData} 
+                  layout="horizontal"
+                  margin={{ top: 20, right: 30, left: 100, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis 
+                    type="number" 
+                    stroke="#6b7280" 
+                    tickFormatter={(value) => {
+                      if (value >= 10000000) {
+                        return `₹${(value / 10000000).toFixed(1)}Cr`;
+                      } else if (value >= 100000) {
+                        return `₹${(value / 100000).toFixed(1)}L`;
+                      } else {
+                        return `₹${formatINRNumber(value)}`;
+                      }
+                    }} 
+                  />
+                  <YAxis 
+                    type="category" 
+                    dataKey="name" 
+                    stroke="#6b7280"
+                    width={90}
+                    tick={{ fontSize: 12 }}
+                  />
+                  <Tooltip
+                    formatter={(value, name) => [formatINR(value), 'Revenue']}
+                    labelFormatter={(label) => `Project: ${label}`}
+                    contentStyle={{
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                  <Bar 
+                    dataKey="value" 
+                    radius={[0, 4, 4, 0]}
+                  >
+                    {safeProjectChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+            
+            {/* Project Summary Table */}
+            {safeProjectChartData.length > 0 && (
+              <Box sx={{ mt: 3 }}>
+                <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, color: 'text.primary' }}>
+                  Project Summary
+                </Typography>
+                <Box sx={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '2fr 1fr 1fr', 
+                  gap: 1,
+                  p: 2,
+                  bgcolor: 'grey.50',
+                  borderRadius: 2,
+                  border: '1px solid',
+                  borderColor: 'grey.200'
+                }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    Project Name
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    Revenue
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    % of Total
+                  </Typography>
+                  
+                  {safeProjectChartData.map((entry, index) => {
+                    const percentage = ((entry.value / totalPayments) * 100).toFixed(1);
+                    return (
+                      <React.Fragment key={entry.name}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Box sx={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: '50%',
+                            bgcolor: COLORS[index % COLORS.length],
+                            mr: 1,
+                            flexShrink: 0
+                          }} />
+                          <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
+                            {entry.name}
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
+                          {formatINR(entry.value)}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
+                          {percentage}%
+                        </Typography>
+                      </React.Fragment>
+                    );
+                  })}
+                </Box>
+              </Box>
+            )}
           </Paper>
         </Grid>
 
