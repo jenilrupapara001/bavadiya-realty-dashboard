@@ -23,13 +23,39 @@ app.use(bodyParser.json());
 
 // ---- MongoDB Connection ----
 const mongoURI = process.env.MONGO_URI || 'mongodb+srv://jenilrupapara340_db_user:gPaASk6ZOa4Wa44L@sample-data.vyal4lo.mongodb.net/bavadiya-realty?appName=Sample-Data';
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+
+// Connection options optimized for serverless
+const mongoOptions = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+  socketTimeoutMS: 45000,
+};
+
+// Connect to MongoDB
+mongoose.connect(mongoURI, mongoOptions)
   .then(async () => {
     console.log('✅ MongoDB connected');
     // Initialize default admin if no users exist
     await initializeDefaultAdmin();
   })
-  .catch(err => console.error('❌ MongoDB connection error:', err));
+  .catch(err => {
+    console.error('❌ MongoDB connection error:', err.message);
+    console.error('❌ Stack:', err.stack);
+  });
+
+// Handle MongoDB connection events
+mongoose.connection.on('error', (err) => {
+  console.error('❌ MongoDB connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('⚠️  MongoDB disconnected');
+});
+
+mongoose.connection.on('reconnected', () => {
+  console.log('✅ MongoDB reconnected');
+});
 
 // ---- Schemas ----
 const dataSchema = new mongoose.Schema({
@@ -91,6 +117,46 @@ const Employee = mongoose.model('Employee', employeeSchema);
 const Project = mongoose.model('Project', projectSchema);
 const User = mongoose.model('User', userSchema);
 
+// ---- HEALTH CHECK ENDPOINT ----
+app.get('/api/health', async (req, res) => {
+  try {
+    const dbState = mongoose.connection.readyState;
+    const dbStateMap = {
+      0: 'disconnected',
+      1: 'connected',
+      2: 'connecting',
+      3: 'disconnecting'
+    };
+    
+    const health = {
+      status: dbState === 1 ? 'healthy' : 'unhealthy',
+      timestamp: new Date().toISOString(),
+      database: {
+        state: dbStateMap[dbState],
+        stateCode: dbState
+      },
+      environment: process.env.NODE_ENV || 'development'
+    };
+    
+    // Try to count users to verify DB is working
+    if (dbState === 1) {
+      try {
+        const userCount = await User.countDocuments();
+        health.database.userCount = userCount;
+      } catch (err) {
+        health.database.error = err.message;
+      }
+    }
+    
+    res.status(dbState === 1 ? 200 : 503).json(health);
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: error.message
+    });
+  }
+});
+
 // ---- INITIALIZATION: Create default admin if no users exist ----
 async function initializeDefaultAdmin() {
   try {
@@ -129,36 +195,67 @@ app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
   
   try {
-    // Check database users only
-    const dbUser = await User.findOne({ username, isActive: true });
-    if (dbUser && bcrypt.compareSync(password, dbUser.password)) {
-      // Update last login
-      dbUser.lastLogin = new Date();
-      await dbUser.save();
-      
-      // Create JWT token with expiration
-      const token = jwt.sign({
-        username: dbUser.username,
-        id: dbUser._id,
-        role: dbUser.role
-      }, SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '24h' });
-      
-      const userResponse = dbUser.toObject();
-      delete userResponse.password;
-      
-      console.log(`✅ User ${dbUser.username} logged in successfully`);
-      
-      res.json({
-        token,
-        user: userResponse
-      });
-      return;
+    // Validate input
+    if (!username || !password) {
+      console.error('❌ Login attempt with missing credentials');
+      return res.status(400).json({ error: 'Username and password are required' });
+    }
+
+    // Check MongoDB connection
+    if (mongoose.connection.readyState !== 1) {
+      console.error('❌ MongoDB not connected. State:', mongoose.connection.readyState);
+      return res.status(503).json({ error: 'Database connection unavailable' });
     }
     
-    res.status(401).json({ error: 'Invalid credentials' });
+    console.log(`🔍 Login attempt for user: ${username}`);
+    
+    // Check database users only
+    const dbUser = await User.findOne({ username, isActive: true });
+    
+    if (!dbUser) {
+      console.log(`❌ User not found: ${username}`);
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    
+    console.log(`✅ User found: ${username}, verifying password...`);
+    
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, dbUser.password);
+    
+    if (!isPasswordValid) {
+      console.log(`❌ Invalid password for user: ${username}`);
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    
+    console.log(`✅ Password verified for user: ${username}`);
+    
+    // Update last login
+    dbUser.lastLogin = new Date();
+    await dbUser.save();
+    
+    // Create JWT token with expiration
+    const token = jwt.sign({
+      username: dbUser.username,
+      id: dbUser._id,
+      role: dbUser.role
+    }, SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '24h' });
+    
+    const userResponse = dbUser.toObject();
+    delete userResponse.password;
+    
+    console.log(`✅ User ${dbUser.username} logged in successfully`);
+    
+    return res.json({
+      token,
+      user: userResponse
+    });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Login failed' });
+    console.error('❌ Login error:', error.message);
+    console.error('❌ Stack trace:', error.stack);
+    return res.status(500).json({ 
+      error: 'Login failed', 
+      message: process.env.NODE_ENV === 'development' ? error.message : undefined 
+    });
   }
 });
 
