@@ -563,6 +563,68 @@ setFormData({
     gap: 1
   };
 
+  const employeeCards = useMemo(() => [
+    {
+      key: 'totalEmployees',
+      title: 'Total Employees',
+      value: employeeStats.totalEmployees.toString(),
+      subtitle: 'Active team members',
+      accent: '#3b82f6',
+      icon: PersonIcon
+    },
+    {
+      key: 'managedPortfolio',
+      title: 'Portfolio Managed',
+      value: formatINR(employeeStats.managedPortfolio),
+      subtitle: 'Sum of assigned deals',
+      accent: '#10b981',
+      icon: AccountBalanceWallet
+    },
+    {
+      key: 'topPerformer',
+      title: 'Top Performer',
+      value: employeeStats.topPerformer !== '—' ? formatINR(employeeStats.topValue) : 'No data',
+      subtitle: employeeStats.topPerformer !== '—' ? 'Highest earning employee' : 'No performance data',
+      accent: '#f59e0b',
+      icon: Insights
+    }
+  ], [employeeStats, formatINR]);
+
+  const projectCards = useMemo(() => [
+    {
+      key: 'totalProjects',
+      title: 'Total Projects',
+      value: projectStats.totalProjects.toString(),
+      subtitle: `${projectStats.activeProjects} active`,
+      accent: '#8b5cf6',
+      icon: TableChart
+    },
+    {
+      key: 'totalDeals',
+      title: 'Total Deals',
+      value: projectStats.totalDeals.toString(),
+      subtitle: 'Across all projects',
+      accent: '#06b6d4',
+      icon: ReceiptLong
+    },
+    {
+      key: 'portfolioValue',
+      title: 'Portfolio Value',
+      value: formatINR(projectStats.portfolioValue),
+      subtitle: 'Across all recorded deals',
+      accent: '#10b981',
+      icon: MonetizationOn
+    },
+    {
+      key: 'activeProjects',
+      title: 'Active Projects',
+      value: projectStats.activeProjects.toString(),
+      subtitle: 'Currently in progress',
+      accent: '#f59e0b',
+      icon: CheckCircle
+    }
+  ], [projectStats, formatINR]);
+
   const topEmployees = useMemo(() => {
     const sorted = [...chartData].sort((a, b) => b.value - a.value);
     return sorted.slice(0, 4);
@@ -659,43 +721,43 @@ const menuItems = [
               </Typography>
             </Box>
 
-            <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: 4 }}>
-              <Grid item xs={12} sm={4}>
-                <Paper sx={{ p: 3, borderRadius: 4 }}>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                    Total Employees
-                  </Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                    {employeeStats.totalEmployees}
-                  </Typography>
-                </Paper>
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <Paper sx={{ p: 3, borderRadius: 4 }}>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                    Portfolio Managed
-                  </Typography>
-                  <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                    {formatINR(employeeStats.managedPortfolio)}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Sum of assigned deals
-                  </Typography>
-                </Paper>
-              </Grid>
-              <Grid item xs={12} sm={4}>
-                <Paper sx={{ p: 3, borderRadius: 4 }}>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                    Top Performer
-                  </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                    {employeeStats.topPerformer}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {employeeStats.topPerformer !== '—' ? formatINR(employeeStats.topValue) : 'No data'}
-                  </Typography>
-                </Paper>
-              </Grid>
+            <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
+              {employeeCards.map((card) => {
+                const Icon = card.icon;
+                return (
+                  <Grid item xs={12} sm={6} md={4} key={card.key}>
+                    <Paper sx={cardBaseStyles}>
+                      <Avatar
+                        sx={{
+                          width: 44,
+                          height: 44,
+                          bgcolor: `${card.accent}15`,
+                          color: card.accent
+                        }}
+                      >
+                        {Icon && <Icon fontSize="small" />}
+                      </Avatar>
+                      <Typography sx={{ fontWeight: 600, color: 'text.primary', fontSize: { xs: 14, sm: 15 } }}>
+                        {card.title}
+                      </Typography>
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          fontWeight: 700,
+                          color: 'text.primary',
+                          fontSize: { xs: '1.3rem', sm: '1.6rem', md: '1.8rem' },
+                          lineHeight: 1.2
+                        }}
+                      >
+                        {card.value}
+                      </Typography>
+                      <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: 'text.secondary' }}>
+                        {card.subtitle}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                );
+              })}
             </Grid>
 
             <Paper sx={{ borderRadius: 4, p: { xs: 2, md: 3 } }}>
@@ -788,43 +850,43 @@ const menuItems = [
               </Typography>
             </Box>
 
-            <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: 4 }}>
-              <Grid item xs={12} sm={3}>
-                <Paper sx={{ p: 3, borderRadius: 4 }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-                    Projects
-                  </Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                    {projectStats.totalProjects}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {projectStats.activeProjects} active
-                  </Typography>
-                </Paper>
-              </Grid>
-              <Grid item xs={12} sm={3}>
-                <Paper sx={{ p: 3, borderRadius: 4 }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-                    Total Deals
-                  </Typography>
-                  <Typography variant="h4" sx={{ fontWeight: 700 }}>
-                    {projectStats.totalDeals}
-                  </Typography>
-                </Paper>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Paper sx={{ p: 3, borderRadius: 4 }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-                    Portfolio Value
-                  </Typography>
-                  <Typography variant="h5" sx={{ fontWeight: 700 }}>
-                    {formatINR(projectStats.portfolioValue)}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Across all recorded deals
-                  </Typography>
-                </Paper>
-              </Grid>
+            <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
+              {projectCards.map((card) => {
+                const Icon = card.icon;
+                return (
+                  <Grid item xs={12} sm={6} md={3} key={card.key}>
+                    <Paper sx={cardBaseStyles}>
+                      <Avatar
+                        sx={{
+                          width: 44,
+                          height: 44,
+                          bgcolor: `${card.accent}15`,
+                          color: card.accent
+                        }}
+                      >
+                        {Icon && <Icon fontSize="small" />}
+                      </Avatar>
+                      <Typography sx={{ fontWeight: 600, color: 'text.primary', fontSize: { xs: 14, sm: 15 } }}>
+                        {card.title}
+                      </Typography>
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          fontWeight: 700,
+                          color: 'text.primary',
+                          fontSize: { xs: '1.3rem', sm: '1.6rem', md: '1.8rem' },
+                          lineHeight: 1.2
+                        }}
+                      >
+                        {card.value}
+                      </Typography>
+                      <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: 'text.secondary' }}>
+                        {card.subtitle}
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                );
+              })}
             </Grid>
 
             <Paper sx={{ borderRadius: 4, p: { xs: 2, md: 3 } }}>
