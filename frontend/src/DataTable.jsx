@@ -242,7 +242,15 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
   }
 
   return (
-    <Container maxWidth={false} sx={{ mt: { xs: 2, sm: 3, md: 4 }, mb: 4, px: { xs: 2, sm: 3 } }}>
+    <Container
+      maxWidth={false}
+      disableGutters
+      sx={{
+        mt: { xs: 2, sm: 3, md: 4 },
+        mb: 4,
+        px: { xs: 2, sm: 3, md: 3 }
+      }}
+    >
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main', mb: { xs: 2, sm: 3, md: 4 }, fontSize: { xs: '1.5rem', sm: '2rem' } }}>
         Payment Records
       </Typography>

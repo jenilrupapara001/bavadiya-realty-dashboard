@@ -299,8 +299,18 @@ const Analytics = () => {
     const entry = payload[0].payload;
     const percentage = totalForMetric ? ((entry.value / totalForMetric) * 100).toFixed(1) : 0;
     return (
-      <Paper elevation={0} sx={{ p: 1.5, borderRadius: 2, border: '1px solid #e5e7eb' }}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+      <Box
+        sx={{
+          p: 1.5,
+          borderRadius: 2,
+          border: '1px solid',
+          borderColor: 'grey.200',
+          boxShadow: '0px 8px 20px rgba(15, 23, 42, 0.12)',
+          bgcolor: 'background.paper',
+          minWidth: 200
+        }}
+      >
+        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5, color: 'text.primary' }}>
           {entry.name}
         </Typography>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>{metricInfo.label}: {formatINR(entry.value)}</Typography>
@@ -320,10 +330,10 @@ const Analytics = () => {
             Received: {formatINR(entry.receivedAmount)}
           </Typography>
         )}
-        <Typography variant="body2" sx={{ mt: 0.5, fontWeight: 600 }}>
+        <Typography variant="body2" sx={{ mt: 0.5, fontWeight: 600, color: 'text.primary' }}>
           {percentage}% of total
         </Typography>
-      </Paper>
+      </Box>
     );
   };
 
@@ -366,7 +376,11 @@ const Analytics = () => {
   // ---- UI ----
   if (loading) {
     return (
-      <Container maxWidth="xl" sx={{ mt: 4 }}>
+      <Container
+        maxWidth="xl"
+        disableGutters
+        sx={{ px: { xs: 2, sm: 3, md: 3 }, py: { xs: 2, sm: 3, md: 4 } }}
+      >
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
           <Typography variant="h6">Loading analytics...</Typography>
         </Box>
@@ -376,7 +390,11 @@ const Analytics = () => {
 
   if (error) {
     return (
-      <Container maxWidth="xl" sx={{ mt: 4 }}>
+      <Container
+        maxWidth="xl"
+        disableGutters
+        sx={{ px: { xs: 2, sm: 3, md: 3 }, py: { xs: 2, sm: 3, md: 4 } }}
+      >
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
           <Alert severity="error">
             {error}
@@ -387,7 +405,11 @@ const Analytics = () => {
   }
 
   return (
-    <Container maxWidth="xl">
+    <Container
+      maxWidth="xl"
+      disableGutters
+      sx={{ px: { xs: 2, sm: 3, md: 3 }, py: { xs: 2, sm: 3, md: 4 } }}
+    >
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main', mb: 4 }}>
         Reports & Analytics
       </Typography>
@@ -661,7 +683,14 @@ const Analytics = () => {
                       ))}
                       <Label content={renderCenterLabel} />
                     </Pie>
-                    <Tooltip content={renderProjectTooltip} />
+                    <Tooltip
+                      content={renderProjectTooltip}
+                      wrapperStyle={{
+                        outline: 'none',
+                        border: 'none',
+                        filter: 'drop-shadow(0px 8px 24px rgba(15,23,42,0.12))'
+                      }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
                 {activeSlice && (

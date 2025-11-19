@@ -268,7 +268,11 @@ const UserSettings = () => {
   );
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container
+      maxWidth="lg"
+      disableGutters
+      sx={{ mt: 4, mb: 4, px: { xs: 2, sm: 3, md: 3 } }}
+    >
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main', mb: 4 }}>
         User Settings & Management
       </Typography>

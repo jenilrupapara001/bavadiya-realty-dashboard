@@ -1322,9 +1322,17 @@ case 'user-settings':
         overflow: 'hidden'
       }}>
         <Toolbar />
-        <Container maxWidth={false} sx={{ p: { xs: 2, sm: 3, md: 4 }, pb: 8, maxWidth: '100%' }}>
+        <Box
+          sx={{
+            width: '100%',
+            maxWidth: '100%',
+            pt: { xs: 2, sm: 3, md: 4 },
+            pb: 8,
+            px: { xs: 2, sm: 3, md: 3 }
+          }}
+        >
           {renderView()}
-        </Container>
+        </Box>
 
         {/* Input Form Modal */}
         <Dialog

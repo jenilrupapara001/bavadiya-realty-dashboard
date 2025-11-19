@@ -44,7 +44,12 @@ const Login = () => {
   };
 
   return (
-    <Container component="main" maxWidth="sm">
+    <Container
+      component="main"
+      maxWidth="sm"
+      disableGutters
+      sx={{ px: { xs: 2, sm: 3 } }}
+    >
       <Box
         sx={{
           marginTop: 8,
