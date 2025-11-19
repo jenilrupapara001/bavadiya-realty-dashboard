@@ -39,6 +39,7 @@ import {
   Alert,
   Snackbar,
   Grow,
+  Avatar,
 } from '@mui/material';
 import {
   Logout,
