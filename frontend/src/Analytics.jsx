@@ -406,7 +406,7 @@ const Analytics = () => {
   }
 
   return (
-    <Box sx={{ width: '100%', maxWidth: '100%' }}>
+    <Box sx={{ width: '100%', maxWidth: '100%', pt: { xs: 2, sm: 3, md: 4 }, pb: 8 }}>
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main', mb: 4, px: { xs: 2, sm: 3 } }}>
         Reports & Analytics
       </Typography>

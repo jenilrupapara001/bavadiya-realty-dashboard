@@ -664,14 +664,14 @@ case 'user-settings':
       case 'dashboard':
       default:
         return (
-          <>
+          <Box sx={{ pt: { xs: 2, sm: 3, md: 4 }, pb: 8 }}>
             {loading && (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
                 <CircularProgress size={60} />
               </Box>
             )}
             {error && (
-              <Alert severity="error" sx={{ mb: 3 }}>
+              <Alert severity="error" sx={{ mb: 3, mx: { xs: 2, sm: 3 } }}>
                 {error}
               </Alert>
             )}
@@ -1296,7 +1296,7 @@ case 'user-settings':
                 </Box>
               </>
             )}
-          </>
+          </Box>
         );
     }
   };
@@ -1411,16 +1411,7 @@ case 'user-settings':
         overflow: 'auto'
       }}>
         <Toolbar />
-        <Box
-          sx={{
-            width: '100%',
-            maxWidth: '100%',
-            pt: { xs: 2, sm: 3, md: 4 },
-            pb: 8
-          }}
-        >
-          {renderView()}
-        </Box>
+        {renderView()}
 
         {/* Input Form Modal */}
         <Dialog
