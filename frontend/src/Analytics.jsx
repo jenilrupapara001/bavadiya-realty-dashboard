@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import {
   Container,
   Typography,
@@ -15,12 +15,14 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, Cell
+  ResponsiveContainer, Cell, PieChart, Pie, Label
 } from 'recharts';
 
 const Analytics = () => {
@@ -30,6 +32,11 @@ const Analytics = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedProjectMetric, setSelectedProjectMetric] = useState('totalBrokerage');
+  const [activeProjectIndex, setActiveProjectIndex] = useState(null);
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMediumScreen = useMediaQuery(theme.breakpoints.down('md'));
 
   // ✅ backend base URL (production)
   const API_BASE_URL = 'https://bavadiya-realty-backend.vercel.app';
@@ -248,6 +255,78 @@ const Analytics = () => {
   };
 
   const totalForMetric = getTotalForMetric();
+
+  const chartHeight = useMemo(() => {
+    if (isSmallScreen) return 320;
+    if (isMediumScreen) return 360;
+    return 420;
+  }, [isSmallScreen, isMediumScreen]);
+
+  const activeSlice = activeProjectIndex !== null ? safeProjectChartData[activeProjectIndex] : null;
+
+  const renderProjectTooltip = ({ active, payload }) => {
+    if (!active || !payload?.length) return null;
+    const entry = payload[0].payload;
+    const percentage = totalForMetric ? ((entry.value / totalForMetric) * 100).toFixed(1) : 0;
+    return (
+      <Paper elevation={0} sx={{ p: 1.5, borderRadius: 2, border: '1px solid #e5e7eb' }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 0.5 }}>
+          {entry.name}
+        </Typography>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>{metricInfo.label}: {formatINR(entry.value)}</Typography>
+        <Typography variant="body2" sx={{ color: 'text.secondary' }}>Deals: {entry.deals}</Typography>
+        {entry.basePrice !== undefined && (
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            Property Value: {formatINR(entry.basePrice)}
+          </Typography>
+        )}
+        {entry.totalBrokerage !== undefined && (
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            Total Brokerage: {formatINR(entry.totalBrokerage)}
+          </Typography>
+        )}
+        {entry.receivedAmount !== undefined && (
+          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+            Received: {formatINR(entry.receivedAmount)}
+          </Typography>
+        )}
+        <Typography variant="body2" sx={{ mt: 0.5, fontWeight: 600 }}>
+          {percentage}% of total
+        </Typography>
+      </Paper>
+    );
+  };
+
+  const renderCenterLabel = ({ viewBox }) => {
+    if (!viewBox || !viewBox.cx || !viewBox.cy) return null;
+    const { cx, cy } = viewBox;
+    const entry = activeSlice;
+    const value = entry ? entry.value : totalForMetric;
+    const percentage = entry && totalForMetric ? ((entry.value / totalForMetric) * 100).toFixed(1) : 100;
+    const title = entry ? entry.name : 'Total';
+
+    return (
+      <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle">
+        <tspan x={cx} y={cy - 10} fill="#6b7280" fontSize={12}>
+          {entry ? metricInfo.label : 'Overall'}
+        </tspan>
+        <tspan
+          x={cx}
+          y={cy + 10}
+          fill="#0f172a"
+          fontSize={isSmallScreen ? 16 : 18}
+          fontWeight="600"
+        >
+          {formatINR(value)}
+        </tspan>
+        {entry && (
+          <tspan x={cx} y={cy + 30} fill="#94a3b8" fontSize={12}>
+            {title} • {percentage}%
+          </tspan>
+        )}
+      </text>
+    );
+  };
 
   // Ensure we have valid data arrays to prevent crashes
   const safeProjectChartData = Array.isArray(currentProjectData) ? currentProjectData : [];
@@ -524,63 +603,104 @@ const Analytics = () => {
                 </Typography>
               </Box>
             ) : (
-              <ResponsiveContainer width="100%" height={Math.max(350, safeProjectChartData.length * 60)}>
-                <BarChart 
-                  data={safeProjectChartData} 
-                  layout="horizontal"
-                  margin={{ top: 20, right: 30, left: 120, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis 
-                    type="number" 
-                    stroke="#6b7280" 
-                    tickFormatter={(value) => {
-                      if (value >= 10000000) {
-                        return `₹${(value / 10000000).toFixed(1)}Cr`;
-                      } else if (value >= 100000) {
-                        return `₹${(value / 100000).toFixed(1)}L`;
-                      } else {
-                        return `₹${formatINRNumber(value)}`;
-                      }
-                    }} 
-                  />
-                  <YAxis 
-                    type="category" 
-                    dataKey="name" 
-                    stroke="#6b7280"
-                    width={110}
-                    tick={{ fontSize: 11 }}
-                  />
-                  <Tooltip
-                    formatter={(value, name, props) => {
-                      const entry = props.payload;
-                      return [
-                        formatINR(value), 
-                        metricInfo.label,
-                        `Deals: ${entry.deals}`,
-                        `Base Price: ${formatINR(entry.basePrice)}`,
-                        `Total Brokerage: ${formatINR(entry.totalBrokerage)}`,
-                        `Received: ${formatINR(entry.receivedAmount)}`
-                      ];
+              <>
+                <ResponsiveContainer width="100%" height={chartHeight}>
+                  <PieChart>
+                    <Pie
+                      data={safeProjectChartData}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius="55%"
+                      outerRadius="80%"
+                      paddingAngle={safeProjectChartData.length > 6 ? 1.5 : 3}
+                      cx="50%"
+                      cy="50%"
+                      onMouseEnter={(_, index) => setActiveProjectIndex(index)}
+                      onMouseLeave={() => setActiveProjectIndex(null)}
+                      cursor="pointer"
+                      activeIndex={activeProjectIndex}
+                    >
+                      {safeProjectChartData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[index % COLORS.length]}
+                          stroke="#ffffff"
+                          strokeWidth={activeProjectIndex === index ? 3 : 1}
+                          opacity={activeProjectIndex === null || activeProjectIndex === index ? 1 : 0.45}
+                        />
+                      ))}
+                      <Label content={renderCenterLabel} />
+                    </Pie>
+                    <Tooltip content={renderProjectTooltip} />
+                  </PieChart>
+                </ResponsiveContainer>
+                {activeSlice && (
+                  <Box
+                    sx={{
+                      display: { xs: 'flex', md: 'none' },
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      mt: 2,
+                      textAlign: 'center'
                     }}
-                    labelFormatter={(label) => `Project: ${label}`}
-                    contentStyle={{
-                      backgroundColor: '#ffffff',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                    }}
-                  />
-                  <Bar 
-                    dataKey="value" 
-                    radius={[0, 4, 4, 0]}
                   >
-                    {safeProjectChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                      {activeSlice.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {metricInfo.label}: {formatINR(activeSlice.value)} ({((activeSlice.value / totalForMetric) * 100).toFixed(1)}%)
+                    </Typography>
+                  </Box>
+                )}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 1.5,
+                    mt: 3,
+                    justifyContent: { xs: 'center', md: 'flex-start' }
+                  }}
+                >
+                  {safeProjectChartData.map((entry, index) => {
+                    const percentage = totalForMetric ? ((entry.value / totalForMetric) * 100).toFixed(1) : 0;
+                    return (
+                      <Box
+                        key={entry.name}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          px: 1.5,
+                          py: 0.75,
+                          borderRadius: 2,
+                          border: '1px solid',
+                          borderColor: activeProjectIndex === index ? 'primary.main' : 'grey.200',
+                          backgroundColor: activeProjectIndex === index ? 'primary.light' : 'background.paper',
+                          minWidth: { xs: '45%', sm: 'auto' }
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: '50%',
+                            backgroundColor: COLORS[index % COLORS.length],
+                            flexShrink: 0
+                          }}
+                        />
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+                            {entry.name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {percentage}% • {formatINR(entry.value)}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    );
+                  })}
+                </Box>
+              </>
             )}
             
             {/* Enhanced Project Summary Table */}
@@ -589,68 +709,83 @@ const Analytics = () => {
                 <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, color: 'text.primary' }}>
                   Project Summary ({metricInfo.label})
                 </Typography>
-                <Box sx={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', 
-                  gap: 1,
-                  p: 2,
-                  bgcolor: 'grey.50',
-                  borderRadius: 2,
-                  border: '1px solid',
-                  borderColor: 'grey.200'
-                }}>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                    Project Name
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                    Deals
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                    Property Value
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                    {metricInfo.label}
-                  </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                    % of Total
-                  </Typography>
-                  
-                  {safeProjectChartData.map((entry, index) => {
-                    const percentage = ((entry.value / totalForMetric) * 100).toFixed(1);
-                    return (
-                      <React.Fragment key={entry.name}>
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <Box sx={{
-                            width: 10,
-                            height: 10,
-                            borderRadius: '50%',
-                            bgcolor: COLORS[index % COLORS.length],
-                            mr: 1,
-                            flexShrink: 0
-                          }} />
+                <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                  <Box sx={{ minWidth: 640 }}>
+                    <Box sx={{ 
+                      display: 'grid', 
+                      gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', 
+                      gap: 1,
+                      p: 2,
+                      bgcolor: 'grey.50',
+                      borderRadius: 2,
+                      border: '1px solid',
+                      borderColor: 'grey.200'
+                    }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                        Project Name
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                        Deals
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                        Property Value
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                        {metricInfo.label}
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                        % of Total
+                      </Typography>
+                    </Box>
+                    {safeProjectChartData.map((entry, index) => {
+                      const percentage = ((entry.value / totalForMetric) * 100).toFixed(1);
+                      return (
+                        <Box
+                          key={entry.name}
+                          sx={{
+                            display: 'grid',
+                            gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr',
+                            gap: 1,
+                            p: 1.5,
+                            borderBottom: '1px solid',
+                            borderColor: 'grey.100',
+                            '&:last-of-type': { borderBottom: 'none' },
+                            alignItems: 'center'
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Box sx={{
+                              width: 10,
+                              height: 10,
+                              borderRadius: '50%',
+                              bgcolor: COLORS[index % COLORS.length],
+                              mr: 1,
+                              flexShrink: 0
+                            }} />
+                            <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
+                              {entry.name}
+                            </Typography>
+                          </Box>
                           <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
-                            {entry.name}
+                            {entry.deals}
+                          </Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
+                            {formatINR(entry.basePrice)}
+                          </Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
+                            {formatINR(entry.value)}
+                          </Typography>
+                          <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
+                            {percentage}%
                           </Typography>
                         </Box>
-                        <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
-                          {entry.deals}
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
-                          {formatINR(entry.basePrice)}
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
-                          {formatINR(entry.value)}
-                        </Typography>
-                        <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
-                          {percentage}%
-                        </Typography>
-                      </React.Fragment>
-                    );
-                  })}
+                      );
+                    })}
+                  </Box>
                 </Box>
                 
                 {/* Summary Statistics */}
-                <Box sx={{ mt: 2, display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                <Box sx={{ mt: 2, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                   <Box sx={{ p: 2, bgcolor: 'primary.light', color: 'primary.contrastText', borderRadius: 2 }}>
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
                       Total Projects: {safeProjectChartData.length}

@@ -279,6 +279,9 @@ const UserSettings = () => {
             value={activeTab} 
             onChange={handleTabChange} 
             aria-label="user settings tabs"
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
             sx={{ 
               '& .MuiTab-root': {
                 textTransform: 'none',
@@ -493,7 +496,14 @@ const UserSettings = () => {
 
         {/* User Management Tab */}
         <TabPanel value={activeTab} index={2}>
-          <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ 
+            mb: 3, 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: { xs: 'stretch', sm: 'center' },
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: { xs: 2, sm: 0 }
+          }}>
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
               User Management
             </Typography>
@@ -508,62 +518,64 @@ const UserSettings = () => {
           </Box>
 
           <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
-            <Table>
-              <TableHead>
-                <TableRow sx={{ bgcolor: 'primary.main', '& th': { color: 'white', fontWeight: 600 } }}>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Username</TableCell>
-                  <TableCell>Email</TableCell>
-                  <TableCell>Role</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Last Login</TableCell>
-                  <TableCell>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paginatedUsers.map((user) => (
-                  <TableRow key={user._id}>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Avatar sx={{ width: 32, height: 32, mr: 2, bgcolor: 'primary.main' }}>
-                          {user.fullName.charAt(0).toUpperCase()}
-                        </Avatar>
-                        {user.fullName}
-                      </Box>
-                    </TableCell>
-                    <TableCell>{user.username}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={user.role} 
-                        color={user.role === 'Admin' ? 'primary' : 'default'}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={user.isActive ? 'Active' : 'Inactive'}
-                        color={user.isActive ? 'success' : 'error'}
-                        size="small"
-                        icon={user.isActive ? <CheckCircle /> : <CancelIcon />}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
-                    </TableCell>
-                    <TableCell>
-                      <IconButton
-                        onClick={() => handleDeactivateUser(user._id)}
-                        sx={{ color: 'error.main' }}
-                        disabled={!user.isActive}
-                      >
-                        <Delete />
-                      </IconButton>
-                    </TableCell>
+            <Box sx={{ width: '100%', overflowX: 'auto' }}>
+              <Table sx={{ minWidth: 760 }}>
+                <TableHead>
+                  <TableRow sx={{ bgcolor: 'primary.main', '& th': { color: 'white', fontWeight: 600 } }}>
+                    <TableCell>Name</TableCell>
+                    <TableCell>Username</TableCell>
+                    <TableCell>Email</TableCell>
+                    <TableCell>Role</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Last Login</TableCell>
+                    <TableCell>Actions</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {paginatedUsers.map((user) => (
+                    <TableRow key={user._id}>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Avatar sx={{ width: 32, height: 32, mr: 2, bgcolor: 'primary.main' }}>
+                            {user.fullName.charAt(0).toUpperCase()}
+                          </Avatar>
+                          {user.fullName}
+                        </Box>
+                      </TableCell>
+                      <TableCell>{user.username}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <Chip 
+                          label={user.role} 
+                          color={user.role === 'Admin' ? 'primary' : 'default'}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip 
+                          label={user.isActive ? 'Active' : 'Inactive'}
+                          color={user.isActive ? 'success' : 'error'}
+                          size="small"
+                          icon={user.isActive ? <CheckCircle /> : <CancelIcon />}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
+                      </TableCell>
+                      <TableCell>
+                        <IconButton
+                          onClick={() => handleDeactivateUser(user._id)}
+                          sx={{ color: 'error.main' }}
+                          disabled={!user.isActive}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Box>
             <TablePagination
               component="div"
               count={users.length}

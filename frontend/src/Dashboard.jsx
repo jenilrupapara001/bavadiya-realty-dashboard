@@ -468,30 +468,32 @@ const menuItems = [
               </Button>
             </Box>
             <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-              <Table>
-                <TableHead>
-                  <TableRow sx={{ bgcolor: 'primary.main', '& th': { color: 'white', fontWeight: 600 } }}>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Code</TableCell>
-                    <TableCell>Number</TableCell>
-                    <TableCell>Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {employees.map((emp, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{emp.name}</TableCell>
-                      <TableCell>{emp.code}</TableCell>
-                      <TableCell>{emp.number}</TableCell>
-                      <TableCell>
-                        <IconButton onClick={() => { setEmployeeFormData(emp); setEditingEmployeeIndex(emp._id); setEmployeeOpen(true); }}>
-                          <Edit />
-                        </IconButton>
-                      </TableCell>
+              <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                <Table sx={{ minWidth: 600 }}>
+                  <TableHead>
+                    <TableRow sx={{ bgcolor: 'primary.main', '& th': { color: 'white', fontWeight: 600 } }}>
+                      <TableCell>Name</TableCell>
+                      <TableCell>Code</TableCell>
+                      <TableCell>Number</TableCell>
+                      <TableCell>Actions</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHead>
+                  <TableBody>
+                    {employees.map((emp, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{emp.name}</TableCell>
+                        <TableCell>{emp.code}</TableCell>
+                        <TableCell>{emp.number}</TableCell>
+                        <TableCell>
+                          <IconButton onClick={() => { setEmployeeFormData(emp); setEditingEmployeeIndex(emp._id); setEmployeeOpen(true); }}>
+                            <Edit />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </Box>
             </TableContainer>
           </Container>
         );
@@ -510,64 +512,66 @@ const menuItems = [
             {/* Projects Table */}
             <Paper sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
               <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow sx={{ bgcolor: 'primary.main', '& th': { color: 'white', fontWeight: 600 } }}>
-                      <TableCell>Project Name</TableCell>
-                      <TableCell>Description</TableCell>
-                      <TableCell>Location</TableCell>
-                      <TableCell>Status</TableCell>
-                      <TableCell>Total Deals</TableCell>
-                      <TableCell>Total Value</TableCell>
-                      <TableCell>Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {projects.map((project) => {
-                      // Calculate project statistics from data
-                      const projectStats = data.filter(item => item.projectName === project.name).reduce((acc, item) => {
-                        acc.deals += 1;
-                        acc.value += item.basePrice || 0;
-                        return acc;
-                      }, { deals: 0, value: 0 });
+                <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                  <Table sx={{ minWidth: 800 }}>
+                    <TableHead>
+                      <TableRow sx={{ bgcolor: 'primary.main', '& th': { color: 'white', fontWeight: 600 } }}>
+                        <TableCell>Project Name</TableCell>
+                        <TableCell>Description</TableCell>
+                        <TableCell>Location</TableCell>
+                        <TableCell>Status</TableCell>
+                        <TableCell>Total Deals</TableCell>
+                        <TableCell>Total Value</TableCell>
+                        <TableCell>Actions</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {projects.map((project) => {
+                        // Calculate project statistics from data
+                        const projectStats = data.filter(item => item.projectName === project.name).reduce((acc, item) => {
+                          acc.deals += 1;
+                          acc.value += item.basePrice || 0;
+                          return acc;
+                        }, { deals: 0, value: 0 });
 
-                      return (
-                        <TableRow key={project._id}>
-                          <TableCell sx={{ fontWeight: 500 }}>{project.name}</TableCell>
-                          <TableCell>{project.description || '-'}</TableCell>
-                          <TableCell>{project.location || '-'}</TableCell>
-                          <TableCell>
-                            <Chip
-                              label={project.status}
-                              color={project.status === 'Active' ? 'success' : 'warning'}
-                              size="small"
-                              variant="outlined"
-                            />
-                          </TableCell>
-                          <TableCell>{projectStats.deals}</TableCell>
-                          <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
-                            ₹{projectStats.value.toLocaleString()}
-                          </TableCell>
-                          <TableCell>
-                            <IconButton onClick={() => {
-                              setProjectFormData(project);
-                              setEditingProjectIndex(project._id);
-                              setProjectOpen(true);
-                            }}>
-                              <Edit />
-                            </IconButton>
-                            <IconButton
-                              onClick={() => handleProjectDelete(project._id)}
-                              sx={{ color: 'error.main', '&:hover': { bgcolor: 'error.light', color: 'white' } }}
-                            >
-                              <Delete />
-                            </IconButton>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
+                        return (
+                          <TableRow key={project._id}>
+                            <TableCell sx={{ fontWeight: 500 }}>{project.name}</TableCell>
+                            <TableCell>{project.description || '-'}</TableCell>
+                            <TableCell>{project.location || '-'}</TableCell>
+                            <TableCell>
+                              <Chip
+                                label={project.status}
+                                color={project.status === 'Active' ? 'success' : 'warning'}
+                                size="small"
+                                variant="outlined"
+                              />
+                            </TableCell>
+                            <TableCell>{projectStats.deals}</TableCell>
+                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
+                              ₹{projectStats.value.toLocaleString()}
+                            </TableCell>
+                            <TableCell>
+                              <IconButton onClick={() => {
+                                setProjectFormData(project);
+                                setEditingProjectIndex(project._id);
+                                setProjectOpen(true);
+                              }}>
+                                <Edit />
+                              </IconButton>
+                              <IconButton
+                                onClick={() => handleProjectDelete(project._id)}
+                                sx={{ color: 'error.main', '&:hover': { bgcolor: 'error.light', color: 'white' } }}
+                              >
+                                <Delete />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </Box>
               </TableContainer>
             </Paper>
           </Container>
