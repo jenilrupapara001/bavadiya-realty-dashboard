@@ -286,13 +286,27 @@ const Analytics = () => {
 
   const totalForMetric = getTotalForMetric();
 
+  const safeProjectChartData = useMemo(
+    () => (Array.isArray(currentProjectData) ? currentProjectData : []),
+    [currentProjectData]
+  );
+  const safeEmployeeChartData = useMemo(
+    () => (Array.isArray(employeeChartData) ? employeeChartData : []),
+    [employeeChartData]
+  );
+  const safeReceivedByData = useMemo(
+    () => (Array.isArray(receivedByData) ? receivedByData : []),
+    [receivedByData]
+  );
+
   const chartHeight = useMemo(() => {
     if (isSmallScreen) return 320;
     if (isMediumScreen) return 360;
     return 420;
   }, [isSmallScreen, isMediumScreen]);
 
-  const activeSlice = activeProjectIndex !== null ? safeProjectChartData[activeProjectIndex] : null;
+  const activeSlice =
+    activeProjectIndex !== null ? safeProjectChartData[activeProjectIndex] : null;
 
   const renderProjectTooltip = ({ active, payload }) => {
     if (!active || !payload?.length) return null;
@@ -367,11 +381,6 @@ const Analytics = () => {
       </text>
     );
   };
-
-  // Ensure we have valid data arrays to prevent crashes
-  const safeProjectChartData = Array.isArray(currentProjectData) ? currentProjectData : [];
-  const safeEmployeeChartData = Array.isArray(employeeChartData) ? employeeChartData : [];
-  const safeReceivedByData = Array.isArray(receivedByData) ? receivedByData : [];
 
   // ---- UI ----
   if (loading) {

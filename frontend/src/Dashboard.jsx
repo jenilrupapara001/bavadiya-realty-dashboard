@@ -1319,7 +1319,8 @@ case 'user-settings':
         p: 0,
         minHeight: 'calc(100vh - 64px)',
         marginLeft: isMobile ? 0 : '280px',
-        overflow: 'hidden'
+        backgroundColor: '#F2F2F7',
+        overflow: 'auto'
       }}>
         <Toolbar />
         <Box
@@ -1328,7 +1329,8 @@ case 'user-settings':
             maxWidth: '100%',
             pt: { xs: 2, sm: 3, md: 4 },
             pb: 8,
-            px: { xs: 2, sm: 3, md: 3 }
+            px: { xs: 2, sm: 3, md: 4 },
+            mx: 'auto'
           }}
         >
           {renderView()}
