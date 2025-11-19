@@ -679,7 +679,7 @@ case 'user-settings':
               <>
                 {/* Welcome Header */}
                 <Grow in={true} timeout={1000}>
-                  <Box sx={{ mb: { xs: 3, md: 4 } }}>
+                  <Box sx={{ mb: { xs: 3, md: 4 }, px: { xs: 2, sm: 3 } }}>
                     <Typography
                       variant="h4"
                       sx={{
@@ -702,7 +702,7 @@ case 'user-settings':
                 </Grow>
 
                 {/* Metric Cards */}
-                <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
+                <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4, px: { xs: 2, sm: 3 } }}>
                   <Grid item xs={12} sm={6} md={4} lg={3}>
                     <Card sx={{ borderRadius: 3, boxShadow: 3, height: '100%', minHeight: 150 }}>
                       <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
@@ -929,7 +929,7 @@ case 'user-settings':
                 </Grid>
 
                 {/* Analytics Overview */}
-                <Box sx={{ mb: 4 }}>
+                <Box sx={{ mb: 4, px: { xs: 2, sm: 3 } }}>
                   <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 3 }}>
                     Analytics Overview - Total Brokerage: {formatINR(totalBrokerage)}
                   </Typography>
@@ -1028,7 +1028,8 @@ case 'user-settings':
                   justifyContent: 'space-between',
                   alignItems: { xs: 'stretch', sm: 'center' },
                   gap: { xs: 2, sm: 0 },
-                  mb: 3
+                  mb: 3,
+                  px: { xs: 2, sm: 3 }
                 }}>
                   <Typography
                     variant="h5"
@@ -1056,7 +1057,7 @@ case 'user-settings':
                 </Box>
 
 {/* Filters */}
-                <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3, borderRadius: 3 }}>
+                <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3, borderRadius: 3, mx: { xs: 2, sm: 3 } }}>
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                     Filters
                   </Typography>
@@ -1152,6 +1153,7 @@ case 'user-settings':
                 </Paper>
 
 {/* Table */}
+                <Box sx={{ px: { xs: 2, sm: 3 } }}>
                 <TableContainer component={Paper} sx={{
                   borderRadius: 3,
                   boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
@@ -1291,6 +1293,7 @@ case 'user-settings':
                     </TableBody>
                   </Table>
                 </TableContainer>
+                </Box>
               </>
             )}
           </>
