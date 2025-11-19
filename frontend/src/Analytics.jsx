@@ -9,6 +9,12 @@ import {
   CardContent,
   Alert,
   Chip,
+  ToggleButton,
+  ToggleButtonGroup,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
@@ -23,6 +29,7 @@ const Analytics = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedProjectMetric, setSelectedProjectMetric] = useState('totalBrokerage');
 
   // ✅ backend base URL (production)
   const API_BASE_URL = 'https://bavadiya-realty-backend.vercel.app';
@@ -147,24 +154,103 @@ const Analytics = () => {
   }, {});
   const employeeChartData = Object.values(employeeData).sort((a, b) => b.revenue - a.revenue);
 
-  // Project distribution
+  // Project distribution with multiple metrics
   const projectData = data.reduce((acc, item) => {
     const project = item.projectName || 'Unknown';
-    if (!acc[project]) acc[project] = { name: project, value: 0, brokerage: 0 };
-    acc[project].value += item.basePrice || 0;
+    if (!acc[project]) {
+      acc[project] = { 
+        name: project, 
+        basePrice: 0, 
+        totalBrokerage: 0,
+        receivedAmount: 0,
+        deals: 0,
+        employee: item.employee || 'Unknown'
+      };
+    }
+    acc[project].basePrice += item.basePrice || 0;
+    acc[project].deals += 1;
     
-    // Calculate brokerage for this project
+    // Calculate total brokerage for this project
     const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
     const customerBrok = typeof item.customerBro === 'number' ? item.customerBro : convertPercentageToAmount(item.customerBro, item.basePrice);
-    acc[project].brokerage += ownerBrok + customerBrok;
+    acc[project].totalBrokerage += ownerBrok + customerBrok;
+    
+    // Calculate received amount
+    let receivedAmount = 0;
+    if (item.receiveDate) receivedAmount += ownerBrok;
+    if (item.customerReceiveDate) receivedAmount += customerBrok;
+    acc[project].receivedAmount += receivedAmount;
+    
     return acc;
   }, {});
-  const projectChartData = Object.values(projectData).slice(0, 8);
+  
+  // Create different chart data options
+  const projectChartDataByBasePrice = Object.values(projectData)
+    .map(item => ({ name: item.name, value: item.basePrice, totalBrokerage: item.totalBrokerage, deals: item.deals }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 10);
+    
+  const projectChartDataByBrokerage = Object.values(projectData)
+    .map(item => ({ name: item.name, value: item.totalBrokerage, basePrice: item.basePrice, deals: item.deals }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 10);
+    
+  const projectChartDataByReceived = Object.values(projectData)
+    .map(item => ({ name: item.name, value: item.receivedAmount, basePrice: item.basePrice, totalBrokerage: item.totalBrokerage, deals: item.deals }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 10);
 
   const COLORS = ['#1a365d', '#3b82f6', '#059669', '#d97706', '#7c3aed', '#dc2626', '#ea580c', '#0891b2'];
 
+  // Get current chart data based on selected metric
+  const getCurrentProjectData = () => {
+    switch (selectedProjectMetric) {
+      case 'basePrice':
+        return projectChartDataByBasePrice;
+      case 'totalBrokerage':
+        return projectChartDataByBrokerage;
+      case 'receivedAmount':
+        return projectChartDataByReceived;
+      default:
+        return projectChartDataByBrokerage;
+    }
+  };
+
+  // Get metric label and description
+  const getMetricInfo = () => {
+    switch (selectedProjectMetric) {
+      case 'basePrice':
+        return { label: 'Property Value', description: 'Total base price of properties in each project' };
+      case 'totalBrokerage':
+        return { label: 'Total Brokerage', description: 'Total brokerage amount earned from each project' };
+      case 'receivedAmount':
+        return { label: 'Received Amount', description: 'Total amount actually received from each project' };
+      default:
+        return { label: 'Total Brokerage', description: 'Total brokerage amount earned from each project' };
+    }
+  };
+
+  const currentProjectData = getCurrentProjectData();
+  const metricInfo = getMetricInfo();
+
+  // Calculate total for percentage calculations
+  const getTotalForMetric = () => {
+    switch (selectedProjectMetric) {
+      case 'basePrice':
+        return totalPayments;
+      case 'totalBrokerage':
+        return totalBrokerage;
+      case 'receivedAmount':
+        return paymentReceived;
+      default:
+        return totalBrokerage;
+    }
+  };
+
+  const totalForMetric = getTotalForMetric();
+
   // Ensure we have valid data arrays to prevent crashes
-  const safeProjectChartData = Array.isArray(projectChartData) ? projectChartData : [];
+  const safeProjectChartData = Array.isArray(currentProjectData) ? currentProjectData : [];
   const safeEmployeeChartData = Array.isArray(employeeChartData) ? employeeChartData : [];
   const safeReceivedByData = Array.isArray(receivedByData) ? receivedByData : [];
 
@@ -406,12 +492,31 @@ const Analytics = () => {
 
       {/* Charts */}
       <Grid container spacing={3}>
-        {/* Project Distribution - Horizontal Bar Chart */}
+        {/* Project Distribution - Enhanced Horizontal Bar Chart */}
         <Grid item xs={12} lg={12}>
           <Paper sx={{ p: 3, height: '100%', borderRadius: 3 }}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-              Revenue by Project
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Project Analytics
+              </Typography>
+              <FormControl size="small" sx={{ minWidth: 200 }}>
+                <InputLabel>View by</InputLabel>
+                <Select
+                  value={selectedProjectMetric}
+                  label="View by"
+                  onChange={(e) => setSelectedProjectMetric(e.target.value)}
+                >
+                  <MenuItem value="totalBrokerage">Total Brokerage</MenuItem>
+                  <MenuItem value="basePrice">Property Value</MenuItem>
+                  <MenuItem value="receivedAmount">Received Amount</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              {metricInfo.description}
             </Typography>
+
             {safeProjectChartData.length === 0 ? (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
                 <Typography variant="body2" color="text.secondary">
@@ -423,7 +528,7 @@ const Analytics = () => {
                 <BarChart 
                   data={safeProjectChartData} 
                   layout="horizontal"
-                  margin={{ top: 20, right: 30, left: 100, bottom: 5 }}
+                  margin={{ top: 20, right: 30, left: 120, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis 
@@ -443,11 +548,21 @@ const Analytics = () => {
                     type="category" 
                     dataKey="name" 
                     stroke="#6b7280"
-                    width={90}
-                    tick={{ fontSize: 12 }}
+                    width={110}
+                    tick={{ fontSize: 11 }}
                   />
                   <Tooltip
-                    formatter={(value, name) => [formatINR(value), 'Revenue']}
+                    formatter={(value, name, props) => {
+                      const entry = props.payload;
+                      return [
+                        formatINR(value), 
+                        metricInfo.label,
+                        `Deals: ${entry.deals}`,
+                        `Base Price: ${formatINR(entry.basePrice)}`,
+                        `Total Brokerage: ${formatINR(entry.totalBrokerage)}`,
+                        `Received: ${formatINR(entry.receivedAmount)}`
+                      ];
+                    }}
                     labelFormatter={(label) => `Project: ${label}`}
                     contentStyle={{
                       backgroundColor: '#ffffff',
@@ -468,15 +583,15 @@ const Analytics = () => {
               </ResponsiveContainer>
             )}
             
-            {/* Project Summary Table */}
+            {/* Enhanced Project Summary Table */}
             {safeProjectChartData.length > 0 && (
               <Box sx={{ mt: 3 }}>
                 <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, color: 'text.primary' }}>
-                  Project Summary
+                  Project Summary ({metricInfo.label})
                 </Typography>
                 <Box sx={{ 
                   display: 'grid', 
-                  gridTemplateColumns: '2fr 1fr 1fr', 
+                  gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', 
                   gap: 1,
                   p: 2,
                   bgcolor: 'grey.50',
@@ -488,14 +603,20 @@ const Analytics = () => {
                     Project Name
                   </Typography>
                   <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                    Revenue
+                    Deals
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    Property Value
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    {metricInfo.label}
                   </Typography>
                   <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
                     % of Total
                   </Typography>
                   
                   {safeProjectChartData.map((entry, index) => {
-                    const percentage = ((entry.value / totalPayments) * 100).toFixed(1);
+                    const percentage = ((entry.value / totalForMetric) * 100).toFixed(1);
                     return (
                       <React.Fragment key={entry.name}>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -512,6 +633,12 @@ const Analytics = () => {
                           </Typography>
                         </Box>
                         <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
+                          {entry.deals}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
+                          {formatINR(entry.basePrice)}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
                           {formatINR(entry.value)}
                         </Typography>
                         <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
@@ -520,6 +647,25 @@ const Analytics = () => {
                       </React.Fragment>
                     );
                   })}
+                </Box>
+                
+                {/* Summary Statistics */}
+                <Box sx={{ mt: 2, display: 'flex', gap: 3, flexWrap: 'wrap' }}>
+                  <Box sx={{ p: 2, bgcolor: 'primary.light', color: 'primary.contrastText', borderRadius: 2 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      Total Projects: {safeProjectChartData.length}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ p: 2, bgcolor: 'success.light', color: 'success.contrastText', borderRadius: 2 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      Total Deals: {safeProjectChartData.reduce((sum, item) => sum + item.deals, 0)}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ p: 2, bgcolor: 'info.light', color: 'info.contrastText', borderRadius: 2 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      {metricInfo.label}: {formatINR(totalForMetric)}
+                    </Typography>
+                  </Box>
                 </Box>
               </Box>
             )}
