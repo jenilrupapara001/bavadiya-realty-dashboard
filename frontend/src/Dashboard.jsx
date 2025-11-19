@@ -552,15 +552,20 @@ setFormData({
   ], [data, paymentReceived, outstandingAmount]);
 
   const cardBaseStyles = {
-    borderRadius: 4,
+    borderRadius: 3,
     p: { xs: 2.5, sm: 3 },
     height: '100%',
     border: '1px solid rgba(15,23,42,0.06)',
-    boxShadow: '0px 20px 40px rgba(15,23,42,0.08)',
+    boxShadow: '0px 12px 32px rgba(15,23,42,0.06)',
     backgroundColor: 'background.paper',
     display: 'flex',
     flexDirection: 'column',
-    gap: 1
+    gap: 1,
+    transition: 'all 0.2s ease',
+    '&:hover': {
+      boxShadow: '0px 16px 40px rgba(15,23,42,0.1)',
+      transform: 'translateY(-1px)'
+    }
   };
 
   const topEmployees = useMemo(() => {

@@ -373,7 +373,9 @@ const UserSettings = () => {
                       fullWidth
                       label="Full Name"
                       value={profileData.fullName}
-                      onChange={(e) => setProfileData({...profileData, fullName: e.target.value})}
+                      onChange={(e) => {
+                        setProfileData(prevData => ({...prevData, fullName: e.target.value}));
+                      }}
                       sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                     />
                   </Grid>
@@ -383,7 +385,9 @@ const UserSettings = () => {
                       label="Email"
                       type="email"
                       value={profileData.email}
-                      onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                      onChange={(e) => {
+                        setProfileData(prevData => ({...prevData, email: e.target.value}));
+                      }}
                       sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                     />
                   </Grid>
@@ -392,7 +396,9 @@ const UserSettings = () => {
                       fullWidth
                       label="Phone Number"
                       value={profileData.phone}
-                      onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                      onChange={(e) => {
+                        setProfileData(prevData => ({...prevData, phone: e.target.value}));
+                      }}
                       sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
                     />
                   </Grid>
@@ -449,7 +455,9 @@ const UserSettings = () => {
                       label="Current Password"
                       type={showPasswords.current ? 'text' : 'password'}
                       value={passwordData.currentPassword}
-                      onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                      onChange={(e) => {
+                        setPasswordData(prevData => ({...prevData, currentPassword: e.target.value}));
+                      }}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
@@ -470,7 +478,9 @@ const UserSettings = () => {
                       label="New Password"
                       type={showPasswords.new ? 'text' : 'password'}
                       value={passwordData.newPassword}
-                      onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                      onChange={(e) => {
+                        setPasswordData(prevData => ({...prevData, newPassword: e.target.value}));
+                      }}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
@@ -491,7 +501,9 @@ const UserSettings = () => {
                       label="Confirm New Password"
                       type={showPasswords.confirm ? 'text' : 'password'}
                       value={passwordData.confirmPassword}
-                      onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                      onChange={(e) => {
+                        setPasswordData(prevData => ({...prevData, confirmPassword: e.target.value}));
+                      }}
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
@@ -650,7 +662,9 @@ const UserSettings = () => {
                 fullWidth
                 label="Username"
                 value={newUserData.username}
-                onChange={(e) => setNewUserData({...newUserData, username: e.target.value})}
+                onChange={(e) => {
+                  setNewUserData(prevData => ({...prevData, username: e.target.value}));
+                }}
                 sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
             </Grid>
@@ -660,7 +674,9 @@ const UserSettings = () => {
                 label="Password"
                 type="password"
                 value={newUserData.password}
-                onChange={(e) => setNewUserData({...newUserData, password: e.target.value})}
+                onChange={(e) => {
+                  setNewUserData(prevData => ({...prevData, password: e.target.value}));
+                }}
                 sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
             </Grid>
@@ -669,7 +685,9 @@ const UserSettings = () => {
                 fullWidth
                 label="Full Name"
                 value={newUserData.fullName}
-                onChange={(e) => setNewUserData({...newUserData, fullName: e.target.value})}
+                onChange={(e) => {
+                  setNewUserData(prevData => ({...prevData, fullName: e.target.value}));
+                }}
                 sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
             </Grid>
@@ -679,7 +697,9 @@ const UserSettings = () => {
                 label="Email"
                 type="email"
                 value={newUserData.email}
-                onChange={(e) => setNewUserData({...newUserData, email: e.target.value})}
+                onChange={(e) => {
+                  setNewUserData(prevData => ({...prevData, email: e.target.value}));
+                }}
                 sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
             </Grid>
@@ -688,7 +708,9 @@ const UserSettings = () => {
                 fullWidth
                 label="Phone Number"
                 value={newUserData.phone}
-                onChange={(e) => setNewUserData({...newUserData, phone: e.target.value})}
+                onChange={(e) => {
+                  setNewUserData(prevData => ({...prevData, phone: e.target.value}));
+                }}
                 sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
               />
             </Grid>
@@ -698,7 +720,9 @@ const UserSettings = () => {
                 <Select
                   value={newUserData.role}
                   label="Role"
-                  onChange={(e) => setNewUserData({...newUserData, role: e.target.value})}
+                  onChange={(e) => {
+                    setNewUserData(prevData => ({...prevData, role: e.target.value}));
+                  }}
                   sx={{ borderRadius: 2 }}
                 >
                   <MenuItem value="User">User</MenuItem>
