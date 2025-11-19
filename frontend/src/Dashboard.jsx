@@ -701,140 +701,147 @@ case 'user-settings':
                   </Box>
                 </Grow>
 
-                {/* Cards On Dashboard */}
-                <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 140 }}>
-                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
-                          Total Portfolio
+                {/* Gradient Metric Cards */}
+                <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: 4 }}>
+                  {[
+                    {
+                      title: 'Total Portfolio',
+                      value: formatINR(totalPortfolio),
+                      subtitle: 'Base Price • All transactions',
+                      colors: ['#0f172a', '#2563eb']
+                    },
+                    {
+                      title: 'Total Brokerage',
+                      value: formatINR(totalBrokerage),
+                      subtitle: 'Owner + Customer commissions',
+                      colors: ['#1d4ed8', '#3b82f6']
+                    },
+                    {
+                      title: 'Owner Brokerage',
+                      value: formatINR(totalOwnerBrok),
+                      subtitle: 'Owner commissions',
+                      colors: ['#ea580c', '#f97316']
+                    },
+                    {
+                      title: 'Customer Brokerage',
+                      value: formatINR(totalCustomerBrok),
+                      subtitle: 'Customer commissions',
+                      colors: ['#7c3aed', '#a855f7']
+                    },
+                    {
+                      title: 'Payment Received',
+                      value: formatINR(paymentReceived),
+                      subtitle: 'Based on receive dates',
+                      colors: ['#047857', '#10b981']
+                    },
+                    {
+                      title: 'Outstanding Amount',
+                      value: formatINR(outstandingAmount),
+                      subtitle: 'Pending payments',
+                      colors: ['#b91c1c', '#ef4444']
+                    }
+                  ].map((card, index) => (
+                    <Grid item xs={12} sm={6} md={3} key={`${card.title}-${index}`}>
+                      <Box
+                        sx={{
+                          p: { xs: 2, sm: 2.5, md: 3 },
+                          borderRadius: 4,
+                          height: '100%',
+                          minHeight: 150,
+                          background: `linear-gradient(135deg, ${card.colors[0]} 0%, ${card.colors[1]} 100%)`,
+                          color: '#fff',
+                          boxShadow: '0 20px 35px rgba(15, 23, 42, 0.2)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between'
+                        }}
+                      >
+                        <Typography sx={{ fontSize: { xs: 12, md: 14 }, fontWeight: 500, opacity: 0.85 }}>
+                          {card.title}
                         </Typography>
-                        <Typography variant="h5" component="div" sx={{ 
-                          fontWeight: 'bold', 
-                          color: 'primary.main', 
-                          mb: 1, 
-                          fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
-                          wordBreak: 'break-word',
-                          lineHeight: 1.2
-                        }}>
-                          {formatINR(totalPortfolio)}
+                        <Typography
+                          sx={{
+                            fontWeight: 700,
+                            fontSize: { xs: '1.3rem', md: '1.75rem' },
+                            lineHeight: 1.2
+                          }}
+                        >
+                          {card.value}
                         </Typography>
-                        <Typography sx={{ fontSize: { xs: 8, sm: 10, md: 12 }, color: 'text.secondary' }}>
-                          Base Price • All transactions
+                        <Typography sx={{ fontSize: { xs: 10, md: 12 }, opacity: 0.75 }}>
+                          {card.subtitle}
                         </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 140 }}>
-                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
-                          Total Brokerage
+                      </Box>
+                    </Grid>
+                  ))}
+                </Grid>
+
+                {/* Payment Status */}
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 2 }}>
+                  Payment Status Analytics
+                </Typography>
+                <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: 4 }}>
+                  {[
+                    {
+                      title: 'Received',
+                      value: formatINR(paymentReceived),
+                      subtitle: `${data.filter(item => item.receiveDate && item.customerReceiveDate).length} fully received`,
+                      colors: ['#059669', '#34d399']
+                    },
+                    {
+                      title: 'Outstanding',
+                      value: formatINR(outstandingAmount),
+                      subtitle: `${data.filter(item => !(item.receiveDate && item.customerReceiveDate)).length} pending payments`,
+                      colors: ['#dc2626', '#f87171']
+                    },
+                    {
+                      title: 'Owner Only',
+                      value: formatINR(data.reduce((sum, item) => {
+                        if (item.receiveDate && !item.customerReceiveDate) {
+                          const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
+                          return sum + ownerBrok;
+                        }
+                        return sum;
+                      }, 0)),
+                      subtitle: `${data.filter(item => item.receiveDate && !item.customerReceiveDate).length} owner received`,
+                      colors: ['#ea580c', '#f97316']
+                    },
+                    {
+                      title: 'Customer Only',
+                      value: formatINR(data.reduce((sum, item) => {
+                        if (!item.receiveDate && item.customerReceiveDate) {
+                          const customerBrok = typeof item.customerBro === 'number' ? item.customerBro : convertPercentageToAmount(item.customerBro, item.basePrice);
+                          return sum + customerBrok;
+                        }
+                        return sum;
+                      }, 0)),
+                      subtitle: `${data.filter(item => !item.receiveDate && item.customerReceiveDate).length} customer received`,
+                      colors: ['#9333ea', '#c084fc']
+                    }
+                  ].map(card => (
+                    <Grid item xs={12} sm={6} md={3} key={card.title}>
+                      <Box
+                        sx={{
+                          p: { xs: 2, sm: 2.5 },
+                          borderRadius: 4,
+                          height: '100%',
+                          background: `linear-gradient(135deg, ${card.colors[0]} 0%, ${card.colors[1]} 100%)`,
+                          color: '#fff',
+                          boxShadow: '0 15px 30px rgba(15, 23, 42, 0.2)'
+                        }}
+                      >
+                        <Typography sx={{ fontSize: 13, fontWeight: 600, opacity: 0.85 }}>
+                          {card.title}
                         </Typography>
-                        <Typography variant="h5" component="div" sx={{ 
-                          fontWeight: 'bold', 
-                          color: 'success.main', 
-                          mb: 1, 
-                          fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
-                          wordBreak: 'break-word',
-                          lineHeight: 1.2
-                        }}>
-                          {formatINR(totalBrokerage)}
+                        <Typography sx={{ fontSize: { xs: '1.25rem', md: '1.6rem' }, fontWeight: 700, my: 1 }}>
+                          {card.value}
                         </Typography>
-                        <Typography sx={{ fontSize: { xs: 8, sm: 10, md: 12 }, color: 'text.secondary' }}>
-                          Owner + Customer commissions
+                        <Typography sx={{ fontSize: 12, opacity: 0.85 }}>
+                          {card.subtitle}
                         </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 140 }}>
-                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
-                          Owner Brokerage
-                        </Typography>
-                        <Typography variant="h5" component="div" sx={{ 
-                          fontWeight: 'bold', 
-                          color: '#f59e0b', 
-                          mb: 1, 
-                          fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
-                          wordBreak: 'break-word',
-                          lineHeight: 1.2
-                        }}>
-                          {formatINR(totalOwnerBrok)}
-                        </Typography>
-                        <Typography sx={{ fontSize: { xs: 8, sm: 10, md: 12 }, color: 'text.secondary' }}>
-                          Owner commissions
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 140 }}>
-                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
-                          Customer Brokerage
-                        </Typography>
-                        <Typography variant="h5" component="div" sx={{ 
-                          fontWeight: 'bold', 
-                          color: '#8b5cf6', 
-                          mb: 1, 
-                          fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
-                          wordBreak: 'break-word',
-                          lineHeight: 1.2
-                        }}>
-                          {formatINR(totalCustomerBrok)}
-                        </Typography>
-                        <Typography sx={{ fontSize: { xs: 8, sm: 10, md: 12 }, color: 'text.secondary' }}>
-                          Customer commissions
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 140 }}>
-                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
-                          Payment Received
-                        </Typography>
-                        <Typography variant="h5" component="div" sx={{ 
-                          fontWeight: 'bold', 
-                          color: '#22c55e', 
-                          mb: 1, 
-                          fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
-                          wordBreak: 'break-word',
-                          lineHeight: 1.2
-                        }}>
-                          {formatINR(paymentReceived)}
-                        </Typography>
-                        <Typography sx={{ fontSize: { xs: 8, sm: 10, md: 12 }, color: 'text.secondary' }}>
-                          Based on receive dates
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 140 }}>
-                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
-                          Outstanding Amount
-                        </Typography>
-                        <Typography variant="h5" component="div" sx={{ 
-                          fontWeight: 'bold', 
-                          color: '#ef4444', 
-                          mb: 1, 
-                          fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
-                          wordBreak: 'break-word',
-                          lineHeight: 1.2
-                        }}>
-                          {formatINR(outstandingAmount)}
-                        </Typography>
-                        <Typography sx={{ fontSize: { xs: 8, sm: 10, md: 12 }, color: 'text.secondary' }}>
-                          Pending payments
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
+                      </Box>
+                    </Grid>
+                  ))}
                 </Grid>
 
                 {/* Analytics Overview */}
@@ -842,97 +849,91 @@ case 'user-settings':
                   <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 3 }}>
                     Analytics Overview - Total Brokerage: {formatINR(totalBrokerage)}
                   </Typography>
-                  <Grid container spacing={{ xs: 2, md: 3 }}>
-                    <Grid item xs={12}>
-                      <Paper sx={{
-                        p: { xs: 1.5, sm: 2 },
-                        height: { xs: 280, sm: 320 },
-                        display: 'flex',
-                        flexDirection: 'column',
-                        background: 'linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)',
-                        border: '1px solid rgba(0,0,0,0.08)',
-                        borderRadius: 3,
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                      }}>
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            fontWeight: 600,
-                            color: 'text.primary',
-                            mb: 2,
-                            fontSize: { xs: '1rem', sm: '1.25rem' }
+                  <Paper
+                    sx={{
+                      p: { xs: 2, sm: 3 },
+                      borderRadius: 4,
+                      background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+                      border: '1px solid rgba(148, 163, 184, 0.2)',
+                      boxShadow: '0 12px 30px rgba(15, 23, 42, 0.08)'
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: 600,
+                        color: 'text.primary',
+                        mb: 2,
+                        fontSize: { xs: '1rem', sm: '1.25rem' }
+                      }}
+                    >
+                      Payments by Employee
+                    </Typography>
+                    <Box sx={{ width: '100%', height: { xs: 280, md: 320 } }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart
+                          data={chartData}
+                          margin={{
+                            top: 20,
+                            right: 20,
+                            left: 10,
+                            bottom: 60
                           }}
+                          barCategoryGap="20%"
                         >
-                          Payments by Employee
-                        </Typography>
-                        <Box sx={{ flexGrow: 1, minHeight: 0 }}>
-                          <ResponsiveContainer width="100%" height="100%" minHeight={200}>
-                            <BarChart
-                              data={chartData}
-                              margin={{
-                                top: 20,
-                                right: 20,
-                                left: 10,
-                                bottom: 60
-                              }}
-                              barCategoryGap="15%"
-                            >
-                              <CartesianGrid
-                                strokeDasharray="3 3"
-                                stroke="#e0e0e0"
-                                opacity={0.3}
-                                vertical={false}
-                              />
-                              <XAxis
-                                dataKey="name"
-                                tick={{
-                                  fontSize: 11,
-                                  fill: '#64748b'
-                                }}
-                                axisLine={false}
-                                tickLine={false}
-                                angle={-45}
-                                textAnchor="end"
-                                height={80}
-                                interval={0}
-                              />
-                              <YAxis
-                                tick={{
-                                  fontSize: 11,
-                                  fill: '#64748b'
-                                }}
-                                axisLine={false}
-                                tickLine={false}
-                                tickFormatter={(value) => `₹${(value / 100000).toFixed(0)}L`}
-                                width={50}
-                              />
-                              <Tooltip
-                                formatter={(value) => [`₹${value.toLocaleString()}`, 'Revenue']}
-                                labelFormatter={(label) => `${label}`}
-                                contentStyle={{
-                                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                                  border: 'none',
-                                  borderRadius: '12px',
-                                  boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
-                                  fontSize: '13px',
-                                  fontWeight: 500
-                                }}
-                                cursor={{ fill: 'rgba(0, 122, 255, 0.1)' }}
-                              />
-                              <Bar
-                                dataKey="value"
-                                fill="#007AFF"
-                                radius={[6, 6, 0, 0]}
-                                animationBegin={0}
-                                animationDuration={1000}
-                                animationEasing="ease-out"
-                              />
-                            </BarChart>
-                          </ResponsiveContainer>
-                        </Box>
-                      </Paper>
-                    </Grid>
-                  </Grid>
+                          <CartesianGrid
+                            strokeDasharray="3 3"
+                            stroke="#e0e0e0"
+                            opacity={0.3}
+                            vertical={false}
+                          />
+                          <XAxis
+                            dataKey="name"
+                            tick={{
+                              fontSize: 11,
+                              fill: '#475569'
+                            }}
+                            axisLine={false}
+                            tickLine={false}
+                            angle={-45}
+                            textAnchor="end"
+                            height={80}
+                            interval={0}
+                          />
+                          <YAxis
+                            tick={{
+                              fontSize: 11,
+                              fill: '#475569'
+                            }}
+                            axisLine={false}
+                            tickLine={false}
+                            tickFormatter={(value) => `₹${(value / 100000).toFixed(0)}L`}
+                            width={60}
+                          />
+                          <Tooltip
+                            formatter={(value) => [`₹${value.toLocaleString()}`, 'Revenue']}
+                            labelFormatter={(label) => `${label}`}
+                            contentStyle={{
+                              backgroundColor: '#0f172a',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: 12,
+                              boxShadow: '0 10px 30px rgba(15, 23, 42, 0.4)'
+                            }}
+                            cursor={{ fill: 'rgba(59, 130, 246, 0.15)' }}
+                          />
+                          <Bar
+                            dataKey="value"
+                            fill="#2563eb"
+                            radius={[8, 8, 0, 0]}
+                            animationBegin={0}
+                            animationDuration={1000}
+                            animationEasing="ease-out"
+                          />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </Box>
+                  </Paper>
                 </Box>
 
                 {/* Payment Records */}

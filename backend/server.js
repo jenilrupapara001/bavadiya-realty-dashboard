@@ -22,39 +22,66 @@ app.use(cors({
 app.use(bodyParser.json());
 
 // ---- MongoDB Connection ----
-const mongoURI = process.env.MONGO_URI || 'mongodb+srv://jenilrupapara340_db_user:gPaASk6ZOa4Wa44L@sample-data.vyal4lo.mongodb.net/bavadiya-realty?appName=Sample-Data';
+const mongoURI = process.env.MONGO_URI || 'mongodb+srv://jenilrupapara340_db_user:gPaASk6ZOa4Wa44L@sample-data.vyal4lo.mongodb.net/bavadiya-realty?retryWrites=true&w=majority';
 
-// Connection options optimized for serverless
+// Connection options optimized for serverless (Vercel)
 const mongoOptions = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+  serverSelectionTimeoutMS: 10000, // 10 seconds for initial connection
   socketTimeoutMS: 45000,
+  maxPoolSize: 10, // Maintain up to 10 socket connections
+  minPoolSize: 1,
+  maxIdleTimeMS: 30000,
+  connectTimeoutMS: 10000,
+  retryWrites: true,
+  retryReads: true,
 };
 
-// Connect to MongoDB
-mongoose.connect(mongoURI, mongoOptions)
-  .then(async () => {
-    console.log('✅ MongoDB connected');
-    // Initialize default admin if no users exist
+// Global connection promise for serverless
+let cachedConnection = null;
+
+async function connectToDatabase() {
+  if (cachedConnection && mongoose.connection.readyState === 1) {
+    console.log('✅ Using cached MongoDB connection');
+    return cachedConnection;
+  }
+
+  try {
+    console.log('🔄 Connecting to MongoDB...');
+    cachedConnection = await mongoose.connect(mongoURI, mongoOptions);
+    console.log('✅ MongoDB connected successfully');
+    
+    // Initialize default admin if no users exist (only on first connection)
     await initializeDefaultAdmin();
-  })
-  .catch(err => {
+    
+    return cachedConnection;
+  } catch (err) {
     console.error('❌ MongoDB connection error:', err.message);
-    console.error('❌ Stack:', err.stack);
-  });
+    console.error('❌ Full error:', err);
+    cachedConnection = null;
+    throw err;
+  }
+}
 
 // Handle MongoDB connection events
 mongoose.connection.on('error', (err) => {
-  console.error('❌ MongoDB connection error:', err);
+  console.error('❌ MongoDB runtime error:', err);
+  cachedConnection = null;
 });
 
 mongoose.connection.on('disconnected', () => {
   console.log('⚠️  MongoDB disconnected');
+  cachedConnection = null;
 });
 
 mongoose.connection.on('reconnected', () => {
   console.log('✅ MongoDB reconnected');
+});
+
+// Initial connection attempt
+connectToDatabase().catch(err => {
+  console.error('❌ Initial MongoDB connection failed:', err.message);
 });
 
 // ---- Schemas ----
@@ -201,9 +228,23 @@ app.post('/api/login', async (req, res) => {
       return res.status(400).json({ error: 'Username and password are required' });
     }
 
-    // Check MongoDB connection
+    // Ensure database connection (for serverless)
     if (mongoose.connection.readyState !== 1) {
-      console.error('❌ MongoDB not connected. State:', mongoose.connection.readyState);
+      console.log('⚠️  MongoDB not connected, attempting to connect...');
+      try {
+        await connectToDatabase();
+      } catch (connErr) {
+        console.error('❌ Failed to connect to MongoDB:', connErr.message);
+        return res.status(503).json({ 
+          error: 'Database connection unavailable',
+          details: process.env.NODE_ENV === 'development' ? connErr.message : undefined
+        });
+      }
+    }
+    
+    // Double-check connection state
+    if (mongoose.connection.readyState !== 1) {
+      console.error('❌ MongoDB still not connected. State:', mongoose.connection.readyState);
       return res.status(503).json({ error: 'Database connection unavailable' });
     }
     
