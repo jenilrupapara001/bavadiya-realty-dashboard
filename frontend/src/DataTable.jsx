@@ -254,147 +254,24 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
       </Typography>
 
       {/* Summary Cards */}
-      <Grid container spacing={{ xs: 2, sm: 2, md: 3 }} sx={{ mb: { xs: 3, md: 4 } }}>
-        <Grid item xs={12} sm={6} lg={3}>
-          <Card sx={{ 
-            borderRadius: 3, 
-            minHeight: { xs: 120, sm: 140 },
-            height: '100%',
-            transition: 'transform 0.2s ease-in-out',
-            '&:hover': { transform: 'translateY(-2px)' }
-          }}>
-            <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 3 } }}>
-              <Typography 
-                variant="h6" 
-                color="text.secondary" 
-                sx={{ 
-                  fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
-                  mb: 1,
-                  lineHeight: 1.2
-                }}
-              >
-                Total Portfolio
+      <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: { xs: 3, md: 4 } }}>
+        {[
+          { label: 'Total Portfolio', value: formatINR(totalValue), color: 'primary.main' },
+          { label: 'Total Brokerage', value: formatINR(totalBrokerage), color: 'success.main' },
+          { label: 'Payment Received', value: formatINR(paymentReceived), color: '#16a34a' },
+          { label: 'Outstanding Amount', value: formatINR(outstandingAmount), color: '#dc2626' }
+        ].map((card) => (
+          <Grid item xs={12} sm={6} lg={3} key={card.label}>
+            <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 4, height: '100%' }}>
+              <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: 'text.secondary', fontWeight: 600 }}>
+                {card.label}
               </Typography>
-              <Typography 
-                variant="h4" 
-                sx={{ 
-                  fontWeight: 700, 
-                  color: 'primary.main', 
-                  fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }, 
-                  wordBreak: 'break-word',
-                  lineHeight: 1.2
-                }}
-              >
-                {formatINR(totalValue)}
+              <Typography variant="h5" sx={{ fontWeight: 700, color: card.color, mt: 0.5 }}>
+                {card.value}
               </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
-          <Card sx={{ 
-            borderRadius: 3, 
-            minHeight: { xs: 120, sm: 140 },
-            height: '100%',
-            transition: 'transform 0.2s ease-in-out',
-            '&:hover': { transform: 'translateY(-2px)' }
-          }}>
-            <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 3 } }}>
-              <Typography 
-                variant="h6" 
-                color="text.secondary" 
-                sx={{ 
-                  fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
-                  mb: 1,
-                  lineHeight: 1.2
-                }}
-              >
-                Total Brokerage
-              </Typography>
-              <Typography 
-                variant="h4" 
-                sx={{ 
-                  fontWeight: 700, 
-                  color: 'success.main', 
-                  fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }, 
-                  wordBreak: 'break-word',
-                  lineHeight: 1.2
-                }}
-              >
-                {formatINR(totalBrokerage)}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
-          <Card sx={{ 
-            borderRadius: 3, 
-            minHeight: { xs: 120, sm: 140 },
-            height: '100%',
-            transition: 'transform 0.2s ease-in-out',
-            '&:hover': { transform: 'translateY(-2px)' }
-          }}>
-            <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 3 } }}>
-              <Typography 
-                variant="h6" 
-                color="text.secondary" 
-                sx={{ 
-                  fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
-                  mb: 1,
-                  lineHeight: 1.2
-                }}
-              >
-                Payment Received
-              </Typography>
-              <Typography 
-                variant="h4" 
-                sx={{ 
-                  fontWeight: 700, 
-                  color: '#22c55e', 
-                  fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }, 
-                  wordBreak: 'break-word',
-                  lineHeight: 1.2
-                }}
-              >
-                {formatINR(paymentReceived)}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
-          <Card sx={{ 
-            borderRadius: 3, 
-            minHeight: { xs: 120, sm: 140 },
-            height: '100%',
-            transition: 'transform 0.2s ease-in-out',
-            '&:hover': { transform: 'translateY(-2px)' }
-          }}>
-            <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 3 } }}>
-              <Typography 
-                variant="h6" 
-                color="text.secondary" 
-                sx={{ 
-                  fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
-                  mb: 1,
-                  lineHeight: 1.2
-                }}
-              >
-                Outstanding Amount
-              </Typography>
-              <Typography 
-                variant="h4" 
-                sx={{ 
-                  fontWeight: 700, 
-                  color: '#ef4444', 
-                  fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }, 
-                  wordBreak: 'break-word',
-                  lineHeight: 1.2
-                }}
-              >
-                {formatINR(outstandingAmount)}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+            </Paper>
+          </Grid>
+        ))}
       </Grid>
 
       {/* Filters - Responsive */}
@@ -527,33 +404,16 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
         </Grid>
       </Paper>
 
-{/* Data Table - Responsive */}
-      <Paper sx={{
-        borderRadius: 3,
-        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-        overflow: 'hidden'
-      }}>
-        {/* Mobile-friendly scrollable container */}
-        <Box sx={{ 
-          overflowX: 'auto',
-          '&::-webkit-scrollbar': {
-            height: '8px',
-          },
-          '&::-webkit-scrollbar-track': {
-            background: '#f1f1f1',
-            borderRadius: '4px',
-          },
-          '&::-webkit-scrollbar-thumb': {
-            background: '#888',
-            borderRadius: '4px',
-            '&:hover': {
-              background: '#555',
-            },
-          },
-        }}>
-          <TableContainer component={Box} sx={{ minWidth: { xs: '800px', sm: '900px', md: '100%' } }}>
-            <Table>
-              <TableHead>
+      {/* Data Table - Responsive */}
+      <Paper sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)', p: { xs: 1.5, sm: 2.5 } }}>
+        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 2 }}>
+          <Chip label={`Entries: ${totalEntries}`} variant="outlined" />
+          <Chip label={`Value: ${formatINR(totalValue)}`} color="success" variant="outlined" />
+          <Chip label={`Pending: ${filteredData.filter(item => !(item.receiveDate && item.customerReceiveDate)).length}`} color="warning" variant="outlined" />
+        </Box>
+        <Box sx={{ overflowX: 'auto' }}>
+          <Table sx={{ minWidth: { xs: 900, md: '100%' } }}>
+            <TableHead>
                 <TableRow sx={{
                   bgcolor: 'primary.main',
                   position: 'sticky',
@@ -584,8 +444,8 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
                   <TableCell sx={{ minWidth: { xs: '60px', sm: '80px' } }}>Actions</TableCell>
                   <TableCell sx={{ minWidth: { xs: '60px', sm: '80px' } }}>Delete</TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
+            </TableHead>
+            <TableBody>
                 {paginatedData.map((row, index) => (
                   <TableRow
                     key={row._id || index}
@@ -733,20 +593,20 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
                 ))}
               </TableBody>
             </Table>
-          </TableContainer>
         </Box>
 
         {/* Responsive Pagination */}
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          px: { xs: 2, sm: 3 }, 
-          py: { xs: 1, sm: 1.5 },
-          flexDirection: { xs: 'column', sm: 'row' },
-          gap: { xs: 1, sm: 0 }
-        }}>
-          <Typography variant="body2" sx={{ fontSize: { xs: '0.625rem', sm: '0.75rem' } }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: { xs: 1, sm: 0 },
+            mt: 2
+          }}
+        >
+          <Typography variant="body2" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
             Showing {page * rowsPerPage + 1} to {Math.min((page + 1) * rowsPerPage, filteredData.length)} of {filteredData.length} entries
           </Typography>
           <TablePagination
@@ -757,17 +617,6 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
             rowsPerPage={rowsPerPage}
             onRowsPerPageChange={handleChangeRowsPerPage}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            sx={{
-              '& .MuiTablePagination-selectLabel': {
-                fontSize: { xs: '0.625rem', sm: '0.75rem' }
-              },
-              '& .MuiTablePagination-displayedRows': {
-                fontSize: { xs: '0.625rem', sm: '0.75rem' }
-              },
-              '& .MuiTablePagination-actions button': {
-                fontSize: { xs: '0.625rem', sm: '0.75rem' }
-              }
-            }}
           />
         </Box>
       </Paper>

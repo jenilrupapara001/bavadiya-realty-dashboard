@@ -308,6 +308,72 @@ const Analytics = () => {
   const activeSlice =
     activeProjectIndex !== null ? safeProjectChartData[activeProjectIndex] : null;
 
+  const summaryCards = useMemo(() => [
+    {
+      key: 'portfolio',
+      title: 'Total Portfolio',
+      value: formatINR(totalPayments),
+      subtitle: 'Base Price • All transactions'
+    },
+    {
+      key: 'brokerage',
+      title: 'Total Brokerage',
+      value: formatINR(totalBrokerage),
+      subtitle: 'Owner + Customer commissions'
+    },
+    {
+      key: 'received',
+      title: 'Payment Received',
+      value: formatINR(paymentReceived),
+      subtitle: 'Based on receive dates'
+    },
+    {
+      key: 'outstanding',
+      title: 'Outstanding Amount',
+      value: formatINR(outstandingAmount),
+      subtitle: 'Pending payments'
+    }
+  ], [totalPayments, totalBrokerage, paymentReceived, outstandingAmount]);
+
+  const paymentCards = useMemo(() => [
+    {
+      key: 'receivedStatus',
+      title: 'Received',
+      value: formatINR(paymentReceived),
+      meta: `${data.filter(item => item.receiveDate && item.customerReceiveDate).length} fully received`
+    },
+    {
+      key: 'outstandingStatus',
+      title: 'Outstanding',
+      value: formatINR(outstandingAmount),
+      meta: `${data.filter(item => !(item.receiveDate && item.customerReceiveDate)).length} pending payments`
+    },
+    {
+      key: 'ownerOnly',
+      title: 'Owner Only',
+      value: formatINR(data.reduce((sum, item) => {
+        if (item.receiveDate && !item.customerReceiveDate) {
+          const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
+          return sum + ownerBrok;
+        }
+        return sum;
+      }, 0)),
+      meta: `${data.filter(item => item.receiveDate && !item.customerReceiveDate).length} owner received`
+    },
+    {
+      key: 'customerOnly',
+      title: 'Customer Only',
+      value: formatINR(data.reduce((sum, item) => {
+        if (!item.receiveDate && item.customerReceiveDate) {
+          const customerBrok = typeof item.customerBro === 'number' ? item.customerBro : convertPercentageToAmount(item.customerBro, item.basePrice);
+          return sum + customerBrok;
+        }
+        return sum;
+      }, 0)),
+      meta: `${data.filter(item => !item.receiveDate && item.customerReceiveDate).length} customer received`
+    }
+  ], [data, paymentReceived, outstandingAmount]);
+
   const renderProjectTooltip = ({ active, payload }) => {
     if (!active || !payload?.length) return null;
     const entry = payload[0].payload;
@@ -383,236 +449,91 @@ const Analytics = () => {
   };
 
   // ---- UI ----
-  if (loading) {
+  if (loading || error) {
     return (
-      <Box sx={{ width: '100%', maxWidth: '100%', px: { xs: 2, sm: 3 } }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-          <Typography variant="h6">Loading analytics...</Typography>
+      <Container maxWidth="xl" sx={{ py: 6 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 320 }}>
+          {loading ? <Typography variant="h6">Loading analytics...</Typography> : <Alert severity="error">{error}</Alert>}
         </Box>
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ width: '100%', maxWidth: '100%', px: { xs: 2, sm: 3 } }}>
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-          <Alert severity="error">
-            {error}
-          </Alert>
-        </Box>
-      </Box>
+      </Container>
     );
   }
 
   return (
-    <Box sx={{ width: '100%', maxWidth: '100%' }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main', mb: 4, px: { xs: 2, sm: 3 } }}>
+    <Container maxWidth="xl" sx={{ py: 4 }}>
+      <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main', mb: 1 }}>
         Reports & Analytics
+      </Typography>
+      <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 4 }}>
+        Consolidated insights for projects, payments, and teams
       </Typography>
 
       {/* Key Metrics */}
-      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4, px: { xs: 2, sm: 3 } }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ background: 'linear-gradient(135deg, #1a365d 0%, #3b82f6 100%)', color: 'white', borderRadius: 3, minHeight: 140 }}>
-            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Total Portfolio</Typography>
-              <Typography variant="h4" sx={{ 
-                fontWeight: 700, 
-                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
-                wordBreak: 'break-word',
-                lineHeight: 1.2
-              }}>
-                {formatINR(totalPayments)}
+      <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: 4 }}>
+        {summaryCards.map((card) => (
+          <Grid item xs={12} sm={6} md={3} key={card.key}>
+            <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 4, display: 'flex', flexDirection: 'column', gap: 1 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: 'text.secondary', fontWeight: 600 }}>
+                  {card.title}
               </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', color: 'white', borderRadius: 3, minHeight: 140 }}>
-            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Total Brokerage</Typography>
-              <Typography variant="h4" sx={{ 
-                fontWeight: 700, 
-                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
-                wordBreak: 'break-word',
-                lineHeight: 1.2
-              }}>
-                {formatINR(totalBrokerage)}
+                <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: 'primary.main', opacity: 0.35 }} />
+              </Box>
+              <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                {card.value}
               </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)', color: 'white', borderRadius: 3, minHeight: 140 }}>
-            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Payment Received</Typography>
-              <Typography variant="h4" sx={{ 
-                fontWeight: 700, 
-                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
-                wordBreak: 'break-word',
-                lineHeight: 1.2
-              }}>
-                {formatINR(paymentReceived)}
+              <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: 'text.secondary' }}>
+                {card.subtitle}
               </Typography>
-            </CardContent>
-          </Card>
+            </Paper>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', color: 'white', borderRadius: 3, minHeight: 140 }}>
-            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Outstanding Amount</Typography>
-              <Typography variant="h4" sx={{ 
-                fontWeight: 700, 
-                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
-                wordBreak: 'break-word',
-                lineHeight: 1.2
-              }}>
-                {formatINR(outstandingAmount)}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+        ))}
       </Grid>
 
-      {/* Payment Status Cards */}
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 3, px: { xs: 2, sm: 3 } }}>
+      {/* Payment Status */}
+      <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
         Payment Status Analytics
       </Typography>
-      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4, px: { xs: 2, sm: 3 } }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)', color: 'white', borderRadius: 3, minHeight: 140 }}>
-            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Received</Typography>
-              <Typography variant="h4" sx={{ 
-                fontWeight: 700, 
-                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
-                wordBreak: 'break-word',
-                lineHeight: 1.2
-              }}>
-                {formatINR(paymentReceived)}
+      <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: 4 }}>
+        {paymentCards.map((card) => (
+          <Grid item xs={12} sm={6} md={3} key={card.key}>
+            <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 4, minHeight: 150 }}>
+              <Typography sx={{ fontWeight: 600, color: 'text.secondary', mb: 1 }}>
+                {card.title}
               </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.8, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-                {data.filter(item => item.receiveDate && item.customerReceiveDate).length} fully received
+              <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary', mb: 0.5 }}>
+                {card.value}
               </Typography>
-            </CardContent>
-          </Card>
+              <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: 'text.secondary' }}>
+                {card.meta}
+              </Typography>
+            </Paper>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', color: 'white', borderRadius: 3, minHeight: 140 }}>
-            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Outstanding</Typography>
-              <Typography variant="h4" sx={{ 
-                fontWeight: 700, 
-                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
-                wordBreak: 'break-word',
-                lineHeight: 1.2
-              }}>
-                {formatINR(outstandingAmount)}
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.8, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-                {data.filter(item => !(item.receiveDate && item.customerReceiveDate)).length} pending payments
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', color: 'white', borderRadius: 3, minHeight: 140 }}>
-            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Owner Only</Typography>
-              <Typography variant="h4" sx={{ 
-                fontWeight: 700, 
-                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
-                wordBreak: 'break-word',
-                lineHeight: 1.2
-              }}>
-                {formatINR(data.reduce((sum, item) => {
-                  if (item.receiveDate && !item.customerReceiveDate) {
-                    const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
-                    return sum + ownerBrok;
-                  }
-                  return sum;
-                }, 0))}
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.8, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-                {data.filter(item => item.receiveDate && !item.customerReceiveDate).length} owner received
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)', color: 'white', borderRadius: 3, minHeight: 140 }}>
-            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Customer Only</Typography>
-              <Typography variant="h4" sx={{ 
-                fontWeight: 700, 
-                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
-                wordBreak: 'break-word',
-                lineHeight: 1.2
-              }}>
-                {formatINR(data.reduce((sum, item) => {
-                  if (!item.receiveDate && item.customerReceiveDate) {
-                    const customerBrok = typeof item.customerBro === 'number' ? item.customerBro : convertPercentageToAmount(item.customerBro, item.basePrice);
-                    return sum + customerBrok;
-                  }
-                  return sum;
-                }, 0))}
-              </Typography>
-              <Typography variant="body2" sx={{ opacity: 0.8, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-                {data.filter(item => !item.receiveDate && item.customerReceiveDate).length} customer received
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+        ))}
       </Grid>
 
       {/* Received By Cards */}
-      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 3, px: { xs: 2, sm: 3 } }}>
+      <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
         Received By Analytics
       </Typography>
-      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4, px: { xs: 2, sm: 3 } }}>
+      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
         {safeReceivedByData.length === 0 ? (
           <Grid item xs={12}>
-            <Alert severity="info">
-              No payment records with received amounts found. Add payment records to see analytics.
-            </Alert>
+            <Alert severity="info">No payment records with received amounts found. Add payment records to see analytics.</Alert>
           </Grid>
         ) : (
           safeReceivedByData.map((person, index) => (
             <Grid item xs={12} sm={6} md={4} key={person.name}>
-              <Card sx={{
-                background: `linear-gradient(135deg, ${COLORS[index % COLORS.length]} 0%, ${COLORS[index % COLORS.length]}dd 100%)`,
-                color: 'white',
-                borderRadius: 3,
-                minHeight: 160
-              }}>
-                <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                  <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' }, mb: 1 }}>
-                    {person.name}
-                  </Typography>
-                  <Typography variant="h5" sx={{ 
-                    fontWeight: 700, 
-                    fontSize: { xs: '1rem', sm: '1.25rem', md: '1.75rem' }, 
-                    mb: 1,
-                    wordBreak: 'break-word',
-                    lineHeight: 1.2
-                  }}>
+              <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 4, minHeight: 160 }}>
+                <Typography sx={{ fontWeight: 600, mb: 0.75 }}>{person.name}</Typography>
+                <Typography variant="h5" sx={{ fontWeight: 700, color: COLORS[index % COLORS.length], mb: 1 }}>
                     {formatINR(person.amount)}
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                    <Chip
-                      label={`Owner: ${person.ownerReceived}`}
-                      size="small"
-                      sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 500, fontSize: { xs: '0.625rem', sm: '0.75rem' } }}
-                    />
-                    <Chip
-                      label={`Customer: ${person.customerReceived}`}
-                      size="small"
-                      sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 500, fontSize: { xs: '0.625rem', sm: '0.75rem' } }}
-                    />
+                  <Chip label={`Owner: ${person.ownerReceived}`} size="small" variant="outlined" />
+                  <Chip label={`Customer: ${person.customerReceived}`} size="small" variant="outlined" />
                   </Box>
-                </CardContent>
-              </Card>
+              </Paper>
             </Grid>
           ))
         )}
@@ -656,7 +577,7 @@ const Analytics = () => {
                 <ResponsiveContainer width="100%" height={chartHeight}>
                   <PieChart>
                     <Pie
-                      data={safeProjectChartData}
+                  data={safeProjectChartData} 
                       dataKey="value"
                       nameKey="name"
                       innerRadius="55%"
@@ -767,35 +688,35 @@ const Analytics = () => {
                 </Typography>
                 <Box sx={{ width: '100%', overflowX: 'auto' }}>
                   <Box sx={{ minWidth: 640 }}>
-                    <Box sx={{ 
-                      display: 'grid', 
-                      gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', 
-                      gap: 1,
-                      p: 2,
-                      bgcolor: 'grey.50',
-                      borderRadius: 2,
-                      border: '1px solid',
-                      borderColor: 'grey.200'
-                    }}>
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                        Project Name
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                        Deals
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                        Property Value
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                        {metricInfo.label}
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                        % of Total
-                      </Typography>
+                <Box sx={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', 
+                  gap: 1,
+                  p: 2,
+                  bgcolor: 'grey.50',
+                  borderRadius: 2,
+                  border: '1px solid',
+                  borderColor: 'grey.200'
+                }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    Project Name
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    Deals
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    Property Value
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    {metricInfo.label}
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    % of Total
+                  </Typography>
                     </Box>
-                    {safeProjectChartData.map((entry, index) => {
-                      const percentage = ((entry.value / totalForMetric) * 100).toFixed(1);
-                      return (
+                  {safeProjectChartData.map((entry, index) => {
+                    const percentage = ((entry.value / totalForMetric) * 100).toFixed(1);
+                    return (
                         <Box
                           key={entry.name}
                           sx={{
@@ -809,34 +730,34 @@ const Analytics = () => {
                             alignItems: 'center'
                           }}
                         >
-                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Box sx={{
-                              width: 10,
-                              height: 10,
-                              borderRadius: '50%',
-                              bgcolor: COLORS[index % COLORS.length],
-                              mr: 1,
-                              flexShrink: 0
-                            }} />
-                            <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
-                              {entry.name}
-                            </Typography>
-                          </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Box sx={{
+                            width: 10,
+                            height: 10,
+                            borderRadius: '50%',
+                            bgcolor: COLORS[index % COLORS.length],
+                            mr: 1,
+                            flexShrink: 0
+                          }} />
                           <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
-                            {entry.deals}
-                          </Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
-                            {formatINR(entry.basePrice)}
-                          </Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
-                            {formatINR(entry.value)}
-                          </Typography>
-                          <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
-                            {percentage}%
+                            {entry.name}
                           </Typography>
                         </Box>
-                      );
-                    })}
+                        <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
+                          {entry.deals}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
+                          {formatINR(entry.basePrice)}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
+                          {formatINR(entry.value)}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 500, fontSize: '0.75rem' }}>
+                          {percentage}%
+                        </Typography>
+                        </Box>
+                    );
+                  })}
                   </Box>
                 </Box>
                 
@@ -910,7 +831,7 @@ const Analytics = () => {
           </Paper>
         </Grid>
       </Grid>
-    </Box>
+    </Container>
   );
 };
 
