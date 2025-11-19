@@ -40,7 +40,26 @@ import {
   Snackbar,
   Grow,
 } from '@mui/material';
-import { Logout, Add, Edit, Delete, Dashboard as DashboardIcon, BarChart as BarChartIcon, TableChart, Menu, Person as PersonIcon } from '@mui/icons-material';
+import {
+  Logout,
+  Add,
+  Edit,
+  Delete,
+  Dashboard as DashboardIcon,
+  BarChart as BarChartIcon,
+  TableChart,
+  Menu,
+  Person as PersonIcon,
+  AccountBalanceWallet,
+  Insights,
+  Savings,
+  Diversity3,
+  CheckCircle,
+  PendingActions,
+  MonetizationOn,
+  PeopleAlt,
+  ReceiptLong
+} from '@mui/icons-material';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
@@ -439,42 +458,48 @@ setFormData({
       title: 'Total Portfolio',
       value: formatINR(totalPortfolio),
       subtitle: 'Base Price • All transactions',
-      accent: '#2563eb'
+      accent: '#2563eb',
+      icon: AccountBalanceWallet
     },
     {
       key: 'totalBrokerage',
       title: 'Total Brokerage',
       value: formatINR(totalBrokerage),
       subtitle: 'Owner + Customer commissions',
-      accent: '#0f766e'
+      accent: '#0f766e',
+      icon: Insights
     },
     {
       key: 'ownerBrokerage',
       title: 'Owner Brokerage',
       value: formatINR(totalOwnerBrok),
       subtitle: 'Owner commissions',
-      accent: '#ea580c'
+      accent: '#ea580c',
+      icon: Savings
     },
     {
       key: 'customerBrokerage',
       title: 'Customer Brokerage',
       value: formatINR(totalCustomerBrok),
       subtitle: 'Customer commissions',
-      accent: '#7c3aed'
+      accent: '#7c3aed',
+      icon: Diversity3
     },
     {
       key: 'paymentReceived',
       title: 'Payment Received',
       value: formatINR(paymentReceived),
       subtitle: 'Based on receive dates',
-      accent: '#047857'
+      accent: '#047857',
+      icon: CheckCircle
     },
     {
       key: 'outstandingAmount',
       title: 'Outstanding Amount',
       value: formatINR(outstandingAmount),
       subtitle: 'Pending payments',
-      accent: '#b91c1c'
+      accent: '#b91c1c',
+      icon: PendingActions
     }
   ], [totalPortfolio, totalBrokerage, totalOwnerBrok, totalCustomerBrok, paymentReceived, outstandingAmount]);
 
@@ -484,14 +509,16 @@ setFormData({
       title: 'Received',
       value: formatINR(paymentReceived),
       meta: `${data.filter(item => item.receiveDate && item.customerReceiveDate).length} fully received`,
-      accent: '#16a34a'
+      accent: '#16a34a',
+      icon: CheckCircle
     },
     {
       key: 'outstanding',
       title: 'Outstanding',
       value: formatINR(outstandingAmount),
       meta: `${data.filter(item => !(item.receiveDate && item.customerReceiveDate)).length} pending payments`,
-      accent: '#dc2626'
+      accent: '#dc2626',
+      icon: PendingActions
     },
     {
       key: 'ownerOnly',
@@ -504,7 +531,8 @@ setFormData({
         return sum;
       }, 0)),
       meta: `${data.filter(item => item.receiveDate && !item.customerReceiveDate).length} owner received`,
-      accent: '#f97316'
+      accent: '#f97316',
+      icon: MonetizationOn
     },
     {
       key: 'customerOnly',
@@ -517,9 +545,22 @@ setFormData({
         return sum;
       }, 0)),
       meta: `${data.filter(item => !item.receiveDate && item.customerReceiveDate).length} customer received`,
-      accent: '#8b5cf6'
+      accent: '#8b5cf6',
+      icon: PeopleAlt
     }
   ], [data, paymentReceived, outstandingAmount]);
+
+  const cardBaseStyles = {
+    borderRadius: 4,
+    p: { xs: 2.5, sm: 3 },
+    height: '100%',
+    border: '1px solid rgba(15,23,42,0.06)',
+    boxShadow: '0px 20px 40px rgba(15,23,42,0.08)',
+    backgroundColor: 'background.paper',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 1
+  };
 
   const topEmployees = useMemo(() => {
     const sorted = [...chartData].sort((a, b) => b.value - a.value);
@@ -1017,44 +1058,42 @@ case 'user-settings':
 
                 {/* Metric Cards */}
                 <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
-                  {metricCards.map((card) => (
-                    <Grid item xs={12} sm={6} md={4} lg={3} key={card.key}>
-                      <Paper
-                        sx={{
-                          p: { xs: 2, sm: 3 },
-                          borderRadius: 4,
-                          height: '100%',
-                          boxShadow: '0 15px 35px rgba(15,23,42,0.08)',
-                          border: '1px solid',
-                          borderColor: 'grey.100',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: 1
-                        }}
-                      >
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Typography sx={{ fontSize: { xs: 11, sm: 12, md: 13 }, color: 'text.secondary', fontWeight: 600 }}>
+                  {metricCards.map((card) => {
+                    const Icon = card.icon;
+                    return (
+                      <Grid item xs={12} sm={6} md={4} lg={3} key={card.key}>
+                        <Paper sx={cardBaseStyles}>
+                          <Avatar
+                            sx={{
+                              width: 44,
+                              height: 44,
+                              bgcolor: `${card.accent}15`,
+                              color: card.accent
+                            }}
+                          >
+                            {Icon && <Icon fontSize="small" />}
+                          </Avatar>
+                          <Typography sx={{ fontWeight: 600, color: 'text.primary', fontSize: { xs: 14, sm: 15 } }}>
                             {card.title}
                           </Typography>
-                          <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: card.accent }} />
-                        </Box>
-                        <Typography
-                          variant="h5"
-                          sx={{
-                            fontWeight: 700,
-                            color: 'text.primary',
-                            fontSize: { xs: '1.2rem', sm: '1.5rem', md: '1.8rem' },
-                            lineHeight: 1.2
-                          }}
-                        >
-                          {card.value}
-                        </Typography>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
-                          {card.subtitle}
-                        </Typography>
-                      </Paper>
-                    </Grid>
-                  ))}
+                          <Typography
+                            variant="h5"
+                            sx={{
+                              fontWeight: 700,
+                              color: 'text.primary',
+                              fontSize: { xs: '1.3rem', sm: '1.6rem', md: '1.8rem' },
+                              lineHeight: 1.2
+                            }}
+                          >
+                            {card.value}
+                          </Typography>
+                          <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: 'text.secondary' }}>
+                            {card.subtitle}
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                    );
+                  })}
                 </Grid>
 
                 {/* Payment Status */}
@@ -1062,30 +1101,43 @@ case 'user-settings':
                   Payment Status Analytics
                 </Typography>
                 <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
-                  {paymentStatusCards.map((card) => (
-                    <Grid item xs={12} sm={6} md={3} key={card.key}>
-                      <Paper
-                        sx={{
-                          p: { xs: 2, sm: 3 },
-                          borderRadius: 4,
-                          border: '1px solid',
-                          borderColor: 'grey.100',
-                          boxShadow: '0 12px 28px rgba(15,23,42,0.08)',
-                          minHeight: 140
-                        }}
-                      >
-                        <Typography sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1rem' }, color: card.accent }}>
-                          {card.title}
-                        </Typography>
-                        <Typography sx={{ fontWeight: 700, fontSize: { xs: '1.2rem', sm: '1.6rem' }, my: 0.5 }}>
-                          {card.value}
-                        </Typography>
-                        <Typography sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, color: 'text.secondary' }}>
-                          {card.meta}
-                        </Typography>
-                      </Paper>
-                    </Grid>
-                  ))}
+                  {paymentStatusCards.map((card) => {
+                    const Icon = card.icon;
+                    return (
+                      <Grid item xs={12} sm={6} md={3} key={card.key}>
+                        <Paper sx={{ ...cardBaseStyles, minHeight: 170 }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                            <Avatar
+                              sx={{
+                                width: 40,
+                                height: 40,
+                                bgcolor: `${card.accent}15`,
+                                color: card.accent
+                              }}
+                            >
+                              {Icon && <Icon fontSize="small" />}
+                            </Avatar>
+                            <Chip
+                              label={card.title}
+                              size="small"
+                              sx={{
+                                bgcolor: `${card.accent}10`,
+                                color: card.accent,
+                                fontWeight: 600,
+                                borderRadius: 2
+                              }}
+                            />
+                          </Box>
+                          <Typography sx={{ fontWeight: 700, fontSize: { xs: '1.2rem', sm: '1.5rem' } }}>
+                            {card.value}
+                          </Typography>
+                          <Typography sx={{ fontSize: { xs: '0.8rem', sm: '0.9rem' }, color: 'text.secondary' }}>
+                            {card.meta}
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                    );
+                  })}
                 </Grid> */}
 
                 {/* Analytics Overview */}
