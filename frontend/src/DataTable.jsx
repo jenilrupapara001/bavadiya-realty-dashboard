@@ -262,7 +262,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
           { label: 'Outstanding Amount', value: formatINR(outstandingAmount), color: '#dc2626' }
         ].map((card) => (
           <Grid item xs={12} sm={6} lg={3} key={card.label}>
-            <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 4, height: '100%' }}>
+            <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2, height: '100%' }}>
               <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: 'text.secondary', fontWeight: 600 }}>
                 {card.label}
               </Typography>
@@ -278,7 +278,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
       <Paper sx={{ 
         p: { xs: 1.5, sm: 2, md: 3 }, 
         mb: { xs: 2, md: 3 }, 
-        borderRadius: 3 
+        borderRadius: 2 
       }}>
         <Typography 
           variant="h6" 

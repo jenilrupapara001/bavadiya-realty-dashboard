@@ -17,7 +17,17 @@ import {
   MenuItem,
   useTheme,
   useMediaQuery,
+  Avatar,
 } from '@mui/material';
+import {
+  AccountBalanceWallet,
+  Insights,
+  CheckCircle,
+  PendingActions,
+  Savings,
+  Diversity3,
+  Person,
+} from '@mui/icons-material';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
 import {
@@ -308,30 +318,55 @@ const Analytics = () => {
   const activeSlice =
     activeProjectIndex !== null ? safeProjectChartData[activeProjectIndex] : null;
 
+  const cardBaseStyles = {
+    borderRadius: 3,
+    p: { xs: 2.5, sm: 3 },
+    height: '100%',
+    border: '1px solid rgba(15,23,42,0.06)',
+    boxShadow: '0px 12px 32px rgba(15,23,42,0.06)',
+    backgroundColor: 'background.paper',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 1,
+    transition: 'all 0.2s ease',
+    '&:hover': {
+      boxShadow: '0px 16px 40px rgba(15,23,42,0.1)',
+      transform: 'translateY(-1px)'
+    }
+  };
+
   const summaryCards = useMemo(() => [
     {
       key: 'portfolio',
       title: 'Total Portfolio',
       value: formatINR(totalPayments),
-      subtitle: 'Base Price • All transactions'
+      subtitle: 'Base Price • All transactions',
+      accent: '#2563eb',
+      icon: AccountBalanceWallet
     },
     {
       key: 'brokerage',
       title: 'Total Brokerage',
       value: formatINR(totalBrokerage),
-      subtitle: 'Owner + Customer commissions'
+      subtitle: 'Owner + Customer commissions',
+      accent: '#0f766e',
+      icon: Insights
     },
     {
       key: 'received',
       title: 'Payment Received',
       value: formatINR(paymentReceived),
-      subtitle: 'Based on receive dates'
+      subtitle: 'Based on receive dates',
+      accent: '#047857',
+      icon: CheckCircle
     },
     {
       key: 'outstanding',
       title: 'Outstanding Amount',
       value: formatINR(outstandingAmount),
-      subtitle: 'Pending payments'
+      subtitle: 'Pending payments',
+      accent: '#b91c1c',
+      icon: PendingActions
     }
   ], [totalPayments, totalBrokerage, paymentReceived, outstandingAmount]);
 
@@ -340,13 +375,17 @@ const Analytics = () => {
       key: 'receivedStatus',
       title: 'Received',
       value: formatINR(paymentReceived),
-      meta: `${data.filter(item => item.receiveDate && item.customerReceiveDate).length} fully received`
+      meta: `${data.filter(item => item.receiveDate && item.customerReceiveDate).length} fully received`,
+      accent: '#16a34a',
+      icon: CheckCircle
     },
     {
       key: 'outstandingStatus',
       title: 'Outstanding',
       value: formatINR(outstandingAmount),
-      meta: `${data.filter(item => !(item.receiveDate && item.customerReceiveDate)).length} pending payments`
+      meta: `${data.filter(item => !(item.receiveDate && item.customerReceiveDate)).length} pending payments`,
+      accent: '#dc2626',
+      icon: PendingActions
     },
     {
       key: 'ownerOnly',
@@ -358,7 +397,9 @@ const Analytics = () => {
         }
         return sum;
       }, 0)),
-      meta: `${data.filter(item => item.receiveDate && !item.customerReceiveDate).length} owner received`
+      meta: `${data.filter(item => item.receiveDate && !item.customerReceiveDate).length} owner received`,
+      accent: '#f97316',
+      icon: Savings
     },
     {
       key: 'customerOnly',
@@ -370,7 +411,9 @@ const Analytics = () => {
         }
         return sum;
       }, 0)),
-      meta: `${data.filter(item => !item.receiveDate && item.customerReceiveDate).length} customer received`
+      meta: `${data.filter(item => !item.receiveDate && item.customerReceiveDate).length} customer received`,
+      accent: '#8b5cf6',
+      icon: Diversity3
     }
   ], [data, paymentReceived, outstandingAmount]);
 
@@ -469,47 +512,86 @@ const Analytics = () => {
       </Typography>
 
       {/* Key Metrics */}
-      <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: 4 }}>
-        {summaryCards.map((card) => (
-          <Grid item xs={12} sm={6} md={3} key={card.key}>
-            <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: 'text.secondary', fontWeight: 600 }}>
+      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
+        {summaryCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <Grid item xs={12} sm={6} md={3} key={card.key}>
+              <Paper sx={cardBaseStyles}>
+                <Avatar
+                  sx={{
+                    width: 44,
+                    height: 44,
+                    bgcolor: `${card.accent}15`,
+                    color: card.accent
+                  }}
+                >
+                  {Icon && <Icon fontSize="small" />}
+                </Avatar>
+                <Typography sx={{ fontWeight: 600, color: 'text.primary', fontSize: { xs: 14, sm: 15 } }}>
                   {card.title}
               </Typography>
-                <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: 'primary.main', opacity: 0.35 }} />
-              </Box>
-              <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary' }}>
-                {card.value}
+                <Typography
+                  variant="h5"
+                  sx={{
+                fontWeight: 700, 
+                    color: 'text.primary',
+                    fontSize: { xs: '1.3rem', sm: '1.6rem', md: '1.8rem' },
+                lineHeight: 1.2
+                  }}
+                >
+                  {card.value}
               </Typography>
-              <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: 'text.secondary' }}>
-                {card.subtitle}
+                <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: 'text.secondary' }}>
+                  {card.subtitle}
               </Typography>
-            </Paper>
+              </Paper>
         </Grid>
-        ))}
+          );
+        })}
       </Grid>
 
       {/* Payment Status */}
       <Typography variant="h5" sx={{ fontWeight: 600, mb: 3 }}>
         Payment Status Analytics
       </Typography>
-      <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: 4 }}>
-        {paymentCards.map((card) => (
-          <Grid item xs={12} sm={6} md={3} key={card.key}>
-            <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2, minHeight: 150 }}>
-              <Typography sx={{ fontWeight: 600, color: 'text.secondary', mb: 1 }}>
-                {card.title}
+      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
+        {paymentCards.map((card) => {
+          const Icon = card.icon;
+          return (
+            <Grid item xs={12} sm={6} md={3} key={card.key}>
+              <Paper sx={cardBaseStyles}>
+                <Avatar
+                  sx={{
+                    width: 44,
+                    height: 44,
+                    bgcolor: `${card.accent}15`,
+                    color: card.accent
+                  }}
+                >
+                  {Icon && <Icon fontSize="small" />}
+                </Avatar>
+                <Typography sx={{ fontWeight: 600, color: 'text.primary', fontSize: { xs: 14, sm: 15 } }}>
+                  {card.title}
               </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary', mb: 0.5 }}>
-                {card.value}
+                <Typography
+                  variant="h5"
+                  sx={{
+                fontWeight: 700, 
+                    color: 'text.primary',
+                    fontSize: { xs: '1.3rem', sm: '1.6rem', md: '1.8rem' },
+                lineHeight: 1.2
+                  }}
+                >
+                  {card.value}
               </Typography>
-              <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: 'text.secondary' }}>
-                {card.meta}
+                <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: 'text.secondary' }}>
+                  {card.meta}
               </Typography>
-            </Paper>
+              </Paper>
         </Grid>
-        ))}
+          );
+        })}
       </Grid>
 
       {/* Received By Cards */}
@@ -522,20 +604,43 @@ const Analytics = () => {
             <Alert severity="info">No payment records with received amounts found. Add payment records to see analytics.</Alert>
           </Grid>
         ) : (
-          safeReceivedByData.map((person, index) => (
+          safeReceivedByData.map((person, index) => {
+            const accentColor = COLORS[index % COLORS.length];
+            return (
             <Grid item xs={12} sm={6} md={4} key={person.name}>
-              <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2, minHeight: 160 }}>
-                <Typography sx={{ fontWeight: 600, mb: 0.75 }}>{person.name}</Typography>
-                <Typography variant="h5" sx={{ fontWeight: 700, color: COLORS[index % COLORS.length], mb: 1 }}>
+                <Paper sx={cardBaseStyles}>
+                  <Avatar
+                    sx={{
+                      width: 44,
+                      height: 44,
+                      bgcolor: `${accentColor}15`,
+                      color: accentColor
+                    }}
+                  >
+                    <Person fontSize="small" />
+                  </Avatar>
+                  <Typography sx={{ fontWeight: 600, color: 'text.primary', fontSize: { xs: 14, sm: 15 } }}>
+                    {person.name}
+                  </Typography>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                    fontWeight: 700, 
+                      color: accentColor,
+                      fontSize: { xs: '1.3rem', sm: '1.6rem', md: '1.8rem' },
+                    lineHeight: 1.2
+                    }}
+                  >
                     {formatINR(person.amount)}
                   </Typography>
-                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                  <Chip label={`Owner: ${person.ownerReceived}`} size="small" variant="outlined" />
-                  <Chip label={`Customer: ${person.customerReceived}`} size="small" variant="outlined" />
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 0.5 }}>
+                    <Chip label={`Owner: ${person.ownerReceived}`} size="small" variant="outlined" />
+                    <Chip label={`Customer: ${person.customerReceived}`} size="small" variant="outlined" />
                   </Box>
-              </Paper>
+                </Paper>
             </Grid>
-          ))
+            );
+          })
         )}
       </Grid>
 

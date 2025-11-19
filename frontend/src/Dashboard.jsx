@@ -1305,7 +1305,7 @@ case 'user-settings':
                       <Paper
                         sx={{
                           p: { xs: 2, sm: 3 },
-                          borderRadius: 4,
+                          borderRadius: 2,
                           border: '1px solid',
                           borderColor: 'grey.100',
                           boxShadow: '0 15px 35px rgba(15,23,42,0.08)',
@@ -1329,7 +1329,7 @@ case 'user-settings':
                               flexDirection: 'column',
                               gap: 0.5,
                               p: 1.5,
-                              borderRadius: 3,
+                              borderRadius: 2,
                               bgcolor: 'grey.50'
                             }}
                           >
