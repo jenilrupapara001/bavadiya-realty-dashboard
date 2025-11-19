@@ -1,14 +1,12 @@
 import React, { useState, useContext } from 'react';
 import {
-  Container,
   Paper,
   TextField,
   Button,
   Typography,
   Box,
   Alert,
-  Avatar,
-  Grid,
+  Avatar
 } from '@mui/material';
 import { LockOutlined } from '@mui/icons-material';
 import { AuthContext } from './AuthContext';

@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Container,
   Typography,
   Box,
   Paper,
   TextField,
   Button,
   Grid,
-  Card,
-  CardContent,
   Avatar,
   Tab,
   Tabs,
@@ -25,7 +22,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
   TablePagination,
@@ -267,17 +263,52 @@ const UserSettings = () => {
     </div>
   );
 
-  return (
-    <Container
-      maxWidth="lg"
-      disableGutters
-      sx={{ mt: 4, mb: 4, px: { xs: 2, sm: 3, md: 3 } }}
-    >
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main', mb: 4 }}>
-        User Settings & Management
-      </Typography>
+  const accountHighlights = [
+    { label: 'Role', value: profileData.role || 'User' },
+    { label: 'Username', value: profileData.username || '—' },
+    { label: 'Email', value: profileData.email || 'Not set' }
+  ];
 
-      <Paper sx={{ width: '100%', borderRadius: 3 }}>
+  return (
+    <Box
+      component="section"
+      sx={{ maxWidth: '1200px', mx: 'auto', py: 4, px: { xs: 2, sm: 3, md: 4 } }}
+    >
+      <Paper
+        sx={{
+          borderRadius: 4,
+          p: { xs: 3, md: 4 },
+          mb: 4,
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          gap: 3,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          background: 'linear-gradient(135deg, #0f172a 0%, #1d4ed8 80%)',
+          color: 'primary.contrastText'
+        }}
+      >
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
+            User Settings & Management
+          </Typography>
+          <Typography variant="body2" sx={{ opacity: 0.85 }}>
+            Control access, update your profile, and manage the team in one workspace.
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+          {accountHighlights.map((item) => (
+            <Chip
+              key={item.label}
+              label={`${item.label}: ${item.value}`}
+              variant="outlined"
+              sx={{ borderColor: 'primary.contrastText', color: 'primary.contrastText' }}
+            />
+          ))}
+        </Box>
+      </Paper>
+
+      <Paper sx={{ width: '100%', borderRadius: 4, p: { xs: 1, md: 2 } }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs 
             value={activeTab} 
@@ -304,102 +335,98 @@ const UserSettings = () => {
         <TabPanel value={activeTab} index={0}>
           <Grid container spacing={4}>
             <Grid item xs={12} md={4}>
-              <Card sx={{ textAlign: 'center', borderRadius: 3 }}>
-                <CardContent sx={{ p: 4 }}>
-                  <Avatar
-                    sx={{ 
-                      width: 120, 
-                      height: 120, 
-                      mx: 'auto', 
-                      mb: 2,
-                      bgcolor: 'primary.main',
-                      fontSize: '3rem'
-                    }}
-                  >
-                    {profileData.fullName ? profileData.fullName.charAt(0).toUpperCase() : <Person />}
-                  </Avatar>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    {profileData.fullName || 'User Name'}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    {profileData.email || 'email@example.com'}
-                  </Typography>
-                  <Chip 
-                    label={profileData.role || 'User'} 
-                    color="primary" 
-                    variant="outlined"
-                  />
-                </CardContent>
-              </Card>
+              <Paper sx={{ textAlign: 'center', borderRadius: 4, p: 4 }}>
+                <Avatar
+                  sx={{ 
+                    width: 120, 
+                    height: 120, 
+                    mx: 'auto', 
+                    mb: 2,
+                    bgcolor: 'primary.main',
+                    fontSize: '3rem'
+                  }}
+                >
+                  {profileData.fullName ? profileData.fullName.charAt(0).toUpperCase() : <Person />}
+                </Avatar>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  {profileData.fullName || 'User Name'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  {profileData.email || 'email@example.com'}
+                </Typography>
+                <Chip 
+                  label={profileData.role || 'User'} 
+                  color="primary" 
+                  variant="outlined"
+                />
+              </Paper>
             </Grid>
             
             <Grid item xs={12} md={8}>
-              <Card sx={{ borderRadius: 3 }}>
-                <CardContent sx={{ p: 4 }}>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                    Personal Information
-                  </Typography>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        label="Full Name"
-                        value={profileData.fullName}
-                        onChange={(e) => setProfileData({...profileData, fullName: e.target.value})}
-                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        label="Email"
-                        type="email"
-                        value={profileData.email}
-                        onChange={(e) => setProfileData({...profileData, email: e.target.value})}
-                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        label="Phone Number"
-                        value={profileData.phone}
-                        onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
-                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        label="Username"
-                        value={profileData.username}
-                        disabled
-                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                        <Button
-                          variant="contained"
-                          startIcon={<Save />}
-                          onClick={handleProfileUpdate}
-                          disabled={loading}
-                          sx={{ borderRadius: 2 }}
-                        >
-                          Save Changes
-                        </Button>
-                        <Button
-                          variant="outlined"
-                          onClick={() => fetchCurrentUser()}
-                          sx={{ borderRadius: 2 }}
-                        >
-                          Reset
-                        </Button>
-                      </Box>
-                    </Grid>
+              <Paper sx={{ borderRadius: 4, p: 4 }}>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                  Personal Information
+                </Typography>
+                <Grid container spacing={3}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Full Name"
+                      value={profileData.fullName}
+                      onChange={(e) => setProfileData({...profileData, fullName: e.target.value})}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    />
                   </Grid>
-                </CardContent>
-              </Card>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Email"
+                      type="email"
+                      value={profileData.email}
+                      onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Phone Number"
+                      value={profileData.phone}
+                      onChange={(e) => setProfileData({...profileData, phone: e.target.value})}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Username"
+                      value={profileData.username}
+                      disabled
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Box sx={{ display: 'flex', gap: 2, mt: 2, flexWrap: 'wrap' }}>
+                      <Button
+                        variant="contained"
+                        startIcon={<Save />}
+                        onClick={handleProfileUpdate}
+                        disabled={loading}
+                        sx={{ borderRadius: 2 }}
+                      >
+                        Save Changes
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        onClick={() => fetchCurrentUser()}
+                        sx={{ borderRadius: 2 }}
+                      >
+                        Reset
+                      </Button>
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Paper>
             </Grid>
           </Grid>
         </TabPanel>
@@ -408,136 +435,145 @@ const UserSettings = () => {
         <TabPanel value={activeTab} index={1}>
           <Grid container justifyContent="center">
             <Grid item xs={12} md={8}>
-              <Card sx={{ borderRadius: 3 }}>
-                <CardContent sx={{ p: 4 }}>
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                    Change Password
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    Ensure your account is using a long, random password to stay secure.
-                  </Typography>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Current Password"
-                        type={showPasswords.current ? 'text' : 'password'}
-                        value={passwordData.currentPassword}
-                        onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <IconButton
-                                onClick={() => setShowPasswords({...showPasswords, current: !showPasswords.current})}
-                              >
-                                {showPasswords.current ? <VisibilityOff /> : <Visibility />}
-                              </IconButton>
-                            </InputAdornment>
-                          )
-                        }}
-                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        label="New Password"
-                        type={showPasswords.new ? 'text' : 'password'}
-                        value={passwordData.newPassword}
-                        onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <IconButton
-                                onClick={() => setShowPasswords({...showPasswords, new: !showPasswords.new})}
-                              >
-                                {showPasswords.new ? <VisibilityOff /> : <Visibility />}
-                              </IconButton>
-                            </InputAdornment>
-                          )
-                        }}
-                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <TextField
-                        fullWidth
-                        label="Confirm New Password"
-                        type={showPasswords.confirm ? 'text' : 'password'}
-                        value={passwordData.confirmPassword}
-                        onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <IconButton
-                                onClick={() => setShowPasswords({...showPasswords, confirm: !showPasswords.confirm})}
-                              >
-                                {showPasswords.confirm ? <VisibilityOff /> : <Visibility />}
-                              </IconButton>
-                            </InputAdornment>
-                          )
-                        }}
-                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Button
-                        variant="contained"
-                        startIcon={<Security />}
-                        onClick={handlePasswordChange}
-                        disabled={loading || !passwordData.currentPassword || !passwordData.newPassword}
-                        sx={{ borderRadius: 2 }}
-                      >
-                        Change Password
-                      </Button>
-                    </Grid>
+              <Paper sx={{ borderRadius: 4, p: 4 }}>
+                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                  Change Password
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  Ensure your account is using a long, random password to stay secure.
+                </Typography>
+                <Grid container spacing={3}>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Current Password"
+                      type={showPasswords.current ? 'text' : 'password'}
+                      value={passwordData.currentPassword}
+                      onChange={(e) => setPasswordData({...passwordData, currentPassword: e.target.value})}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() => setShowPasswords({...showPasswords, current: !showPasswords.current})}
+                            >
+                              {showPasswords.current ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    />
                   </Grid>
-                </CardContent>
-              </Card>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="New Password"
+                      type={showPasswords.new ? 'text' : 'password'}
+                      value={passwordData.newPassword}
+                      onChange={(e) => setPasswordData({...passwordData, newPassword: e.target.value})}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() => setShowPasswords({...showPasswords, new: !showPasswords.new})}
+                            >
+                              {showPasswords.new ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      label="Confirm New Password"
+                      type={showPasswords.confirm ? 'text' : 'password'}
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => setPasswordData({...passwordData, confirmPassword: e.target.value})}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={() => setShowPasswords({...showPasswords, confirm: !showPasswords.confirm})}
+                            >
+                              {showPasswords.confirm ? <VisibilityOff /> : <Visibility />}
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                      sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Button
+                      variant="contained"
+                      startIcon={<Security />}
+                      onClick={handlePasswordChange}
+                      disabled={loading || !passwordData.currentPassword || !passwordData.newPassword}
+                      sx={{ borderRadius: 2 }}
+                    >
+                      Change Password
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Paper>
             </Grid>
           </Grid>
         </TabPanel>
 
         {/* User Management Tab */}
         <TabPanel value={activeTab} index={2}>
-          <Box sx={{ 
-            mb: 3, 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: { xs: 'stretch', sm: 'center' },
-            flexDirection: { xs: 'column', sm: 'row' },
-            gap: { xs: 2, sm: 0 }
-          }}>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              User Management
-            </Typography>
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={() => setAddUserOpen(true)}
-              sx={{ borderRadius: 2 }}
-            >
-              Add New User
-            </Button>
-          </Box>
-
-          <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
+          <Paper sx={{ borderRadius: 4, p: { xs: 2, md: 3 } }}>
+            <Box sx={{ 
+              mb: 2, 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: { xs: 'stretch', sm: 'center' },
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: { xs: 2, sm: 0 }
+            }}>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  User Management
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Invite admins and disable inactive users.
+                </Typography>
+              </Box>
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => setAddUserOpen(true)}
+                sx={{ borderRadius: 2 }}
+              >
+                Add New User
+              </Button>
+            </Box>
+            <Divider sx={{ mb: 2 }} />
             <Box sx={{ width: '100%', overflowX: 'auto' }}>
               <Table sx={{ minWidth: 760 }}>
                 <TableHead>
-                  <TableRow sx={{ bgcolor: 'primary.main', '& th': { color: 'white', fontWeight: 600 } }}>
+                  <TableRow sx={{ bgcolor: 'background.default', '& th': { fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase' } }}>
                     <TableCell>Name</TableCell>
                     <TableCell>Username</TableCell>
                     <TableCell>Email</TableCell>
                     <TableCell>Role</TableCell>
                     <TableCell>Status</TableCell>
                     <TableCell>Last Login</TableCell>
-                    <TableCell>Actions</TableCell>
+                    <TableCell align="right">Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {paginatedUsers.map((user) => (
-                    <TableRow key={user._id}>
+                    <TableRow
+                      key={user._id}
+                      sx={{
+                        '&:nth-of-type(odd)': { bgcolor: 'action.hover' },
+                        '&:hover': { bgcolor: 'action.selected' }
+                      }}
+                    >
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           <Avatar sx={{ width: 32, height: 32, mr: 2, bgcolor: 'primary.main' }}>
@@ -566,7 +602,7 @@ const UserSettings = () => {
                       <TableCell>
                         {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
                       </TableCell>
-                      <TableCell>
+                      <TableCell align="right">
                         <IconButton
                           onClick={() => handleDeactivateUser(user._id)}
                           sx={{ color: 'error.main' }}
@@ -592,7 +628,7 @@ const UserSettings = () => {
               }}
               rowsPerPageOptions={[5, 10, 25, 50]}
             />
-          </TableContainer>
+          </Paper>
         </TabPanel>
       </Paper>
 
@@ -703,7 +739,7 @@ const UserSettings = () => {
           {error || success}
         </Alert>
       </Snackbar>
-    </Container>
+    </Box>
   );
 };
 

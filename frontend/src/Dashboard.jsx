@@ -533,6 +533,55 @@ setFormData({
     return { totalEntries, totalValue, pending };
   }, [filteredData]);
 
+  const employeePerformance = useMemo(() => {
+    return data.reduce((acc, item) => {
+      if (!item.employee) return acc;
+      const amount = item.basePrice || 0;
+      acc[item.employee] = (acc[item.employee] || 0) + amount;
+      return acc;
+    }, {});
+  }, [data]);
+
+  const projectPerformance = useMemo(() => {
+    return data.reduce((acc, item) => {
+      if (!item.projectName) return acc;
+      if (!acc[item.projectName]) {
+        acc[item.projectName] = { deals: 0, value: 0 };
+      }
+      acc[item.projectName].deals += 1;
+      acc[item.projectName].value += item.basePrice || 0;
+      return acc;
+    }, {});
+  }, [data]);
+
+  const employeeStats = useMemo(() => {
+    const totalEmployees = employees.length;
+    const managedPortfolio = Object.values(employeePerformance).reduce((sum, value) => sum + value, 0);
+    const [topPerformer, topValue] =
+      Object.entries(employeePerformance).sort((a, b) => b[1] - a[1])[0] || [null, 0];
+
+    return {
+      totalEmployees,
+      managedPortfolio,
+      topPerformer: topPerformer || '—',
+      topValue
+    };
+  }, [employees, employeePerformance]);
+
+  const projectStats = useMemo(() => {
+    const performanceEntries = Object.values(projectPerformance);
+    const totalDeals = performanceEntries.reduce((sum, item) => sum + item.deals, 0);
+    const portfolioValue = performanceEntries.reduce((sum, item) => sum + item.value, 0);
+    const activeProjects = projects.filter((project) => project.status === 'Active').length;
+
+    return {
+      totalProjects: projects.length,
+      activeProjects,
+      totalDeals,
+      portfolioValue
+    };
+  }, [projects, projectPerformance]);
+
 const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, view: 'dashboard' },
     { text: 'Analytics Overview', icon: <BarChartIcon />, view: 'analytics' },
@@ -558,34 +607,122 @@ const menuItems = [
         }} onDeleteEntry={handleDelete} />;
       case 'employees':
         return (
-          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: 'primary.main', mb: 4 }}>
-              Employee Management
-            </Typography>
-            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end' }}>
-              <Button variant="contained" startIcon={<Add />} onClick={() => setEmployeeOpen(true)}>
-                Add Employee
-              </Button>
+          <Box component="section" sx={{ maxWidth: '1200px', mx: 'auto', pt: 4, pb: 6, px: { xs: 2, md: 4 } }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 4 }}>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                Employee Management
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Maintain your brokerage team, employee codes, and contact details.
+              </Typography>
             </Box>
-            <TableContainer component={Paper} sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+
+            <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: 4 }}>
+              <Grid item xs={12} sm={4}>
+                <Paper sx={{ p: 3, borderRadius: 4 }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                    Total Employees
+                  </Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                    {employeeStats.totalEmployees}
+                  </Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <Paper sx={{ p: 3, borderRadius: 4 }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                    Portfolio Managed
+                  </Typography>
+                  <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                    {formatINR(employeeStats.managedPortfolio)}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Sum of assigned deals
+                  </Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} sm={4}>
+                <Paper sx={{ p: 3, borderRadius: 4 }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>
+                    Top Performer
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    {employeeStats.topPerformer}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {employeeStats.topPerformer !== '—' ? formatINR(employeeStats.topValue) : 'No data'}
+                  </Typography>
+                </Paper>
+              </Grid>
+            </Grid>
+
+            <Paper sx={{ borderRadius: 4, p: { xs: 2, md: 3 } }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: { xs: 'column', md: 'row' },
+                  justifyContent: 'space-between',
+                  alignItems: { xs: 'flex-start', md: 'center' },
+                  gap: 2,
+                  mb: 2
+                }}
+              >
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Team Directory
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Edit employee details and keep identifiers in sync.
+                  </Typography>
+                </Box>
+                <Button variant="contained" startIcon={<Add />} onClick={() => setEmployeeOpen(true)}>
+                  Add Employee
+                </Button>
+              </Box>
+              <Divider sx={{ mb: 2 }} />
               <Box sx={{ width: '100%', overflowX: 'auto' }}>
-                <Table sx={{ minWidth: 600 }}>
+                <Table sx={{ minWidth: 640 }}>
                   <TableHead>
-                    <TableRow sx={{ bgcolor: 'primary.main', '& th': { color: 'white', fontWeight: 600 } }}>
+                    <TableRow
+                      sx={{
+                        bgcolor: 'background.default',
+                        '& th': { fontWeight: 600, fontSize: 13, color: 'text.secondary', textTransform: 'uppercase' }
+                      }}
+                    >
                       <TableCell>Name</TableCell>
                       <TableCell>Code</TableCell>
-                      <TableCell>Number</TableCell>
-                      <TableCell>Actions</TableCell>
+                      <TableCell>Contact Number</TableCell>
+                      <TableCell align="right">Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {employees.map((emp, index) => (
-                      <TableRow key={index}>
-                        <TableCell>{emp.name}</TableCell>
-                        <TableCell>{emp.code}</TableCell>
-                        <TableCell>{emp.number}</TableCell>
+                      <TableRow
+                        key={index}
+                        sx={{
+                          '&:nth-of-type(odd)': { bgcolor: 'action.hover' },
+                          '&:hover': { bgcolor: 'action.selected' }
+                        }}
+                      >
                         <TableCell>
-                          <IconButton onClick={() => { setEmployeeFormData(emp); setEditingEmployeeIndex(emp._id); setEmployeeOpen(true); }}>
+                          <Typography sx={{ fontWeight: 600 }}>{emp.name}</Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {emp.email || '—'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Chip label={emp.code} size="small" variant="outlined" />
+                        </TableCell>
+                        <TableCell>{emp.number || '—'}</TableCell>
+                        <TableCell align="right">
+                          <IconButton
+                            onClick={() => {
+                              setEmployeeFormData(emp);
+                              setEditingEmployeeIndex(emp._id);
+                              setEmployeeOpen(true);
+                            }}
+                            sx={{ color: 'primary.main' }}
+                          >
                             <Edit />
                           </IconButton>
                         </TableCell>
@@ -594,87 +731,164 @@ const menuItems = [
                   </TableBody>
                 </Table>
               </Box>
-            </TableContainer>
-          </Container>
+            </Paper>
+          </Box>
         );
       case 'projects':
         return (
-          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: 'primary.main', mb: 4 }}>
-              Project Management
-            </Typography>
-            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'flex-end' }}>
-              <Button variant="contained" startIcon={<Add />} onClick={() => setProjectOpen(true)}>
-                Add Project
-              </Button>
+          <Box component="section" sx={{ maxWidth: '1200px', mx: 'auto', pt: 4, pb: 6, px: { xs: 2, md: 4 } }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 4 }}>
+              <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                Project Management
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Track project status, portfolio value, and overall pipeline.
+              </Typography>
             </Box>
 
-            {/* Projects Table */}
-            <Paper sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
-              <TableContainer>
-                <Box sx={{ width: '100%', overflowX: 'auto' }}>
-                  <Table sx={{ minWidth: 800 }}>
-                    <TableHead>
-                      <TableRow sx={{ bgcolor: 'primary.main', '& th': { color: 'white', fontWeight: 600 } }}>
-                        <TableCell>Project Name</TableCell>
-                        <TableCell>Description</TableCell>
-                        <TableCell>Location</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell>Total Deals</TableCell>
-                        <TableCell>Total Value</TableCell>
-                        <TableCell>Actions</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {projects.map((project) => {
-                        // Calculate project statistics from data
-                        const projectStats = data.filter(item => item.projectName === project.name).reduce((acc, item) => {
-                          acc.deals += 1;
-                          acc.value += item.basePrice || 0;
-                          return acc;
-                        }, { deals: 0, value: 0 });
+            <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: 4 }}>
+              <Grid item xs={12} sm={3}>
+                <Paper sx={{ p: 3, borderRadius: 4 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+                    Projects
+                  </Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                    {projectStats.totalProjects}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {projectStats.activeProjects} active
+                  </Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} sm={3}>
+                <Paper sx={{ p: 3, borderRadius: 4 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+                    Total Deals
+                  </Typography>
+                  <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                    {projectStats.totalDeals}
+                  </Typography>
+                </Paper>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Paper sx={{ p: 3, borderRadius: 4 }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+                    Portfolio Value
+                  </Typography>
+                  <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                    {formatINR(projectStats.portfolioValue)}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Across all recorded deals
+                  </Typography>
+                </Paper>
+              </Grid>
+            </Grid>
 
-                        return (
-                          <TableRow key={project._id}>
-                            <TableCell sx={{ fontWeight: 500 }}>{project.name}</TableCell>
-                            <TableCell>{project.description || '-'}</TableCell>
-                            <TableCell>{project.location || '-'}</TableCell>
-                            <TableCell>
-                              <Chip
-                                label={project.status}
-                                color={project.status === 'Active' ? 'success' : 'warning'}
-                                size="small"
-                                variant="outlined"
-                              />
-                            </TableCell>
-                            <TableCell>{projectStats.deals}</TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
-                              ₹{projectStats.value.toLocaleString()}
-                            </TableCell>
-                            <TableCell>
-                              <IconButton onClick={() => {
+            <Paper sx={{ borderRadius: 4, p: { xs: 2, md: 3 } }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  flexDirection: { xs: 'column', md: 'row' },
+                  justifyContent: 'space-between',
+                  alignItems: { xs: 'flex-start', md: 'center' },
+                  gap: 2,
+                  mb: 2
+                }}
+              >
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    Portfolio Overview
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Add or edit projects to keep analytics up to date.
+                  </Typography>
+                </Box>
+                <Button variant="contained" startIcon={<Add />} onClick={() => setProjectOpen(true)}>
+                  Add Project
+                </Button>
+              </Box>
+              <Divider sx={{ mb: 2 }} />
+              <Box sx={{ width: '100%', overflowX: 'auto' }}>
+                <Table sx={{ minWidth: 820 }}>
+                  <TableHead>
+                    <TableRow
+                      sx={{
+                        bgcolor: 'background.default',
+                        '& th': { fontWeight: 600, fontSize: 13, color: 'text.secondary', textTransform: 'uppercase' }
+                      }}
+                    >
+                      <TableCell>Project</TableCell>
+                      <TableCell>Description</TableCell>
+                      <TableCell>Location</TableCell>
+                      <TableCell>Status</TableCell>
+                      <TableCell>Deals</TableCell>
+                      <TableCell>Value</TableCell>
+                      <TableCell align="right">Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {projects.map((project) => {
+                      const stats = data
+                        .filter((item) => item.projectName === project.name)
+                        .reduce(
+                          (acc, item) => {
+                            acc.deals += 1;
+                            acc.value += item.basePrice || 0;
+                            return acc;
+                          },
+                          { deals: 0, value: 0 }
+                        );
+
+                      return (
+                        <TableRow
+                          key={project._id}
+                          sx={{
+                            '&:nth-of-type(odd)': { bgcolor: 'action.hover' },
+                            '&:hover': { bgcolor: 'action.selected' }
+                          }}
+                        >
+                          <TableCell sx={{ fontWeight: 600 }}>{project.name}</TableCell>
+                          <TableCell sx={{ maxWidth: 240 }}>{project.description || '-'}</TableCell>
+                          <TableCell>{project.location || '-'}</TableCell>
+                          <TableCell>
+                            <Chip
+                              label={project.status}
+                              color={project.status === 'Active' ? 'success' : 'warning'}
+                              size="small"
+                              variant="outlined"
+                            />
+                          </TableCell>
+                          <TableCell>{stats.deals}</TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
+                            {formatINR(stats.value)}
+                          </TableCell>
+                          <TableCell align="right">
+                            <IconButton
+                              onClick={() => {
                                 setProjectFormData(project);
                                 setEditingProjectIndex(project._id);
                                 setProjectOpen(true);
-                              }}>
-                                <Edit />
-                              </IconButton>
-                              <IconButton
-                                onClick={() => handleProjectDelete(project._id)}
-                                sx={{ color: 'error.main', '&:hover': { bgcolor: 'error.light', color: 'white' } }}
-                              >
-                                <Delete />
-                              </IconButton>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </Box>
-              </TableContainer>
+                              }}
+                              sx={{ color: 'primary.main' }}
+                            >
+                              <Edit />
+                            </IconButton>
+                            <IconButton
+                              onClick={() => handleProjectDelete(project._id)}
+                              sx={{ color: 'error.main', '&:hover': { bgcolor: 'error.light', color: 'white' } }}
+                            >
+                              <Delete />
+                            </IconButton>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </Box>
             </Paper>
-          </Container>
+          </Box>
         );
 case 'user-settings':
         return <UserSettings />;
@@ -1427,7 +1641,6 @@ case 'user-settings':
         flexGrow: 1,
         p: 0,
         minHeight: 'calc(100vh - 64px)',
-        marginLeft: isMobile ? 0 : '280px',
         backgroundColor: '#F2F2F7',
         overflow: 'auto'
       }}>
