@@ -1058,7 +1058,7 @@ case 'user-settings':
                 </Grid>
 
                 {/* Payment Status */}
-                <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 3 }}>
+                {/* <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 3 }}>
                   Payment Status Analytics
                 </Typography>
                 <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
@@ -1086,7 +1086,7 @@ case 'user-settings':
                       </Paper>
                     </Grid>
                   ))}
-                </Grid>
+                </Grid> */}
 
                 {/* Analytics Overview */}
                 <Box sx={{ mb: 4 }}>
