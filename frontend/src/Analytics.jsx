@@ -383,7 +383,7 @@ const Analytics = () => {
         elevation={3}
         sx={{
           p: 2,
-          borderRadius: 3,
+          borderRadius: 2,
           border: '1px solid #e5e7eb',
           bgcolor: 'white',
           boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
@@ -472,7 +472,7 @@ const Analytics = () => {
       <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: 4 }}>
         {summaryCards.map((card) => (
           <Grid item xs={12} sm={6} md={3} key={card.key}>
-            <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 4, display: 'flex', flexDirection: 'column', gap: 1 }}>
+            <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: 'text.secondary', fontWeight: 600 }}>
                   {card.title}
@@ -497,7 +497,7 @@ const Analytics = () => {
       <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: 4 }}>
         {paymentCards.map((card) => (
           <Grid item xs={12} sm={6} md={3} key={card.key}>
-            <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 4, minHeight: 150 }}>
+            <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2, minHeight: 150 }}>
               <Typography sx={{ fontWeight: 600, color: 'text.secondary', mb: 1 }}>
                 {card.title}
               </Typography>
@@ -524,7 +524,7 @@ const Analytics = () => {
         ) : (
           safeReceivedByData.map((person, index) => (
             <Grid item xs={12} sm={6} md={4} key={person.name}>
-              <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 4, minHeight: 160 }}>
+              <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2, minHeight: 160 }}>
                 <Typography sx={{ fontWeight: 600, mb: 0.75 }}>{person.name}</Typography>
                 <Typography variant="h5" sx={{ fontWeight: 700, color: COLORS[index % COLORS.length], mb: 1 }}>
                     {formatINR(person.amount)}
@@ -543,7 +543,7 @@ const Analytics = () => {
       <Grid container spacing={3} sx={{ px: { xs: 2, sm: 3 } }}>
         {/* Project Distribution - Enhanced Horizontal Bar Chart */}
         <Grid item xs={12} lg={12}>
-          <Paper sx={{ p: 3, height: '100%', borderRadius: 3 }}>
+              <Paper sx={{ p: 3, height: '100%', borderRadius: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
                 Project Analytics
@@ -786,7 +786,7 @@ const Analytics = () => {
 
         {/* Employee Performance */}
         <Grid item xs={12}>
-          <Paper sx={{ p: 3, borderRadius: 3 }}>
+          <Paper sx={{ p: 3, borderRadius: 2 }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
               Employee Performance (Revenue & Commission)
             </Typography>
