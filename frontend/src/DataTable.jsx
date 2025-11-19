@@ -246,9 +246,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
       sx={{
         width: '100%',
         maxWidth: '100%',
-        px: { xs: 2, sm: 3 },
-        pt: { xs: 2, sm: 3, md: 4 },
-        pb: 8
+        px: { xs: 2, sm: 3 }
       }}
     >
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main', mb: { xs: 2, sm: 3, md: 4 }, fontSize: { xs: '1.5rem', sm: '2rem' } }}>

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import {
   Container,
   Typography,
@@ -433,6 +433,106 @@ setFormData({
     { name: 'Outstanding', value: outstandingAmount, color: '#ef4444' }, // Red for outstanding
   ];
 
+  const metricCards = useMemo(() => [
+    {
+      key: 'totalPortfolio',
+      title: 'Total Portfolio',
+      value: formatINR(totalPortfolio),
+      subtitle: 'Base Price • All transactions',
+      accent: '#2563eb'
+    },
+    {
+      key: 'totalBrokerage',
+      title: 'Total Brokerage',
+      value: formatINR(totalBrokerage),
+      subtitle: 'Owner + Customer commissions',
+      accent: '#0f766e'
+    },
+    {
+      key: 'ownerBrokerage',
+      title: 'Owner Brokerage',
+      value: formatINR(totalOwnerBrok),
+      subtitle: 'Owner commissions',
+      accent: '#ea580c'
+    },
+    {
+      key: 'customerBrokerage',
+      title: 'Customer Brokerage',
+      value: formatINR(totalCustomerBrok),
+      subtitle: 'Customer commissions',
+      accent: '#7c3aed'
+    },
+    {
+      key: 'paymentReceived',
+      title: 'Payment Received',
+      value: formatINR(paymentReceived),
+      subtitle: 'Based on receive dates',
+      accent: '#047857'
+    },
+    {
+      key: 'outstandingAmount',
+      title: 'Outstanding Amount',
+      value: formatINR(outstandingAmount),
+      subtitle: 'Pending payments',
+      accent: '#b91c1c'
+    }
+  ], [totalPortfolio, totalBrokerage, totalOwnerBrok, totalCustomerBrok, paymentReceived, outstandingAmount]);
+
+  const paymentStatusCards = useMemo(() => [
+    {
+      key: 'received',
+      title: 'Received',
+      value: formatINR(paymentReceived),
+      meta: `${data.filter(item => item.receiveDate && item.customerReceiveDate).length} fully received`,
+      accent: '#16a34a'
+    },
+    {
+      key: 'outstanding',
+      title: 'Outstanding',
+      value: formatINR(outstandingAmount),
+      meta: `${data.filter(item => !(item.receiveDate && item.customerReceiveDate)).length} pending payments`,
+      accent: '#dc2626'
+    },
+    {
+      key: 'ownerOnly',
+      title: 'Owner Only',
+      value: formatINR(data.reduce((sum, item) => {
+        if (item.receiveDate && !item.customerReceiveDate) {
+          const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
+          return sum + ownerBrok;
+        }
+        return sum;
+      }, 0)),
+      meta: `${data.filter(item => item.receiveDate && !item.customerReceiveDate).length} owner received`,
+      accent: '#f97316'
+    },
+    {
+      key: 'customerOnly',
+      title: 'Customer Only',
+      value: formatINR(data.reduce((sum, item) => {
+        if (!item.receiveDate && item.customerReceiveDate) {
+          const customerBrok = typeof item.customerBro === 'number' ? item.customerBro : convertPercentageToAmount(item.customerBro, item.basePrice);
+          return sum + customerBrok;
+        }
+        return sum;
+      }, 0)),
+      meta: `${data.filter(item => !item.receiveDate && item.customerReceiveDate).length} customer received`,
+      accent: '#8b5cf6'
+    }
+  ], [data, paymentReceived, outstandingAmount]);
+
+  const topEmployees = useMemo(() => {
+    const sorted = [...chartData].sort((a, b) => b.value - a.value);
+    return sorted.slice(0, 4);
+  }, [chartData]);
+
+  const tableStats = useMemo(() => {
+    const totalEntries = filteredData.length;
+    const totalValue = filteredData.reduce((sum, item) => sum + (item.basePrice || 0), 0);
+    const pending = filteredData.filter(item => !(item.receiveDate && item.customerReceiveDate)).length;
+    return { totalEntries, totalValue, pending };
+  }, [filteredData]);
+
 const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, view: 'dashboard' },
     { text: 'Analytics Overview', icon: <BarChartIcon />, view: 'analytics' },
@@ -664,14 +764,14 @@ case 'user-settings':
       case 'dashboard':
       default:
         return (
-          <Box sx={{ pt: { xs: 2, sm: 3, md: 4 }, pb: 8 }}>
+          <>
             {loading && (
               <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
                 <CircularProgress size={60} />
               </Box>
             )}
             {error && (
-              <Alert severity="error" sx={{ mb: 3, mx: { xs: 2, sm: 3 } }}>
+              <Alert severity="error" sx={{ mb: 3 }}>
                 {error}
               </Alert>
             )}
@@ -679,7 +779,7 @@ case 'user-settings':
               <>
                 {/* Welcome Header */}
                 <Grow in={true} timeout={1000}>
-                  <Box sx={{ mb: { xs: 3, md: 4 }, px: { xs: 2, sm: 3 } }}>
+                  <Box sx={{ mb: { xs: 3, md: 4 } }}>
                     <Typography
                       variant="h4"
                       sx={{
@@ -702,139 +802,45 @@ case 'user-settings':
                 </Grow>
 
                 {/* Metric Cards */}
-                <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4, px: { xs: 2, sm: 3 } }}>
-                  <Grid item xs={12} sm={6} md={4} lg={3}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 3, height: '100%', minHeight: 150 }}>
-                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 13 }, color: 'text.secondary', mb: 1, fontWeight: 600 }}>
-                          Total Portfolio
-                        </Typography>
-                        <Typography variant="h5" sx={{ 
-                          fontWeight: 700, 
-                          color: 'primary.main', 
-                          mb: 1, 
-                          fontSize: { xs: '1.1rem', sm: '1.4rem', md: '1.7rem' },
-                          wordBreak: 'break-word',
-                          lineHeight: 1.2
-                        }}>
-                          {formatINR(totalPortfolio)}
-                        </Typography>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
-                          Base Price • All transactions
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={4} lg={3}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 3, height: '100%', minHeight: 150 }}>
-                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 13 }, color: 'text.secondary', mb: 1, fontWeight: 600 }}>
-                          Total Brokerage
-                        </Typography>
-                        <Typography variant="h5" sx={{ 
-                          fontWeight: 700, 
-                          color: 'success.main', 
-                          mb: 1, 
-                          fontSize: { xs: '1.1rem', sm: '1.4rem', md: '1.7rem' },
-                          wordBreak: 'break-word',
-                          lineHeight: 1.2
-                        }}>
-                          {formatINR(totalBrokerage)}
+                <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
+                  {metricCards.map((card) => (
+                    <Grid item xs={12} sm={6} md={4} lg={3} key={card.key}>
+                      <Paper
+                        sx={{
+                          p: { xs: 2, sm: 3 },
+                          borderRadius: 4,
+                          height: '100%',
+                          boxShadow: '0 15px 35px rgba(15,23,42,0.08)',
+                          border: '1px solid',
+                          borderColor: 'grey.100',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 1
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <Typography sx={{ fontSize: { xs: 11, sm: 12, md: 13 }, color: 'text.secondary', fontWeight: 600 }}>
+                            {card.title}
+                          </Typography>
+                          <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: card.accent }} />
+                        </Box>
+                        <Typography
+                          variant="h5"
+                          sx={{
+                            fontWeight: 700,
+                            color: 'text.primary',
+                            fontSize: { xs: '1.2rem', sm: '1.5rem', md: '1.8rem' },
+                            lineHeight: 1.2
+                          }}
+                        >
+                          {card.value}
                         </Typography>
                         <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
-                          Owner + Customer commissions
+                          {card.subtitle}
                         </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={4} lg={3}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 3, height: '100%', minHeight: 150 }}>
-                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 13 }, color: 'text.secondary', mb: 1, fontWeight: 600 }}>
-                          Owner Brokerage
-                        </Typography>
-                        <Typography variant="h5" sx={{ 
-                          fontWeight: 700, 
-                          color: '#f59e0b', 
-                          mb: 1, 
-                          fontSize: { xs: '1.1rem', sm: '1.4rem', md: '1.7rem' },
-                          wordBreak: 'break-word',
-                          lineHeight: 1.2
-                        }}>
-                          {formatINR(totalOwnerBrok)}
-                        </Typography>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
-                          Owner commissions
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={4} lg={3}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 3, height: '100%', minHeight: 150 }}>
-                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 13 }, color: 'text.secondary', mb: 1, fontWeight: 600 }}>
-                          Customer Brokerage
-                        </Typography>
-                        <Typography variant="h5" sx={{ 
-                          fontWeight: 700, 
-                          color: '#8b5cf6', 
-                          mb: 1, 
-                          fontSize: { xs: '1.1rem', sm: '1.4rem', md: '1.7rem' },
-                          wordBreak: 'break-word',
-                          lineHeight: 1.2
-                        }}>
-                          {formatINR(totalCustomerBrok)}
-                        </Typography>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
-                          Customer commissions
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={4} lg={3}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 3, height: '100%', minHeight: 150 }}>
-                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 13 }, color: 'text.secondary', mb: 1, fontWeight: 600 }}>
-                          Payment Received
-                        </Typography>
-                        <Typography variant="h5" sx={{ 
-                          fontWeight: 700, 
-                          color: '#22c55e', 
-                          mb: 1, 
-                          fontSize: { xs: '1.1rem', sm: '1.4rem', md: '1.7rem' },
-                          wordBreak: 'break-word',
-                          lineHeight: 1.2
-                        }}>
-                          {formatINR(paymentReceived)}
-                        </Typography>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
-                          Based on receive dates
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={4} lg={3}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 3, height: '100%', minHeight: 150 }}>
-                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 13 }, color: 'text.secondary', mb: 1, fontWeight: 600 }}>
-                          Outstanding Amount
-                        </Typography>
-                        <Typography variant="h5" sx={{ 
-                          fontWeight: 700, 
-                          color: '#ef4444', 
-                          mb: 1, 
-                          fontSize: { xs: '1.1rem', sm: '1.4rem', md: '1.7rem' },
-                          wordBreak: 'break-word',
-                          lineHeight: 1.2
-                        }}>
-                          {formatINR(outstandingAmount)}
-                        </Typography>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
-                          Pending payments
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
+                      </Paper>
+                    </Grid>
+                  ))}
                 </Grid>
 
                 {/* Payment Status */}
@@ -842,182 +848,175 @@ case 'user-settings':
                   Payment Status Analytics
                 </Typography>
                 <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 3, minHeight: 140 }}>
-                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Received</Typography>
-                        <Typography variant="h4" sx={{ 
-                          fontWeight: 700, 
-                          color: 'success.main', 
-                          fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }, 
-                          mb: 0.5
-                        }}>
-                          {formatINR(paymentReceived)}
+                  {paymentStatusCards.map((card) => (
+                    <Grid item xs={12} sm={6} md={3} key={card.key}>
+                      <Paper
+                        sx={{
+                          p: { xs: 2, sm: 3 },
+                          borderRadius: 4,
+                          border: '1px solid',
+                          borderColor: 'grey.100',
+                          boxShadow: '0 12px 28px rgba(15,23,42,0.08)',
+                          minHeight: 140
+                        }}
+                      >
+                        <Typography sx={{ fontWeight: 600, fontSize: { xs: '0.9rem', sm: '1rem' }, color: card.accent }}>
+                          {card.title}
                         </Typography>
-                        <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-                          {data.filter(item => item.receiveDate && item.customerReceiveDate).length} fully received
+                        <Typography sx={{ fontWeight: 700, fontSize: { xs: '1.2rem', sm: '1.6rem' }, my: 0.5 }}>
+                          {card.value}
                         </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 3, minHeight: 140 }}>
-                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Outstanding</Typography>
-                        <Typography variant="h4" sx={{ 
-                          fontWeight: 700, 
-                          color: 'error.main', 
-                          fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }, 
-                          mb: 0.5
-                        }}>
-                          {formatINR(outstandingAmount)}
+                        <Typography sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' }, color: 'text.secondary' }}>
+                          {card.meta}
                         </Typography>
-                        <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-                          {data.filter(item => !(item.receiveDate && item.customerReceiveDate)).length} pending payments
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 3, minHeight: 140 }}>
-                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Owner Only</Typography>
-                        <Typography variant="h4" sx={{ 
-                          fontWeight: 700, 
-                          color: '#f59e0b', 
-                          fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }, 
-                          mb: 0.5
-                        }}>
-                          {formatINR(data.reduce((sum, item) => {
-                            if (item.receiveDate && !item.customerReceiveDate) {
-                              const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
-                              return sum + ownerBrok;
-                            }
-                            return sum;
-                          }, 0))}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-                          {data.filter(item => item.receiveDate && !item.customerReceiveDate).length} owner received
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={3}>
-                    <Card sx={{ borderRadius: 3, boxShadow: 3, minHeight: 140 }}>
-                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Customer Only</Typography>
-                        <Typography variant="h4" sx={{ 
-                          fontWeight: 700, 
-                          color: '#8b5cf6', 
-                          fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }, 
-                          mb: 0.5
-                        }}>
-                          {formatINR(data.reduce((sum, item) => {
-                            if (!item.receiveDate && item.customerReceiveDate) {
-                              const customerBrok = typeof item.customerBro === 'number' ? item.customerBro : convertPercentageToAmount(item.customerBro, item.basePrice);
-                              return sum + customerBrok;
-                            }
-                            return sum;
-                          }, 0))}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
-                          {data.filter(item => !item.receiveDate && item.customerReceiveDate).length} customer received
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
+                      </Paper>
+                    </Grid>
+                  ))}
                 </Grid>
 
                 {/* Analytics Overview */}
-                <Box sx={{ mb: 4, px: { xs: 2, sm: 3 } }}>
+                <Box sx={{ mb: 4 }}>
                   <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 3 }}>
                     Analytics Overview - Total Brokerage: {formatINR(totalBrokerage)}
                   </Typography>
-                  <Paper
-                    sx={{
-                      p: { xs: 2, sm: 3 },
-                      borderRadius: 4,
-                      background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-                      border: '1px solid rgba(148, 163, 184, 0.2)',
-                      boxShadow: '0 12px 30px rgba(15, 23, 42, 0.08)'
-                    }}
-                  >
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: 600,
-                        color: 'text.primary',
-                        mb: 2,
-                        fontSize: { xs: '1rem', sm: '1.25rem' }
-                      }}
-                    >
-                      Payments by Employee
-                    </Typography>
-                    <Box sx={{ width: '100%', height: { xs: 280, md: 320 } }}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart
-                          data={chartData}
-                          margin={{
-                            top: 20,
-                            right: 20,
-                            left: 10,
-                            bottom: 60
+                  <Grid container spacing={{ xs: 2, md: 3 }}>
+                    <Grid item xs={12} lg={8}>
+                      <Paper
+                        sx={{
+                          p: { xs: 2, sm: 3 },
+                          borderRadius: 4,
+                          border: '1px solid',
+                          borderColor: 'grey.100',
+                          boxShadow: '0 15px 35px rgba(15,23,42,0.08)'
+                        }}
+                      >
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontWeight: 600,
+                            color: 'text.primary',
+                            mb: 2,
+                            fontSize: { xs: '1rem', sm: '1.25rem' }
                           }}
-                          barCategoryGap="20%"
                         >
-                          <CartesianGrid
-                            strokeDasharray="3 3"
-                            stroke="#e0e0e0"
-                            opacity={0.3}
-                            vertical={false}
-                          />
-                          <XAxis
-                            dataKey="name"
-                            tick={{
-                              fontSize: 11,
-                              fill: '#475569'
+                          Payments by Employee
+                        </Typography>
+                        <Box sx={{ width: '100%', height: { xs: 280, md: 320 } }}>
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart
+                              data={chartData}
+                              margin={{
+                                top: 20,
+                                right: 20,
+                                left: 10,
+                                bottom: 60
+                              }}
+                              barCategoryGap="20%"
+                            >
+                              <CartesianGrid
+                                strokeDasharray="3 3"
+                                stroke="#e0e0e0"
+                                opacity={0.3}
+                                vertical={false}
+                              />
+                              <XAxis
+                                dataKey="name"
+                                tick={{
+                                  fontSize: 11,
+                                  fill: '#475569'
+                                }}
+                                axisLine={false}
+                                tickLine={false}
+                                angle={-45}
+                                textAnchor="end"
+                                height={80}
+                                interval={0}
+                              />
+                              <YAxis
+                                tick={{
+                                  fontSize: 11,
+                                  fill: '#475569'
+                                }}
+                                axisLine={false}
+                                tickLine={false}
+                                tickFormatter={(value) => `₹${(value / 100000).toFixed(0)}L`}
+                                width={70}
+                              />
+                              <Tooltip
+                                formatter={(value) => [`₹${value.toLocaleString()}`, 'Revenue']}
+                                labelFormatter={(label) => `${label}`}
+                                contentStyle={{
+                                  backgroundColor: '#0f172a',
+                                  color: '#fff',
+                                  border: 'none',
+                                  borderRadius: 12,
+                                  boxShadow: '0 10px 30px rgba(15, 23, 42, 0.4)'
+                                }}
+                                cursor={{ fill: 'rgba(59, 130, 246, 0.15)' }}
+                              />
+                              <Bar
+                                dataKey="value"
+                                fill="#2563eb"
+                                radius={[8, 8, 0, 0]}
+                                animationBegin={0}
+                                animationDuration={1000}
+                                animationEasing="ease-out"
+                              />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </Box>
+                      </Paper>
+                    </Grid>
+                    <Grid item xs={12} lg={4}>
+                      <Paper
+                        sx={{
+                          p: { xs: 2, sm: 3 },
+                          borderRadius: 4,
+                          border: '1px solid',
+                          borderColor: 'grey.100',
+                          boxShadow: '0 15px 35px rgba(15,23,42,0.08)',
+                          height: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: 2
+                        }}
+                      >
+                        <Typography sx={{ fontWeight: 600 }}>Top Performers</Typography>
+                        {topEmployees.length === 0 && (
+                          <Typography variant="body2" color="text.secondary">
+                            No employee data available
+                          </Typography>
+                        )}
+                        {topEmployees.map((emp) => (
+                          <Box
+                            key={emp.name}
+                            sx={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: 0.5,
+                              p: 1.5,
+                              borderRadius: 3,
+                              bgcolor: 'grey.50'
                             }}
-                            axisLine={false}
-                            tickLine={false}
-                            angle={-45}
-                            textAnchor="end"
-                            height={80}
-                            interval={0}
-                          />
-                          <YAxis
-                            tick={{
-                              fontSize: 11,
-                              fill: '#475569'
-                            }}
-                            axisLine={false}
-                            tickLine={false}
-                            tickFormatter={(value) => `₹${(value / 100000).toFixed(0)}L`}
-                            width={60}
-                          />
-                          <Tooltip
-                            formatter={(value) => [`₹${value.toLocaleString()}`, 'Revenue']}
-                            labelFormatter={(label) => `${label}`}
-                            contentStyle={{
-                              backgroundColor: '#0f172a',
-                              color: '#fff',
-                              border: 'none',
-                              borderRadius: 12,
-                              boxShadow: '0 10px 30px rgba(15, 23, 42, 0.4)'
-                            }}
-                            cursor={{ fill: 'rgba(59, 130, 246, 0.15)' }}
-                          />
-                          <Bar
-                            dataKey="value"
-                            fill="#2563eb"
-                            radius={[8, 8, 0, 0]}
-                            animationBegin={0}
-                            animationDuration={1000}
-                            animationEasing="ease-out"
-                          />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </Box>
-                  </Paper>
+                          >
+                            <Typography sx={{ fontWeight: 600 }}>{emp.name}</Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Revenue: {formatINR(emp.value)}
+                            </Typography>
+                          </Box>
+                        ))}
+                        <Divider />
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                          <Typography variant="body2" color="text.secondary">
+                            Total Employees: {chartData.length}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Highest Earner: {topEmployees[0]?.name || 'N/A'}
+                          </Typography>
+                        </Box>
+                      </Paper>
+                    </Grid>
+                  </Grid>
                 </Box>
 
                 {/* Payment Records */}
@@ -1028,8 +1027,7 @@ case 'user-settings':
                   justifyContent: 'space-between',
                   alignItems: { xs: 'stretch', sm: 'center' },
                   gap: { xs: 2, sm: 0 },
-                  mb: 3,
-                  px: { xs: 2, sm: 3 }
+                  mb: 3
                 }}>
                   <Typography
                     variant="h5"
@@ -1057,7 +1055,7 @@ case 'user-settings':
                 </Box>
 
 {/* Filters */}
-                <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3, borderRadius: 3, mx: { xs: 2, sm: 3 } }}>
+                <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3, borderRadius: 3 }}>
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                     Filters
                   </Typography>
@@ -1153,44 +1151,67 @@ case 'user-settings':
                 </Paper>
 
 {/* Table */}
-                <Box sx={{ px: { xs: 2, sm: 3 } }}>
-                <TableContainer component={Paper} sx={{
-                  borderRadius: 3,
-                  boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                  overflow: 'auto',
-                  '& .MuiTable-root': {
-                    minWidth: { xs: '800px', sm: '900px', md: '100%' }
-                  }
-                }}>
-                  <Table>
-                    <TableHead>
+                <Paper
+                  sx={{
+                    borderRadius: 3,
+                    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                    p: { xs: 1.5, sm: 2.5 }
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: { xs: 'column', md: 'row' },
+                      gap: 2,
+                      justifyContent: 'space-between',
+                      alignItems: { xs: 'flex-start', md: 'center' },
+                      mb: 2
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                      <Chip label={`Entries: ${tableStats.totalEntries}`} color="primary" variant="outlined" />
+                      <Chip label={`Value: ${formatINR(tableStats.totalValue)}`} color="success" variant="outlined" />
+                      <Chip label={`Pending: ${tableStats.pending}`} color="warning" variant="outlined" />
+                    </Box>
+                  </Box>
+                  <Box
+                    sx={{
+                      width: '100%',
+                      overflowX: 'auto',
+                      '& .MuiTable-root': {
+                        minWidth: { xs: '900px', md: '100%' }
+                      }
+                    }}
+                  >
+                    <Table>
+                      <TableHead>
 <TableRow sx={{
-                        bgcolor: 'primary.main',
-                        '& th': {
-                          color: 'white',
-                          fontWeight: 600,
-                          fontSize: '0.875rem',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.5px'
-                        }
-                      }}>
-                        <TableCell>Date</TableCell>
-                        <TableCell>Unit No</TableCell>
-                        <TableCell>Project</TableCell>
-                        <TableCell>Owner</TableCell>
-                        <TableCell>Customer</TableCell>
-                        <TableCell>Base Price</TableCell>
-                        <TableCell>Owner Received By</TableCell>
-                        <TableCell>Customer Received By</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell>Employee</TableCell>
-                        <TableCell>Commission (%)</TableCell>
-                        <TableCell>Commission Amount (₹)</TableCell>
-                        <TableCell>Actions</TableCell>
-                        <TableCell>Delete</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
+                          bgcolor: 'primary.main',
+                          '& th': {
+                            color: 'white',
+                            fontWeight: 600,
+                            fontSize: '0.875rem',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.5px'
+                          }
+                        }}>
+                          <TableCell>Date</TableCell>
+                          <TableCell>Unit No</TableCell>
+                          <TableCell>Project</TableCell>
+                          <TableCell>Owner</TableCell>
+                          <TableCell>Customer</TableCell>
+                          <TableCell>Base Price</TableCell>
+                          <TableCell>Owner Received By</TableCell>
+                          <TableCell>Customer Received By</TableCell>
+                          <TableCell>Status</TableCell>
+                          <TableCell>Employee</TableCell>
+                          <TableCell>Commission (%)</TableCell>
+                          <TableCell>Commission Amount (₹)</TableCell>
+                          <TableCell>Actions</TableCell>
+                          <TableCell>Delete</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
 {filteredData.slice(0, 10).map((row, index) => (
   <TableRow
     key={row._id || index}
@@ -1290,13 +1311,13 @@ case 'user-settings':
     </TableCell>
   </TableRow>
 ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-                </Box>
+                      </TableBody>
+                    </Table>
+                  </Box>
+                </Paper>
               </>
             )}
-          </Box>
+          </>
         );
     }
   };
@@ -1411,7 +1432,18 @@ case 'user-settings':
         overflow: 'auto'
       }}>
         <Toolbar />
-        {renderView()}
+        <Box
+          sx={{
+            width: '100%',
+            maxWidth: '1600px',
+            pt: { xs: 2, sm: 3, md: 4 },
+            pb: 8,
+            px: { xs: 2, sm: 3, md: 4 },
+            mx: 'auto'
+          }}
+        >
+          {renderView()}
+        </Box>
 
         {/* Input Form Modal */}
         <Dialog
