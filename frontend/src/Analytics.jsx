@@ -422,13 +422,15 @@ const Analytics = () => {
                   innerRadius={60}
                   paddingAngle={2}
                   dataKey="value"
+                  label={({ name, value, percent }) => `${name}: ${formatINR(value)} (${(percent * 100).toFixed(0)}%)`}
+                  labelLine={false}
                 >
                   {safeProjectChartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value, name) => [`₹${formatINRNumber(value)}`, 'Revenue']}
+                  formatter={(value, name) => [formatINR(value), 'Revenue']}
                   labelFormatter={(label) => `Project: ${label}`}
                   contentStyle={{
                     backgroundColor: '#ffffff',
@@ -481,10 +483,18 @@ const Analytics = () => {
                 <BarChart data={safeEmployeeChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis dataKey="name" stroke="#6b7280" />
-                  <YAxis stroke="#6b7280" tickFormatter={(value) => `₹${(value / 100000).toFixed(1)}L`} />
+                  <YAxis stroke="#6b7280" tickFormatter={(value) => {
+                    if (value >= 10000000) {
+                      return `₹${(value / 10000000).toFixed(1)}Cr`;
+                    } else if (value >= 100000) {
+                      return `₹${(value / 100000).toFixed(1)}L`;
+                    } else {
+                      return `₹${formatINRNumber(value)}`;
+                    }
+                  }} />
                   <Tooltip
                     formatter={(value, name) => [
-                      `₹${formatINRNumber(value)}`,
+                      formatINR(value),
                       name === 'revenue' ? 'Total Revenue' : 'Commission Earned'
                     ]}
                     labelStyle={{ color: '#374151' }}

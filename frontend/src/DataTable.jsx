@@ -242,48 +242,148 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main', mb: 4 }}>
+    <Container maxWidth={false} sx={{ mt: { xs: 2, sm: 3, md: 4 }, mb: 4, px: { xs: 2, sm: 3 } }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main', mb: { xs: 2, sm: 3, md: 4 }, fontSize: { xs: '1.5rem', sm: '2rem' } }}>
         Payment Records
       </Typography>
 
       {/* Summary Cards */}
-      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ borderRadius: 3, minHeight: 140 }}>
-            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Typography variant="h6" color="text.secondary" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>Total Portfolio</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main', fontSize: { xs: '1.25rem', sm: '1.5rem' }, wordBreak: 'break-word' }}>
+      <Grid container spacing={{ xs: 2, sm: 2, md: 3 }} sx={{ mb: { xs: 3, md: 4 } }}>
+        <Grid item xs={12} sm={6} lg={3}>
+          <Card sx={{ 
+            borderRadius: 3, 
+            minHeight: { xs: 120, sm: 140 },
+            height: '100%',
+            transition: 'transform 0.2s ease-in-out',
+            '&:hover': { transform: 'translateY(-2px)' }
+          }}>
+            <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 3 } }}>
+              <Typography 
+                variant="h6" 
+                color="text.secondary" 
+                sx={{ 
+                  fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
+                  mb: 1,
+                  lineHeight: 1.2
+                }}
+              >
+                Total Portfolio
+              </Typography>
+              <Typography 
+                variant="h4" 
+                sx={{ 
+                  fontWeight: 700, 
+                  color: 'primary.main', 
+                  fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }, 
+                  wordBreak: 'break-word',
+                  lineHeight: 1.2
+                }}
+              >
                 {formatINR(totalValue)}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ borderRadius: 3, minHeight: 140 }}>
-            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Typography variant="h6" color="text.secondary" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>Total Brokerage</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'success.main', fontSize: { xs: '1.25rem', sm: '1.5rem' }, wordBreak: 'break-word' }}>
+        <Grid item xs={12} sm={6} lg={3}>
+          <Card sx={{ 
+            borderRadius: 3, 
+            minHeight: { xs: 120, sm: 140 },
+            height: '100%',
+            transition: 'transform 0.2s ease-in-out',
+            '&:hover': { transform: 'translateY(-2px)' }
+          }}>
+            <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 3 } }}>
+              <Typography 
+                variant="h6" 
+                color="text.secondary" 
+                sx={{ 
+                  fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
+                  mb: 1,
+                  lineHeight: 1.2
+                }}
+              >
+                Total Brokerage
+              </Typography>
+              <Typography 
+                variant="h4" 
+                sx={{ 
+                  fontWeight: 700, 
+                  color: 'success.main', 
+                  fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }, 
+                  wordBreak: 'break-word',
+                  lineHeight: 1.2
+                }}
+              >
                 {formatINR(totalBrokerage)}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ borderRadius: 3, minHeight: 140 }}>
-            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Typography variant="h6" color="text.secondary" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>Payment Received</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: '#22c55e', fontSize: { xs: '1.25rem', sm: '1.5rem' }, wordBreak: 'break-word' }}>
+        <Grid item xs={12} sm={6} lg={3}>
+          <Card sx={{ 
+            borderRadius: 3, 
+            minHeight: { xs: 120, sm: 140 },
+            height: '100%',
+            transition: 'transform 0.2s ease-in-out',
+            '&:hover': { transform: 'translateY(-2px)' }
+          }}>
+            <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 3 } }}>
+              <Typography 
+                variant="h6" 
+                color="text.secondary" 
+                sx={{ 
+                  fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
+                  mb: 1,
+                  lineHeight: 1.2
+                }}
+              >
+                Payment Received
+              </Typography>
+              <Typography 
+                variant="h4" 
+                sx={{ 
+                  fontWeight: 700, 
+                  color: '#22c55e', 
+                  fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }, 
+                  wordBreak: 'break-word',
+                  lineHeight: 1.2
+                }}
+              >
                 {formatINR(paymentReceived)}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ borderRadius: 3, minHeight: 140 }}>
-            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Typography variant="h6" color="text.secondary" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>Outstanding Amount</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: '#ef4444', fontSize: { xs: '1.25rem', sm: '1.5rem' }, wordBreak: 'break-word' }}>
+        <Grid item xs={12} sm={6} lg={3}>
+          <Card sx={{ 
+            borderRadius: 3, 
+            minHeight: { xs: 120, sm: 140 },
+            height: '100%',
+            transition: 'transform 0.2s ease-in-out',
+            '&:hover': { transform: 'translateY(-2px)' }
+          }}>
+            <CardContent sx={{ p: { xs: 1.5, sm: 2, md: 3 } }}>
+              <Typography 
+                variant="h6" 
+                color="text.secondary" 
+                sx={{ 
+                  fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' },
+                  mb: 1,
+                  lineHeight: 1.2
+                }}
+              >
+                Outstanding Amount
+              </Typography>
+              <Typography 
+                variant="h4" 
+                sx={{ 
+                  fontWeight: 700, 
+                  color: '#ef4444', 
+                  fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }, 
+                  wordBreak: 'break-word',
+                  lineHeight: 1.2
+                }}
+              >
                 {formatINR(outstandingAmount)}
               </Typography>
             </CardContent>
@@ -291,13 +391,25 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
         </Grid>
       </Grid>
 
-      {/* Filters - Match Dashboard */}
-      <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3, borderRadius: 3 }}>
-        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
+      {/* Filters - Responsive */}
+      <Paper sx={{ 
+        p: { xs: 1.5, sm: 2, md: 3 }, 
+        mb: { xs: 2, md: 3 }, 
+        borderRadius: 3 
+      }}>
+        <Typography 
+          variant="h6" 
+          gutterBottom 
+          sx={{ 
+            fontWeight: 600, 
+            fontSize: { xs: '0.875rem', sm: '1rem', md: '1.25rem' },
+            mb: { xs: 2, sm: 2 }
+          }}
+        >
           Filters
         </Typography>
-        <Grid container spacing={{ xs: 2, sm: 3 }} alignItems="center">
-          <Grid item xs={12} sm={6} md={2}>
+        <Grid container spacing={{ xs: 1.5, sm: 2, md: 2 }} alignItems="center">
+          <Grid item xs={12} sm={6} lg={3}>
             <TextField
               label="From Date"
               type="date"
@@ -306,10 +418,13 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
               InputLabelProps={{ shrink: true }}
               fullWidth
               size="small"
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+              sx={{ 
+                '& .MuiOutlinedInput-root': { borderRadius: 2 },
+                '& .MuiInputLabel-root': { fontSize: { xs: '0.75rem', sm: '0.875rem' } }
+              }}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid item xs={12} sm={6} lg={3}>
             <TextField
               label="To Date"
               type="date"
@@ -318,17 +433,24 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
               InputLabelProps={{ shrink: true }}
               fullWidth
               size="small"
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+              sx={{ 
+                '& .MuiOutlinedInput-root': { borderRadius: 2 },
+                '& .MuiInputLabel-root': { fontSize: { xs: '0.75rem', sm: '0.875rem' } }
+              }}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid item xs={12} sm={6} lg={2}>
             <FormControl size="small" fullWidth>
-              <InputLabel>Employee Name</InputLabel>
+              <InputLabel sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Employee</InputLabel>
               <Select
                 value={filterEmployee}
-                label="Employee Name"
+                label="Employee"
                 onChange={(e) => setFilterEmployee(e.target.value)}
-                sx={{ borderRadius: 2 }}
+                sx={{ 
+                  borderRadius: 2,
+                  '& .MuiInputLabel-root': { fontSize: { xs: '0.75rem', sm: '0.875rem' } },
+                  '& .MuiSelect-select': { fontSize: { xs: '0.75rem', sm: '0.875rem' } }
+                }}
               >
                 <MenuItem value="">All</MenuItem>
                 {employees.map((emp, index) => (
@@ -337,14 +459,18 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid item xs={12} sm={6} lg={2}>
             <FormControl size="small" fullWidth>
-              <InputLabel>Project</InputLabel>
+              <InputLabel sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Project</InputLabel>
               <Select
                 value={filterProject}
                 label="Project"
                 onChange={(e) => setFilterProject(e.target.value)}
-                sx={{ borderRadius: 2 }}
+                sx={{ 
+                  borderRadius: 2,
+                  '& .MuiInputLabel-root': { fontSize: { xs: '0.75rem', sm: '0.875rem' } },
+                  '& .MuiSelect-select': { fontSize: { xs: '0.75rem', sm: '0.875rem' } }
+                }}
               >
                 <MenuItem value="">All</MenuItem>
                 {projects.map((project) => (
@@ -353,14 +479,18 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid item xs={12} sm={6} lg={1}>
             <FormControl size="small" fullWidth>
-              <InputLabel>Status</InputLabel>
+              <InputLabel sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Status</InputLabel>
               <Select
                 value={filterStatus}
                 label="Status"
                 onChange={(e) => setFilterStatus(e.target.value)}
-                sx={{ borderRadius: 2 }}
+                sx={{ 
+                  borderRadius: 2,
+                  '& .MuiInputLabel-root': { fontSize: { xs: '0.75rem', sm: '0.875rem' } },
+                  '& .MuiSelect-select': { fontSize: { xs: '0.75rem', sm: '0.875rem' } }
+                }}
               >
                 <MenuItem value="">All</MenuItem>
                 <MenuItem value="received">Received</MenuItem>
@@ -368,176 +498,272 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid item xs={12} sm={6} lg={1}>
             <FormControl size="small" fullWidth>
-              <InputLabel>Received By</InputLabel>
+              <InputLabel sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>Received By</InputLabel>
               <Select
                 value={filterReceivedBy}
                 label="Received By"
                 onChange={(e) => setFilterReceivedBy(e.target.value)}
-                sx={{ borderRadius: 2 }}
+                sx={{ 
+                  borderRadius: 2,
+                  '& .MuiInputLabel-root': { fontSize: { xs: '0.75rem', sm: '0.875rem' } },
+                  '& .MuiSelect-select': { fontSize: { xs: '0.75rem', sm: '0.875rem' } }
+                }}
               >
                 <MenuItem value="">All</MenuItem>
-                <MenuItem value="Dharmesh Bavadiya">Dharmesh Bavadiya</MenuItem>
-                <MenuItem value="Yogesh Bavadiya">Yogesh Bavadiya</MenuItem>
-                <MenuItem value="Bavadiya Realty LLP">Bavadiya Realty LLP</MenuItem>
+                <MenuItem value="Dharmesh Bavadiya">Dharmesh</MenuItem>
+                <MenuItem value="Yogesh Bavadiya">Yogesh</MenuItem>
+                <MenuItem value="Bavadiya Realty LLP">Company</MenuItem>
               </Select>
             </FormControl>
           </Grid>
         </Grid>
       </Paper>
 
-{/* Data Table */}
+{/* Data Table - Responsive */}
       <Paper sx={{
         borderRadius: 3,
         boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-        overflow: 'auto',
-        '& .MuiTable-root': {
-          minWidth: { xs: '800px', sm: '900px', md: '100%' }
-        }
+        overflow: 'hidden'
       }}>
-        <TableContainer>
-          <Table>
-            <TableHead>
-<TableRow sx={{
-                bgcolor: 'primary.main',
-                '& th': {
-                  color: 'white',
-                  fontWeight: 600,
-                  fontSize: '0.875rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px'
-                }
-              }}>
-                <TableCell>Date</TableCell>
-                <TableCell>Unit No</TableCell>
-                <TableCell>Project</TableCell>
-                <TableCell>Owner</TableCell>
-                <TableCell>Customer</TableCell>
-                <TableCell>Base Price</TableCell>
-                <TableCell>Owner Received By</TableCell>
-                <TableCell>Customer Received By</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Employee</TableCell>
-                <TableCell>Commission (%)</TableCell>
-                <TableCell>Commission Amount (₹)</TableCell>
-                <TableCell>Actions</TableCell>
-                <TableCell>Delete</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-{paginatedData.map((row, index) => (
-                <TableRow
-                  key={row._id || index}
-                  sx={{
-                    '&:nth-of-type(odd)': { bgcolor: 'action.hover' },
-                    '&:hover': { bgcolor: 'action.selected' },
-                    transition: 'background-color 0.2s ease'
-                  }}
-                >
-                  <TableCell sx={{ fontWeight: 500 }}>{row.date || '-'}</TableCell>
-                  <TableCell>{row.unitNo || '-'}</TableCell>
-                  <TableCell>{row.projectName || '-'}</TableCell>
-                  <TableCell>{row.ownerName || '-'}</TableCell>
-                  <TableCell>{row.customerName || '-'}</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
-                    {formatINR(row.basePrice || 0)}
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" sx={{
-                      fontWeight: 500,
-                      color: row.ownerReceivedBy ? 'success.main' : 'text.secondary',
-                      fontSize: '0.875rem'
-                    }}>
-                      {row.ownerReceivedBy || '-'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" sx={{
-                      fontWeight: 500,
-                      color: row.customerReceivedBy ? 'success.main' : 'text.secondary',
-                      fontSize: '0.875rem'
-                    }}>
-                      {row.customerReceivedBy || '-'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={(row.receiveDate && row.customerReceiveDate) ? 'Received' : 'Pending'}
-                      color={(row.receiveDate && row.customerReceiveDate) ? 'success' : 'error'}
-                      size="small"
-                      variant="outlined"
-                      sx={{
-                        borderRadius: 2,
-                        '&.MuiChip-colorSuccess': {
-                          bgcolor: '#22c55e20',
-                          color: '#22c55e',
-                          borderColor: '#22c55e40'
-                        },
-                        '&.MuiChip-colorError': {
-                          bgcolor: '#ef444420',
-                          color: '#ef4444',
-                          borderColor: '#ef444440'
-                        }
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell>{row.employee || '-'}</TableCell>
-                  <TableCell>{row.commission || 0}%</TableCell>
-                  <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
-                    {/* Calculate commission based on total brokerage */}
-                    {(() => {
-                      const ownerBrok = typeof row.ownerBro === 'number' ? row.ownerBro : convertPercentageToAmount(row.ownerBro, row.basePrice);
-                      const customerBrok = typeof row.customerBro === 'number' ? row.customerBro : convertPercentageToAmount(row.customerBro, row.basePrice);
-                      const totalBrok = ownerBrok + customerBrok;
-                      return formatINR(((row.commission || 0) * totalBrok) / 100);
-                    })()}
-                  </TableCell>
-                  <TableCell>
-                    <IconButton
-                      onClick={() => onEditEntry && onEditEntry(row)}
-                      sx={{
-                        color: 'primary.main',
-                        '&:hover': {
-                          bgcolor: 'primary.light',
-                          color: 'white'
-                        },
-                        borderRadius: 2
-                      }}
-                    >
-                      <Edit />
-                    </IconButton>
-                  </TableCell>
-                  <TableCell>
-                    <IconButton
-                      onClick={() => onDeleteEntry && onDeleteEntry(row._id)}
-                      sx={{
-                        color: 'error.main',
-                        '&:hover': {
-                          bgcolor: 'error.light',
-                          color: 'white'
-                        },
-                        borderRadius: 2
-                      }}
-                    >
-                      <Delete />
-                    </IconButton>
-                  </TableCell>
+        {/* Mobile-friendly scrollable container */}
+        <Box sx={{ 
+          overflowX: 'auto',
+          '&::-webkit-scrollbar': {
+            height: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: '#f1f1f1',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: '#888',
+            borderRadius: '4px',
+            '&:hover': {
+              background: '#555',
+            },
+          },
+        }}>
+          <TableContainer component={Box} sx={{ minWidth: { xs: '800px', sm: '900px', md: '100%' } }}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{
+                  bgcolor: 'primary.main',
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 1,
+                  '& th': {
+                    color: 'white',
+                    fontWeight: 600,
+                    fontSize: { xs: '0.625rem', sm: '0.75rem', md: '0.875rem' },
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    px: { xs: 1, sm: 1.5, md: 2 },
+                    py: { xs: 1, sm: 1.5 }
+                  }
+                }}>
+                  <TableCell sx={{ minWidth: { xs: '80px', sm: '100px' } }}>Date</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '80px', sm: '100px' } }}>Unit No</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '120px', sm: '150px' } }}>Project</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '100px', sm: '120px' } }}>Owner</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '100px', sm: '120px' } }}>Customer</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '120px', sm: '140px' } }}>Base Price</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '130px', sm: '150px' } }}>Owner Received By</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '140px', sm: '160px' } }}>Customer Received By</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '80px', sm: '100px' } }}>Status</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '100px', sm: '120px' } }}>Employee</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '80px', sm: '100px' } }}>Commission (%)</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '140px', sm: '160px' } }}>Commission Amount</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '60px', sm: '80px' } }}>Actions</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '60px', sm: '80px' } }}>Delete</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+              <TableBody>
+                {paginatedData.map((row, index) => (
+                  <TableRow
+                    key={row._id || index}
+                    sx={{
+                      '&:nth-of-type(odd)': { bgcolor: 'action.hover' },
+                      '&:hover': { bgcolor: 'action.selected' },
+                      transition: 'background-color 0.2s ease',
+                      '& td': {
+                        px: { xs: 0.5, sm: 1, md: 1.5 },
+                        py: { xs: 0.75, sm: 1 },
+                        fontSize: { xs: '0.625rem', sm: '0.75rem', md: '0.875rem' }
+                      }
+                    }}
+                  >
+                    <TableCell sx={{ fontWeight: 500 }}>{row.date || '-'}</TableCell>
+                    <TableCell>{row.unitNo || '-'}</TableCell>
+                    <TableCell sx={{ 
+                      maxWidth: { xs: '120px', sm: '150px' },
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {row.projectName || '-'}
+                    </TableCell>
+                    <TableCell sx={{ 
+                      maxWidth: { xs: '100px', sm: '120px' },
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {row.ownerName || '-'}
+                    </TableCell>
+                    <TableCell sx={{ 
+                      maxWidth: { xs: '100px', sm: '120px' },
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {row.customerName || '-'}
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
+                      {formatINR(row.basePrice || 0)}
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{
+                        fontWeight: 500,
+                        color: row.ownerReceivedBy ? 'success.main' : 'text.secondary',
+                        fontSize: { xs: '0.625rem', sm: '0.75rem', md: '0.875rem' },
+                        maxWidth: { xs: '130px', sm: '150px' },
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {row.ownerReceivedBy || '-'}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" sx={{
+                        fontWeight: 500,
+                        color: row.customerReceivedBy ? 'success.main' : 'text.secondary',
+                        fontSize: { xs: '0.625rem', sm: '0.75rem', md: '0.875rem' },
+                        maxWidth: { xs: '140px', sm: '160px' },
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {row.customerReceivedBy || '-'}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Chip
+                        label={(row.receiveDate && row.customerReceiveDate) ? 'Received' : 'Pending'}
+                        color={(row.receiveDate && row.customerReceiveDate) ? 'success' : 'error'}
+                        size="small"
+                        variant="outlined"
+                        sx={{
+                          borderRadius: 2,
+                          fontSize: { xs: '0.5rem', sm: '0.625rem', md: '0.75rem' },
+                          height: { xs: '20px', sm: '24px' },
+                          '&.MuiChip-colorSuccess': {
+                            bgcolor: '#22c55e20',
+                            color: '#22c55e',
+                            borderColor: '#22c55e40'
+                          },
+                          '&.MuiChip-colorError': {
+                            bgcolor: '#ef444420',
+                            color: '#ef4444',
+                            borderColor: '#ef444440'
+                          }
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ 
+                      maxWidth: { xs: '100px', sm: '120px' },
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {row.employee || '-'}
+                    </TableCell>
+                    <TableCell>{row.commission || 0}%</TableCell>
+                    <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
+                      {(() => {
+                        const ownerBrok = typeof row.ownerBro === 'number' ? row.ownerBro : convertPercentageToAmount(row.ownerBro, row.basePrice);
+                        const customerBrok = typeof row.customerBro === 'number' ? row.customerBro : convertPercentageToAmount(row.customerBro, row.basePrice);
+                        const totalBrok = ownerBrok + customerBrok;
+                        return formatINR(((row.commission || 0) * totalBrok) / 100);
+                      })()}
+                    </TableCell>
+                    <TableCell>
+                      <IconButton
+                        onClick={() => onEditEntry && onEditEntry(row)}
+                        sx={{
+                          color: 'primary.main',
+                          '&:hover': {
+                            bgcolor: 'primary.light',
+                            color: 'white'
+                          },
+                          borderRadius: 2,
+                          p: { xs: 0.5, sm: 1 }
+                        }}
+                        size="small"
+                      >
+                        <Edit fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                    <TableCell>
+                      <IconButton
+                        onClick={() => onDeleteEntry && onDeleteEntry(row._id)}
+                        sx={{
+                          color: 'error.main',
+                          '&:hover': {
+                            bgcolor: 'error.light',
+                            color: 'white'
+                          },
+                          borderRadius: 2,
+                          p: { xs: 0.5, sm: 1 }
+                        }}
+                        size="small"
+                      >
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
 
-        <TablePagination
-          component="div"
-          count={filteredData.length}
-          page={page}
-          onPageChange={handleChangePage}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          rowsPerPageOptions={[5, 10, 25, 50]}
-        />
+        {/* Responsive Pagination */}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          px: { xs: 2, sm: 3 }, 
+          py: { xs: 1, sm: 1.5 },
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: { xs: 1, sm: 0 }
+        }}>
+          <Typography variant="body2" sx={{ fontSize: { xs: '0.625rem', sm: '0.75rem' } }}>
+            Showing {page * rowsPerPage + 1} to {Math.min((page + 1) * rowsPerPage, filteredData.length)} of {filteredData.length} entries
+          </Typography>
+          <TablePagination
+            component="div"
+            count={filteredData.length}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            rowsPerPageOptions={[5, 10, 25, 50]}
+            sx={{
+              '& .MuiTablePagination-selectLabel': {
+                fontSize: { xs: '0.625rem', sm: '0.75rem' }
+              },
+              '& .MuiTablePagination-displayedRows': {
+                fontSize: { xs: '0.625rem', sm: '0.75rem' }
+              },
+              '& .MuiTablePagination-actions button': {
+                fontSize: { xs: '0.625rem', sm: '0.75rem' }
+              }
+            }}
+          />
+        </Box>
       </Paper>
     </Container>
   );
