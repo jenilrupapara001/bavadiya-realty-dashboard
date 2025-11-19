@@ -33,6 +33,7 @@ const Analytics = () => {
   const [error, setError] = useState(null);
   const [selectedProjectMetric, setSelectedProjectMetric] = useState('totalBrokerage');
   const [activeProjectIndex, setActiveProjectIndex] = useState(null);
+  const [employees, setEmployees] = useState([]);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
@@ -43,6 +44,7 @@ const Analytics = () => {
 
   useEffect(() => {
     fetchData();
+    fetchEmployees();
   }, []);
 
   useEffect(() => {
@@ -65,6 +67,20 @@ const Analytics = () => {
       setError(`Failed to load analytics data: ${error.message}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchEmployees = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+      
+      const response = await axios.get(`${API_BASE_URL}/api/employees`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setEmployees(response.data || []);
+    } catch (err) {
+      console.error('Error fetching employees:', err);
     }
   };
 
@@ -144,8 +160,22 @@ const Analytics = () => {
   const receivedByData = getReceivedByData();
 
   // Employee performance with commission calculations
+  const employeeLookup = useMemo(() => {
+    const map = new Map();
+    employees.forEach(emp => {
+      if (emp?.code) {
+        map.set(emp.code, emp.name || emp.code);
+      }
+      if (emp?._id) {
+        map.set(emp._id, emp.name || emp.code || emp._id);
+      }
+    });
+    return map;
+  }, [employees]);
+
   const employeeData = data.reduce((acc, item) => {
-    const empName = item.employee || 'Unknown';
+    const employeeCode = item.employee || 'Unknown';
+    const empName = employeeLookup.get(employeeCode) || employeeLookup.get(item.employeeName) || item.employeeName || employeeCode || 'Unknown';
     if (!acc[empName]) acc[empName] = { name: empName, deals: 0, revenue: 0, commission: 0 };
     acc[empName].deals += 1;
     acc[empName].revenue += item.basePrice || 0;
