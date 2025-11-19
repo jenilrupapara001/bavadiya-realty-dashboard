@@ -202,8 +202,13 @@ const Analytics = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ background: 'linear-gradient(135deg, #1a365d 0%, #3b82f6 100%)', color: 'white', borderRadius: 3, minHeight: 140 }}>
             <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '1rem', sm: '1.25rem' } }}>Total Portfolio</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.5rem', sm: '2rem' } }}>
+              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Total Portfolio</Typography>
+              <Typography variant="h4" sx={{ 
+                fontWeight: 700, 
+                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
+                wordBreak: 'break-word',
+                lineHeight: 1.2
+              }}>
                 {formatINR(totalPayments)}
               </Typography>
             </CardContent>
@@ -212,8 +217,13 @@ const Analytics = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', color: 'white', borderRadius: 3, minHeight: 140 }}>
             <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '1rem', sm: '1.25rem' } }}>Total Brokerage</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.5rem', sm: '2rem' } }}>
+              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Total Brokerage</Typography>
+              <Typography variant="h4" sx={{ 
+                fontWeight: 700, 
+                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
+                wordBreak: 'break-word',
+                lineHeight: 1.2
+              }}>
                 {formatINR(totalBrokerage)}
               </Typography>
             </CardContent>
@@ -222,8 +232,13 @@ const Analytics = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)', color: 'white', borderRadius: 3, minHeight: 140 }}>
             <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '1rem', sm: '1.25rem' } }}>Payment Received</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.5rem', sm: '2rem' } }}>
+              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Payment Received</Typography>
+              <Typography variant="h4" sx={{ 
+                fontWeight: 700, 
+                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
+                wordBreak: 'break-word',
+                lineHeight: 1.2
+              }}>
                 {formatINR(paymentReceived)}
               </Typography>
             </CardContent>
@@ -232,9 +247,105 @@ const Analytics = () => {
         <Grid item xs={12} sm={6} md={3}>
           <Card sx={{ background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', color: 'white', borderRadius: 3, minHeight: 140 }}>
             <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '1rem', sm: '1.25rem' } }}>Outstanding Amount</Typography>
-              <Typography variant="h4" sx={{ fontWeight: 700, fontSize: { xs: '1.5rem', sm: '2rem' } }}>
+              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Outstanding Amount</Typography>
+              <Typography variant="h4" sx={{ 
+                fontWeight: 700, 
+                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
+                wordBreak: 'break-word',
+                lineHeight: 1.2
+              }}>
                 {formatINR(outstandingAmount)}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Payment Status Cards */}
+      <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 3 }}>
+        Payment Status Analytics
+      </Typography>
+      <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)', color: 'white', borderRadius: 3, minHeight: 140 }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Received</Typography>
+              <Typography variant="h4" sx={{ 
+                fontWeight: 700, 
+                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
+                wordBreak: 'break-word',
+                lineHeight: 1.2
+              }}>
+                {formatINR(paymentReceived)}
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.8, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+                {data.filter(item => item.receiveDate && item.customerReceiveDate).length} fully received
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', color: 'white', borderRadius: 3, minHeight: 140 }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Outstanding</Typography>
+              <Typography variant="h4" sx={{ 
+                fontWeight: 700, 
+                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
+                wordBreak: 'break-word',
+                lineHeight: 1.2
+              }}>
+                {formatINR(outstandingAmount)}
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.8, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+                {data.filter(item => !(item.receiveDate && item.customerReceiveDate)).length} pending payments
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', color: 'white', borderRadius: 3, minHeight: 140 }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Owner Only</Typography>
+              <Typography variant="h4" sx={{ 
+                fontWeight: 700, 
+                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
+                wordBreak: 'break-word',
+                lineHeight: 1.2
+              }}>
+                {formatINR(data.reduce((sum, item) => {
+                  if (item.receiveDate && !item.customerReceiveDate) {
+                    const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
+                    return sum + ownerBrok;
+                  }
+                  return sum;
+                }, 0))}
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.8, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+                {data.filter(item => item.receiveDate && !item.customerReceiveDate).length} owner received
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Card sx={{ background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)', color: 'white', borderRadius: 3, minHeight: 140 }}>
+            <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+              <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Customer Only</Typography>
+              <Typography variant="h4" sx={{ 
+                fontWeight: 700, 
+                fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' },
+                wordBreak: 'break-word',
+                lineHeight: 1.2
+              }}>
+                {formatINR(data.reduce((sum, item) => {
+                  if (!item.receiveDate && item.customerReceiveDate) {
+                    const customerBrok = typeof item.customerBro === 'number' ? item.customerBro : convertPercentageToAmount(item.customerBro, item.basePrice);
+                    return sum + customerBrok;
+                  }
+                  return sum;
+                }, 0))}
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.8, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+                {data.filter(item => !item.receiveDate && item.customerReceiveDate).length} customer received
               </Typography>
             </CardContent>
           </Card>
@@ -262,22 +373,28 @@ const Analytics = () => {
                 minHeight: 160
               }}>
                 <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                  <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '1rem', sm: '1.25rem' }, mb: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' }, mb: 1 }}>
                     {person.name}
                   </Typography>
-                  <Typography variant="h5" sx={{ fontWeight: 700, fontSize: { xs: '1.25rem', sm: '1.75rem' }, mb: 1 }}>
+                  <Typography variant="h5" sx={{ 
+                    fontWeight: 700, 
+                    fontSize: { xs: '1rem', sm: '1.25rem', md: '1.75rem' }, 
+                    mb: 1,
+                    wordBreak: 'break-word',
+                    lineHeight: 1.2
+                  }}>
                     {formatINR(person.amount)}
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                     <Chip
                       label={`Owner: ${person.ownerReceived}`}
                       size="small"
-                      sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 500 }}
+                      sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 500, fontSize: { xs: '0.625rem', sm: '0.75rem' } }}
                     />
                     <Chip
                       label={`Customer: ${person.customerReceived}`}
                       size="small"
-                      sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 500 }}
+                      sx={{ bgcolor: 'rgba(255,255,255,0.2)', color: 'white', fontWeight: 500, fontSize: { xs: '0.625rem', sm: '0.75rem' } }}
                     />
                   </Box>
                 </CardContent>
@@ -311,7 +428,8 @@ const Analytics = () => {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value) => [`₹${formatINRNumber(value)}`, 'Revenue']}
+                  formatter={(value, name) => [`₹${formatINRNumber(value)}`, 'Revenue']}
+                  labelFormatter={(label) => `Project: ${label}`}
                   contentStyle={{
                     backgroundColor: '#ffffff',
                     border: '1px solid #e5e7eb',

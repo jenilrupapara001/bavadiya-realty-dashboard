@@ -702,13 +702,20 @@ case 'user-settings':
                   <Grid item xs={12} sm={6} md={3}>
                     <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 140 }}>
                       <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontSize: { xs: 12, sm: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
                           Total Portfolio
                         </Typography>
-                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'primary.main', mb: 1, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+                        <Typography variant="h5" component="div" sx={{ 
+                          fontWeight: 'bold', 
+                          color: 'primary.main', 
+                          mb: 1, 
+                          fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
+                          wordBreak: 'break-word',
+                          lineHeight: 1.2
+                        }}>
                           {formatINR(totalPortfolio)}
                         </Typography>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
+                        <Typography sx={{ fontSize: { xs: 8, sm: 10, md: 12 }, color: 'text.secondary' }}>
                           Base Price • All transactions
                         </Typography>
                       </CardContent>
@@ -717,13 +724,20 @@ case 'user-settings':
                   <Grid item xs={12} sm={6} md={3}>
                     <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 140 }}>
                       <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontSize: { xs: 12, sm: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
                           Total Brokerage
                         </Typography>
-                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: 'success.main', mb: 1, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+                        <Typography variant="h5" component="div" sx={{ 
+                          fontWeight: 'bold', 
+                          color: 'success.main', 
+                          mb: 1, 
+                          fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
+                          wordBreak: 'break-word',
+                          lineHeight: 1.2
+                        }}>
                           {formatINR(totalBrokerage)}
                         </Typography>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
+                        <Typography sx={{ fontSize: { xs: 8, sm: 10, md: 12 }, color: 'text.secondary' }}>
                           Owner + Customer commissions
                         </Typography>
                       </CardContent>
@@ -732,13 +746,20 @@ case 'user-settings':
                   <Grid item xs={12} sm={6} md={3}>
                     <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 140 }}>
                       <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontSize: { xs: 12, sm: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
                           Owner Brokerage
                         </Typography>
-                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: '#f59e0b', mb: 1, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+                        <Typography variant="h5" component="div" sx={{ 
+                          fontWeight: 'bold', 
+                          color: '#f59e0b', 
+                          mb: 1, 
+                          fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
+                          wordBreak: 'break-word',
+                          lineHeight: 1.2
+                        }}>
                           {formatINR(totalOwnerBrok)}
                         </Typography>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
+                        <Typography sx={{ fontSize: { xs: 8, sm: 10, md: 12 }, color: 'text.secondary' }}>
                           Owner commissions
                         </Typography>
                       </CardContent>
@@ -747,13 +768,20 @@ case 'user-settings':
                   <Grid item xs={12} sm={6} md={3}>
                     <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 140 }}>
                       <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontSize: { xs: 12, sm: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
                           Customer Brokerage
                         </Typography>
-                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: '#8b5cf6', mb: 1, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+                        <Typography variant="h5" component="div" sx={{ 
+                          fontWeight: 'bold', 
+                          color: '#8b5cf6', 
+                          mb: 1, 
+                          fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
+                          wordBreak: 'break-word',
+                          lineHeight: 1.2
+                        }}>
                           {formatINR(totalCustomerBrok)}
                         </Typography>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
+                        <Typography sx={{ fontSize: { xs: 8, sm: 10, md: 12 }, color: 'text.secondary' }}>
                           Customer commissions
                         </Typography>
                       </CardContent>
@@ -762,13 +790,20 @@ case 'user-settings':
                   <Grid item xs={12} sm={6} md={3}>
                     <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 140 }}>
                       <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontSize: { xs: 12, sm: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
                           Payment Received
                         </Typography>
-                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: '#22c55e', mb: 1, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+                        <Typography variant="h5" component="div" sx={{ 
+                          fontWeight: 'bold', 
+                          color: '#22c55e', 
+                          mb: 1, 
+                          fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
+                          wordBreak: 'break-word',
+                          lineHeight: 1.2
+                        }}>
                           {formatINR(paymentReceived)}
                         </Typography>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
+                        <Typography sx={{ fontSize: { xs: 8, sm: 10, md: 12 }, color: 'text.secondary' }}>
                           Based on receive dates
                         </Typography>
                       </CardContent>
@@ -777,13 +812,20 @@ case 'user-settings':
                   <Grid item xs={12} sm={6} md={3}>
                     <Card sx={{ borderRadius: 2, boxShadow: 2, height: '100%', minHeight: 140 }}>
                       <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
-                        <Typography sx={{ fontSize: { xs: 12, sm: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 14 }, color: 'text.secondary', mb: 1, fontWeight: 500 }}>
                           Outstanding Amount
                         </Typography>
-                        <Typography variant="h5" component="div" sx={{ fontWeight: 'bold', color: '#ef4444', mb: 1, fontSize: { xs: '1.25rem', sm: '1.5rem' } }}>
+                        <Typography variant="h5" component="div" sx={{ 
+                          fontWeight: 'bold', 
+                          color: '#ef4444', 
+                          mb: 1, 
+                          fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' },
+                          wordBreak: 'break-word',
+                          lineHeight: 1.2
+                        }}>
                           {formatINR(outstandingAmount)}
                         </Typography>
-                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
+                        <Typography sx={{ fontSize: { xs: 8, sm: 10, md: 12 }, color: 'text.secondary' }}>
                           Pending payments
                         </Typography>
                       </CardContent>
@@ -797,7 +839,7 @@ case 'user-settings':
                     Analytics Overview - Total Brokerage: {formatINR(totalBrokerage)}
                   </Typography>
                   <Grid container spacing={{ xs: 2, md: 3 }}>
-                    <Grid item xs={12} md={6}>
+                    <Grid item xs={12}>
                       <Paper sx={{
                         p: { xs: 1.5, sm: 2 },
                         height: { xs: 280, sm: 320 },
@@ -882,69 +924,6 @@ case 'user-settings':
                                 animationEasing="ease-out"
                               />
                             </BarChart>
-                          </ResponsiveContainer>
-                        </Box>
-                      </Paper>
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <Paper sx={{
-                        p: { xs: 1.5, sm: 2 },
-                        height: { xs: 280, sm: 320 },
-                        display: 'flex',
-                        flexDirection: 'column',
-                        background: 'linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%)',
-                        border: '1px solid rgba(0,0,0,0.08)',
-                        borderRadius: 3,
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-                      }}>
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            fontWeight: 600,
-                            color: 'text.primary',
-                            mb: 2,
-                            fontSize: { xs: '1rem', sm: '1.25rem' }
-                          }}
-                        >
-                          Payment Status Distribution
-                        </Typography>
-                        <Box sx={{
-                          flexGrow: 1,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          minHeight: 0
-                        }}>
-                          <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                              <Pie
-                                data={pieData}
-                                cx="50%"
-                                cy="45%"
-                                labelLine={false}
-                                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                                outerRadius={{ xs: 65, sm: 85 }}
-                                innerRadius={{ xs: 30, sm: 40 }}
-                                fill="#8884d8"
-                                dataKey="value"
-                                stroke="#fff"
-                                strokeWidth={2}
-                              >
-                                {pieData.map((entry, index) => (
-                                  <Cell key={`cell-${index}`} fill={entry.color} />
-                                ))}
-                              </Pie>
-                              <Tooltip
-                                formatter={(value) => [`₹${value.toLocaleString()}`, 'Amount']}
-                                contentStyle={{
-                                  backgroundColor: '#fff',
-                                  border: '1px solid #ddd',
-                                  borderRadius: '12px',
-                                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                                  fontSize: { xs: '11px', sm: '12px' }
-                                }}
-                              />
-                            </PieChart>
                           </ResponsiveContainer>
                         </Box>
                       </Paper>
@@ -1335,10 +1314,11 @@ case 'user-settings':
         flexGrow: 1,
         p: 0,
         minHeight: 'calc(100vh - 64px)',
-        marginLeft: isMobile ? 0 : '280px'
+        marginLeft: isMobile ? 0 : '280px',
+        overflow: 'hidden'
       }}>
         <Toolbar />
-        <Container maxWidth="xl" sx={{ p: 4, pb: 8 }}>
+        <Container maxWidth={false} sx={{ p: { xs: 2, sm: 3, md: 4 }, pb: 8, maxWidth: '100%' }}>
           {renderView()}
         </Container>
 
