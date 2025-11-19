@@ -1218,7 +1218,7 @@ case 'user-settings':
                       <Paper
                         sx={{
                           p: { xs: 2, sm: 3 },
-                          borderRadius: 4,
+                          borderRadius: 2,
                           border: '1px solid',
                           borderColor: 'grey.100',
                           boxShadow: '0 15px 35px rgba(15,23,42,0.08)'
@@ -1380,7 +1380,7 @@ case 'user-settings':
                       bgcolor: 'primary.main',
                       alignSelf: { xs: 'flex-start', sm: 'auto' },
                       minWidth: { xs: '100%', sm: 'auto' },
-                      borderRadius: 3
+                      borderRadius: 2
                     }}
                     size="large"
                   >
@@ -1389,7 +1389,7 @@ case 'user-settings':
                 </Box>
 
 {/* Filters */}
-                <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3, borderRadius: 3 }}>
+                <Paper sx={{ p: { xs: 2, sm: 3 }, mb: 3, borderRadius: 2 }}>
                   <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                     Filters
                   </Typography>
@@ -1487,7 +1487,7 @@ case 'user-settings':
 {/* Table */}
                 <Paper
                   sx={{
-                    borderRadius: 3,
+                    borderRadius: 2,
                     boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
                     p: { xs: 1.5, sm: 2.5 }
                   }}
@@ -1729,7 +1729,7 @@ case 'user-settings':
                     if (isMobile) setDrawerOpen(false);
                   }}
                   sx={{
-                    borderRadius: 3,
+                    borderRadius: 2,
                     '&.Mui-selected': {
                       backgroundColor: 'primary.main',
                       color: 'white',
@@ -1786,7 +1786,7 @@ case 'user-settings':
           fullWidth
           sx={{
             '& .MuiDialog-paper': {
-              borderRadius: 4,
+              borderRadius: 2,
               boxShadow: '0 25px 50px rgba(0,0,0,0.25)',
             }
           }}
