@@ -563,6 +563,67 @@ setFormData({
     gap: 1
   };
 
+  const topEmployees = useMemo(() => {
+    const sorted = [...chartData].sort((a, b) => b.value - a.value);
+    return sorted.slice(0, 4);
+  }, [chartData]);
+
+  const tableStats = useMemo(() => {
+    const totalEntries = filteredData.length;
+    const totalValue = filteredData.reduce((sum, item) => sum + (item.basePrice || 0), 0);
+    const pending = filteredData.filter(item => !(item.receiveDate && item.customerReceiveDate)).length;
+    return { totalEntries, totalValue, pending };
+  }, [filteredData]);
+
+  const employeePerformance = useMemo(() => {
+    return data.reduce((acc, item) => {
+      if (!item.employee) return acc;
+      const amount = item.basePrice || 0;
+      acc[item.employee] = (acc[item.employee] || 0) + amount;
+      return acc;
+    }, {});
+  }, [data]);
+
+  const projectPerformance = useMemo(() => {
+    return data.reduce((acc, item) => {
+      if (!item.projectName) return acc;
+      if (!acc[item.projectName]) {
+        acc[item.projectName] = { deals: 0, value: 0 };
+      }
+      acc[item.projectName].deals += 1;
+      acc[item.projectName].value += item.basePrice || 0;
+      return acc;
+    }, {});
+  }, [data]);
+
+  const employeeStats = useMemo(() => {
+    const totalEmployees = employees.length;
+    const managedPortfolio = Object.values(employeePerformance).reduce((sum, value) => sum + value, 0);
+    const [topPerformer, topValue] =
+      Object.entries(employeePerformance).sort((a, b) => b[1] - a[1])[0] || [null, 0];
+
+    return {
+      totalEmployees,
+      managedPortfolio,
+      topPerformer: topPerformer || '—',
+      topValue
+    };
+  }, [employees, employeePerformance]);
+
+  const projectStats = useMemo(() => {
+    const performanceEntries = Object.values(projectPerformance);
+    const totalDeals = performanceEntries.reduce((sum, item) => sum + item.deals, 0);
+    const portfolioValue = performanceEntries.reduce((sum, item) => sum + item.value, 0);
+    const activeProjects = projects.filter((project) => project.status === 'Active').length;
+
+    return {
+      totalProjects: projects.length,
+      activeProjects,
+      totalDeals,
+      portfolioValue
+    };
+  }, [projects, projectPerformance]);
+
   const employeeCards = useMemo(() => [
     {
       key: 'totalEmployees',
@@ -624,67 +685,6 @@ setFormData({
       icon: CheckCircle
     }
   ], [projectStats, formatINR]);
-
-  const topEmployees = useMemo(() => {
-    const sorted = [...chartData].sort((a, b) => b.value - a.value);
-    return sorted.slice(0, 4);
-  }, [chartData]);
-
-  const tableStats = useMemo(() => {
-    const totalEntries = filteredData.length;
-    const totalValue = filteredData.reduce((sum, item) => sum + (item.basePrice || 0), 0);
-    const pending = filteredData.filter(item => !(item.receiveDate && item.customerReceiveDate)).length;
-    return { totalEntries, totalValue, pending };
-  }, [filteredData]);
-
-  const employeePerformance = useMemo(() => {
-    return data.reduce((acc, item) => {
-      if (!item.employee) return acc;
-      const amount = item.basePrice || 0;
-      acc[item.employee] = (acc[item.employee] || 0) + amount;
-      return acc;
-    }, {});
-  }, [data]);
-
-  const projectPerformance = useMemo(() => {
-    return data.reduce((acc, item) => {
-      if (!item.projectName) return acc;
-      if (!acc[item.projectName]) {
-        acc[item.projectName] = { deals: 0, value: 0 };
-      }
-      acc[item.projectName].deals += 1;
-      acc[item.projectName].value += item.basePrice || 0;
-      return acc;
-    }, {});
-  }, [data]);
-
-  const employeeStats = useMemo(() => {
-    const totalEmployees = employees.length;
-    const managedPortfolio = Object.values(employeePerformance).reduce((sum, value) => sum + value, 0);
-    const [topPerformer, topValue] =
-      Object.entries(employeePerformance).sort((a, b) => b[1] - a[1])[0] || [null, 0];
-
-    return {
-      totalEmployees,
-      managedPortfolio,
-      topPerformer: topPerformer || '—',
-      topValue
-    };
-  }, [employees, employeePerformance]);
-
-  const projectStats = useMemo(() => {
-    const performanceEntries = Object.values(projectPerformance);
-    const totalDeals = performanceEntries.reduce((sum, item) => sum + item.deals, 0);
-    const portfolioValue = performanceEntries.reduce((sum, item) => sum + item.value, 0);
-    const activeProjects = projects.filter((project) => project.status === 'Active').length;
-
-    return {
-      totalProjects: projects.length,
-      activeProjects,
-      totalDeals,
-      portfolioValue
-    };
-  }, [projects, projectPerformance]);
 
 const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, view: 'dashboard' },
