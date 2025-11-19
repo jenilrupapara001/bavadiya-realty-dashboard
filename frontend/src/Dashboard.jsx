@@ -701,147 +701,231 @@ case 'user-settings':
                   </Box>
                 </Grow>
 
-                {/* Gradient Metric Cards */}
-                <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: 4 }}>
-                  {[
-                    {
-                      title: 'Total Portfolio',
-                      value: formatINR(totalPortfolio),
-                      subtitle: 'Base Price • All transactions',
-                      colors: ['#0f172a', '#2563eb']
-                    },
-                    {
-                      title: 'Total Brokerage',
-                      value: formatINR(totalBrokerage),
-                      subtitle: 'Owner + Customer commissions',
-                      colors: ['#1d4ed8', '#3b82f6']
-                    },
-                    {
-                      title: 'Owner Brokerage',
-                      value: formatINR(totalOwnerBrok),
-                      subtitle: 'Owner commissions',
-                      colors: ['#ea580c', '#f97316']
-                    },
-                    {
-                      title: 'Customer Brokerage',
-                      value: formatINR(totalCustomerBrok),
-                      subtitle: 'Customer commissions',
-                      colors: ['#7c3aed', '#a855f7']
-                    },
-                    {
-                      title: 'Payment Received',
-                      value: formatINR(paymentReceived),
-                      subtitle: 'Based on receive dates',
-                      colors: ['#047857', '#10b981']
-                    },
-                    {
-                      title: 'Outstanding Amount',
-                      value: formatINR(outstandingAmount),
-                      subtitle: 'Pending payments',
-                      colors: ['#b91c1c', '#ef4444']
-                    }
-                  ].map((card, index) => (
-                    <Grid item xs={12} sm={6} md={3} key={`${card.title}-${index}`}>
-                      <Box
-                        sx={{
-                          p: { xs: 2, sm: 2.5, md: 3 },
-                          borderRadius: 4,
-                          height: '100%',
-                          minHeight: 150,
-                          background: `linear-gradient(135deg, ${card.colors[0]} 0%, ${card.colors[1]} 100%)`,
-                          color: '#fff',
-                          boxShadow: '0 20px 35px rgba(15, 23, 42, 0.2)',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'space-between'
-                        }}
-                      >
-                        <Typography sx={{ fontSize: { xs: 12, md: 14 }, fontWeight: 500, opacity: 0.85 }}>
-                          {card.title}
+                {/* Metric Cards */}
+                <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
+                  <Grid item xs={12} sm={6} md={4} lg={3}>
+                    <Card sx={{ borderRadius: 3, boxShadow: 3, height: '100%', minHeight: 150 }}>
+                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 13 }, color: 'text.secondary', mb: 1, fontWeight: 600 }}>
+                          Total Portfolio
                         </Typography>
-                        <Typography
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: { xs: '1.3rem', md: '1.75rem' },
-                            lineHeight: 1.2
-                          }}
-                        >
-                          {card.value}
+                        <Typography variant="h5" sx={{ 
+                          fontWeight: 700, 
+                          color: 'primary.main', 
+                          mb: 1, 
+                          fontSize: { xs: '1.1rem', sm: '1.4rem', md: '1.7rem' },
+                          wordBreak: 'break-word',
+                          lineHeight: 1.2
+                        }}>
+                          {formatINR(totalPortfolio)}
                         </Typography>
-                        <Typography sx={{ fontSize: { xs: 10, md: 12 }, opacity: 0.75 }}>
-                          {card.subtitle}
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
+                          Base Price • All transactions
                         </Typography>
-                      </Box>
-                    </Grid>
-                  ))}
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4} lg={3}>
+                    <Card sx={{ borderRadius: 3, boxShadow: 3, height: '100%', minHeight: 150 }}>
+                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 13 }, color: 'text.secondary', mb: 1, fontWeight: 600 }}>
+                          Total Brokerage
+                        </Typography>
+                        <Typography variant="h5" sx={{ 
+                          fontWeight: 700, 
+                          color: 'success.main', 
+                          mb: 1, 
+                          fontSize: { xs: '1.1rem', sm: '1.4rem', md: '1.7rem' },
+                          wordBreak: 'break-word',
+                          lineHeight: 1.2
+                        }}>
+                          {formatINR(totalBrokerage)}
+                        </Typography>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
+                          Owner + Customer commissions
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4} lg={3}>
+                    <Card sx={{ borderRadius: 3, boxShadow: 3, height: '100%', minHeight: 150 }}>
+                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 13 }, color: 'text.secondary', mb: 1, fontWeight: 600 }}>
+                          Owner Brokerage
+                        </Typography>
+                        <Typography variant="h5" sx={{ 
+                          fontWeight: 700, 
+                          color: '#f59e0b', 
+                          mb: 1, 
+                          fontSize: { xs: '1.1rem', sm: '1.4rem', md: '1.7rem' },
+                          wordBreak: 'break-word',
+                          lineHeight: 1.2
+                        }}>
+                          {formatINR(totalOwnerBrok)}
+                        </Typography>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
+                          Owner commissions
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4} lg={3}>
+                    <Card sx={{ borderRadius: 3, boxShadow: 3, height: '100%', minHeight: 150 }}>
+                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 13 }, color: 'text.secondary', mb: 1, fontWeight: 600 }}>
+                          Customer Brokerage
+                        </Typography>
+                        <Typography variant="h5" sx={{ 
+                          fontWeight: 700, 
+                          color: '#8b5cf6', 
+                          mb: 1, 
+                          fontSize: { xs: '1.1rem', sm: '1.4rem', md: '1.7rem' },
+                          wordBreak: 'break-word',
+                          lineHeight: 1.2
+                        }}>
+                          {formatINR(totalCustomerBrok)}
+                        </Typography>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
+                          Customer commissions
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4} lg={3}>
+                    <Card sx={{ borderRadius: 3, boxShadow: 3, height: '100%', minHeight: 150 }}>
+                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 13 }, color: 'text.secondary', mb: 1, fontWeight: 600 }}>
+                          Payment Received
+                        </Typography>
+                        <Typography variant="h5" sx={{ 
+                          fontWeight: 700, 
+                          color: '#22c55e', 
+                          mb: 1, 
+                          fontSize: { xs: '1.1rem', sm: '1.4rem', md: '1.7rem' },
+                          wordBreak: 'break-word',
+                          lineHeight: 1.2
+                        }}>
+                          {formatINR(paymentReceived)}
+                        </Typography>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
+                          Based on receive dates
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4} lg={3}>
+                    <Card sx={{ borderRadius: 3, boxShadow: 3, height: '100%', minHeight: 150 }}>
+                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12, md: 13 }, color: 'text.secondary', mb: 1, fontWeight: 600 }}>
+                          Outstanding Amount
+                        </Typography>
+                        <Typography variant="h5" sx={{ 
+                          fontWeight: 700, 
+                          color: '#ef4444', 
+                          mb: 1, 
+                          fontSize: { xs: '1.1rem', sm: '1.4rem', md: '1.7rem' },
+                          wordBreak: 'break-word',
+                          lineHeight: 1.2
+                        }}>
+                          {formatINR(outstandingAmount)}
+                        </Typography>
+                        <Typography sx={{ fontSize: { xs: 10, sm: 12 }, color: 'text.secondary' }}>
+                          Pending payments
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
                 </Grid>
 
                 {/* Payment Status */}
-                <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 2 }}>
+                <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 3 }}>
                   Payment Status Analytics
                 </Typography>
-                <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: 4 }}>
-                  {[
-                    {
-                      title: 'Received',
-                      value: formatINR(paymentReceived),
-                      subtitle: `${data.filter(item => item.receiveDate && item.customerReceiveDate).length} fully received`,
-                      colors: ['#059669', '#34d399']
-                    },
-                    {
-                      title: 'Outstanding',
-                      value: formatINR(outstandingAmount),
-                      subtitle: `${data.filter(item => !(item.receiveDate && item.customerReceiveDate)).length} pending payments`,
-                      colors: ['#dc2626', '#f87171']
-                    },
-                    {
-                      title: 'Owner Only',
-                      value: formatINR(data.reduce((sum, item) => {
-                        if (item.receiveDate && !item.customerReceiveDate) {
-                          const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
-                          return sum + ownerBrok;
-                        }
-                        return sum;
-                      }, 0)),
-                      subtitle: `${data.filter(item => item.receiveDate && !item.customerReceiveDate).length} owner received`,
-                      colors: ['#ea580c', '#f97316']
-                    },
-                    {
-                      title: 'Customer Only',
-                      value: formatINR(data.reduce((sum, item) => {
-                        if (!item.receiveDate && item.customerReceiveDate) {
-                          const customerBrok = typeof item.customerBro === 'number' ? item.customerBro : convertPercentageToAmount(item.customerBro, item.basePrice);
-                          return sum + customerBrok;
-                        }
-                        return sum;
-                      }, 0)),
-                      subtitle: `${data.filter(item => !item.receiveDate && item.customerReceiveDate).length} customer received`,
-                      colors: ['#9333ea', '#c084fc']
-                    }
-                  ].map(card => (
-                    <Grid item xs={12} sm={6} md={3} key={card.title}>
-                      <Box
-                        sx={{
-                          p: { xs: 2, sm: 2.5 },
-                          borderRadius: 4,
-                          height: '100%',
-                          background: `linear-gradient(135deg, ${card.colors[0]} 0%, ${card.colors[1]} 100%)`,
-                          color: '#fff',
-                          boxShadow: '0 15px 30px rgba(15, 23, 42, 0.2)'
-                        }}
-                      >
-                        <Typography sx={{ fontSize: 13, fontWeight: 600, opacity: 0.85 }}>
-                          {card.title}
+                <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Card sx={{ borderRadius: 3, boxShadow: 3, minHeight: 140 }}>
+                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                        <Typography sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Received</Typography>
+                        <Typography variant="h4" sx={{ 
+                          fontWeight: 700, 
+                          color: 'success.main', 
+                          fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }, 
+                          mb: 0.5
+                        }}>
+                          {formatINR(paymentReceived)}
                         </Typography>
-                        <Typography sx={{ fontSize: { xs: '1.25rem', md: '1.6rem' }, fontWeight: 700, my: 1 }}>
-                          {card.value}
+                        <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+                          {data.filter(item => item.receiveDate && item.customerReceiveDate).length} fully received
                         </Typography>
-                        <Typography sx={{ fontSize: 12, opacity: 0.85 }}>
-                          {card.subtitle}
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Card sx={{ borderRadius: 3, boxShadow: 3, minHeight: 140 }}>
+                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                        <Typography sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Outstanding</Typography>
+                        <Typography variant="h4" sx={{ 
+                          fontWeight: 700, 
+                          color: 'error.main', 
+                          fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }, 
+                          mb: 0.5
+                        }}>
+                          {formatINR(outstandingAmount)}
                         </Typography>
-                      </Box>
-                    </Grid>
-                  ))}
+                        <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+                          {data.filter(item => !(item.receiveDate && item.customerReceiveDate)).length} pending payments
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Card sx={{ borderRadius: 3, boxShadow: 3, minHeight: 140 }}>
+                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                        <Typography sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Owner Only</Typography>
+                        <Typography variant="h4" sx={{ 
+                          fontWeight: 700, 
+                          color: '#f59e0b', 
+                          fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }, 
+                          mb: 0.5
+                        }}>
+                          {formatINR(data.reduce((sum, item) => {
+                            if (item.receiveDate && !item.customerReceiveDate) {
+                              const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
+                              return sum + ownerBrok;
+                            }
+                            return sum;
+                          }, 0))}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+                          {data.filter(item => item.receiveDate && !item.customerReceiveDate).length} owner received
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={3}>
+                    <Card sx={{ borderRadius: 3, boxShadow: 3, minHeight: 140 }}>
+                      <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                        <Typography sx={{ fontWeight: 500, fontSize: { xs: '0.875rem', sm: '1rem' } }}>Customer Only</Typography>
+                        <Typography variant="h4" sx={{ 
+                          fontWeight: 700, 
+                          color: '#8b5cf6', 
+                          fontSize: { xs: '1.25rem', sm: '1.5rem', md: '2rem' }, 
+                          mb: 0.5
+                        }}>
+                          {formatINR(data.reduce((sum, item) => {
+                            if (!item.receiveDate && item.customerReceiveDate) {
+                              const customerBrok = typeof item.customerBro === 'number' ? item.customerBro : convertPercentageToAmount(item.customerBro, item.basePrice);
+                              return sum + customerBrok;
+                            }
+                            return sum;
+                          }, 0))}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+                          {data.filter(item => !item.receiveDate && item.customerReceiveDate).length} customer received
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
                 </Grid>
 
                 {/* Analytics Overview */}
