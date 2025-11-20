@@ -940,10 +940,10 @@ SOFTWARE.
 ## 👨‍💻 **About the Developer**
 
 **Jenil Rupapara**
-- 🔗 **LinkedIn**: [linkedin.com/in/jenilrupapara]([https://linkedin.com/in/jenilrupapara-fullstack-developer])
-- 🐱 **GitHub**: [github.com/jenilrupapara001](https://github.com/jenilrupapara001)
+- 🔗 **LinkedIn**: [Jenil Rupapara](https://linkedin.com/in/jenilrupapara-fullstack-developer)
+- 🐱 **GitHub**: [Jenil Rupapara](https://github.com/jenilrupapara001)
 - 📧 **Email**: jenilrupapara340@gmail.com
-- 🌍 **Portfolio**: [jenilrupapara.com](https://jenilrupapara.netlify.app)
+- 🌍 **Portfolio**: [jenilrupapara.netlify.app](https://jenilrupapara.netlify.app)
 
 ---
 
