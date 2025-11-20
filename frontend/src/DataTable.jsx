@@ -405,7 +405,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
       </Paper>
 
       {/* Data Table - Responsive */}
-      <Paper sx={{ borderRadius: 3, boxShadow: '0 4px 20px rgba(0,0,0,0.08)', p: { xs: 1.5, sm: 2.5 } }}>
+      <Paper sx={{ borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)', p: { xs: 1.5, sm: 2.5 } }}>
         <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 2 }}>
           <Chip label={`Entries: ${totalEntries}`} variant="outlined" />
           <Chip label={`Value: ${formatINR(totalValue)}`} color="success" variant="outlined" />
