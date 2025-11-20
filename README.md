@@ -951,7 +951,7 @@ SOFTWARE.
 
 Special thanks to:
 
-- **🍎 Apple Design Team** - For the beautiful iOS design language
+- **🍎 Apple Design Team** - For the beautiful iOS design language.
 - **⚛️ React Team** - For the amazing React framework
 - **🌟 Material-UI** - For the comprehensive component library
 - **🚀 Vercel** - For seamless deployment platform
