@@ -360,7 +360,7 @@ const Analytics = () => {
     activeProjectIndex !== null ? safeProjectChartData[activeProjectIndex] : null;
 
   const cardBaseStyles = {
-    borderRadius: 3,
+    borderRadius: 2,
     p: { xs: 2.5, sm: 3 },
     height: '100%',
     border: '1px solid rgba(15,23,42,0.06)',

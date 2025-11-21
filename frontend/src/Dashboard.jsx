@@ -763,7 +763,7 @@ const menuItems = [
               })}
             </Grid>
 
-            <Paper sx={{ borderRadius: 4, p: { xs: 2, md: 3 } }}>
+            <Paper sx={{ borderRadius: 1, p: { xs: 2, md: 3 } }}>
               <Box
                 sx={{
                   display: 'flex',
@@ -2104,7 +2104,7 @@ case 'user-settings':
               onClick={handleSave}
               variant="contained"
               sx={{
-                borderRadius: 3,
+                borderRadius: 2,
                 px: 3,
                 textTransform: 'none',
                 fontWeight: 600,
@@ -2123,7 +2123,7 @@ case 'user-settings':
           fullWidth
           sx={{
             '& .MuiDialog-paper': {
-              borderRadius: 4,
+              borderRadius: 2,
               boxShadow: '0 25px 50px rgba(0,0,0,0.25)',
             }
           }}
@@ -2177,7 +2177,7 @@ case 'user-settings':
               onClick={() => { setEmployeeOpen(false); setEmployeeFormData({ name: '', code: '', number: '' }); setEditingEmployeeIndex(null); }}
               variant="outlined"
               sx={{
-                borderRadius: 3,
+                borderRadius: 2,
                 px: 3,
                 textTransform: 'none'
               }}
@@ -2188,7 +2188,7 @@ case 'user-settings':
               onClick={handleEmployeeSave}
               variant="contained"
               sx={{
-                borderRadius: 3,
+                borderRadius: 2,
                 px: 3,
                 textTransform: 'none',
                 fontWeight: 600,
@@ -2207,7 +2207,7 @@ case 'user-settings':
           fullWidth
           sx={{
             '& .MuiDialog-paper': {
-              borderRadius: 4,
+              borderRadius: 2,
               boxShadow: '0 25px 50px rgba(0,0,0,0.25)',
             }
           }}
@@ -2289,7 +2289,7 @@ case 'user-settings':
               onClick={handleProjectSave}
               variant="contained"
               sx={{
-                borderRadius: 3,
+                borderRadius: 2,
                 px: 3,
                 textTransform: 'none',
                 fontWeight: 600,
@@ -2357,7 +2357,7 @@ case 'user-settings':
         <Alert
           onClose={() => setSnackbar({ ...snackbar, open: false })}
           severity={snackbar.severity}
-          sx={{ width: '100%', borderRadius: 3 }}
+          sx={{ width: '100%', borderRadius: 2 }}
         >
           {snackbar.message}
         </Alert>
