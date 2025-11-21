@@ -433,40 +433,10 @@ setFormData({
   const outstandingAmount = totalBrokerage - paymentReceived;
 
   const employeeData = data.reduce((acc, item) => {
-    const employeeCode = item.employee || 'Unknown';
+    const employeeName = item.employee || 'Unknown';
     
-    // Create lookup map for employees
-    const employeeLookup = new Map();
-    employees.forEach(emp => {
-      if (emp?.code) {
-        employeeLookup.set(emp.code, emp.name || emp.code);
-      }
-      if (emp?.name) {
-        employeeLookup.set(emp.name, emp.name);
-      }
-      if (emp?._id) {
-        employeeLookup.set(emp._id, emp.name || emp.code || emp._id);
-      }
-    });
-    
-    // Try multiple lookup strategies to find employee name
-    let empName = employeeLookup.get(employeeCode) || 
-                  employeeLookup.get(item.employeeName) || 
-                  employeeLookup.get(item.employee?.name) ||
-                  item.employeeName || 
-                  employeeCode || 
-                  'Unknown';
-    
-    // If still not found, try to find by exact name match in employees array
-    if (empName === 'Unknown' && employeeCode !== 'Unknown') {
-      const exactMatch = employees.find(emp => 
-        emp.name?.toLowerCase() === employeeCode.toLowerCase() || 
-        emp.code?.toLowerCase() === employeeCode.toLowerCase()
-      );
-      if (exactMatch) {
-        empName = exactMatch.name;
-      }
-    }
+    // Now the employee field directly contains the name, so we use it directly
+    const empName = employeeName;
     
     // Calculate total brokerage for this entry
     const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
@@ -1484,7 +1454,7 @@ case 'user-settings':
                         >
                           <MenuItem value="">All</MenuItem>
                           {employees.map((emp, index) => (
-                            <MenuItem key={index} value={emp.code}>{emp.name}</MenuItem>
+                            <MenuItem key={index} value={emp.name}>{emp.name}</MenuItem>
                           ))}
                         </Select>
                       </FormControl>
@@ -1657,7 +1627,7 @@ case 'user-settings':
         }}
       />
     </TableCell>
-    <TableCell>{employees.find(e => e.code === row.employee)?.name || row.employee || '-'}</TableCell>
+    <TableCell>{row.employee || '-'}</TableCell>
     <TableCell>{row.commission || 0}%</TableCell>
     <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
       {/* Calculate commission based on total brokerage */}
@@ -2081,7 +2051,7 @@ case 'user-settings':
                   >
                     <MenuItem value="">Select Employee</MenuItem>
                     {employees.map((emp, index) => (
-                      <MenuItem key={index} value={emp.code}>{emp.name} ({emp.code})</MenuItem>
+                      <MenuItem key={index} value={emp.name}>{emp.name}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>

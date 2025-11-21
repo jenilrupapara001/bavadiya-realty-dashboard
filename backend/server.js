@@ -101,7 +101,7 @@ const dataSchema = new mongoose.Schema({
   customerBro: Number,
   customerReceiveDate: String,
   customerReceivedBy: String,
-  employee: String,
+  employee: String, // Now stores employee name instead of code
   commission: Number,
 });
 

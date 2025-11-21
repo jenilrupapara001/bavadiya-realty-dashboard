@@ -170,45 +170,23 @@ const Analytics = () => {
   const receivedByData = getReceivedByData();
 
   // Employee performance with commission calculations
+  // Since we're now using employee names directly, we don't need complex lookup
+  // But we keep it for validation and additional data if needed
   const employeeLookup = useMemo(() => {
     const map = new Map();
     employees.forEach(emp => {
-      if (emp?.code) {
-        map.set(emp.code, emp.name || emp.code);
-      }
-      if (emp?._id) {
-        map.set(emp._id, emp.name || emp.code || emp._id);
-      }
-      // Also map by name for direct name lookups
       if (emp?.name) {
-        map.set(emp.name, emp.name);
+        map.set(emp.name, emp);
       }
     });
     return map;
   }, [employees]);
 
   const employeeData = data.reduce((acc, item) => {
-    const employeeCode = item.employee || 'Unknown';
-    const employeeName = item.employeeName || '';
+    const employeeName = item.employee || 'Unknown';
     
-    // Try multiple lookup strategies to find employee name
-    let empName = employeeLookup.get(employeeCode) || 
-                  employeeLookup.get(employeeName) || 
-                  employeeLookup.get(item.employee?.name) ||
-                  employeeName || 
-                  employeeCode || 
-                  'Unknown';
-    
-    // If still not found, try to find by exact name match in employees array
-    if (empName === 'Unknown' && employeeCode !== 'Unknown') {
-      const exactMatch = employees.find(emp => 
-        emp.name?.toLowerCase() === employeeCode.toLowerCase() || 
-        emp.code?.toLowerCase() === employeeCode.toLowerCase()
-      );
-      if (exactMatch) {
-        empName = exactMatch.name;
-      }
-    }
+    // Now the employee field directly contains the name, so we use it directly
+    const empName = employeeName;
     
     if (!acc[empName]) acc[empName] = { name: empName, deals: 0, revenue: 0, commission: 0 };
     acc[empName].deals += 1;

@@ -337,7 +337,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
               >
                 <MenuItem value="">All</MenuItem>
                 {employees.map((emp, index) => (
-                  <MenuItem key={index} value={emp.code}>{emp.name}</MenuItem>
+                  <MenuItem key={index} value={emp.name}>{emp.name}</MenuItem>
                 ))}
               </Select>
             </FormControl>
