@@ -138,17 +138,8 @@ const Analytics = () => {
   const getEmployeeName = (employeeData) => {
     if (!employeeData) return 'Unknown';
     
-    // If employee data is a string (name), return it directly
-    if (typeof employeeData === 'string') {
-      return employeeData;
-    }
-    
-    // If employee data is an object, try to get the name
-    if (typeof employeeData === 'object') {
-      return employeeData.name || 'Unknown';
-    }
-    
-    return 'Unknown';
+    // Always return the value as-is since we're now storing names directly
+    return employeeData;
   };
 
   // Received By Analytics - Enhanced with better employee name handling
@@ -707,20 +698,17 @@ const Analytics = () => {
                       }}
                     />
                   </Box>
-                  {/* Show employee code if available */}
-                  {person.employeeCode && person.employeeCode !== person.name && (
-                    <Typography 
-                      variant="caption" 
-                      sx={{ 
-                        color: 'text.secondary', 
-                        fontStyle: 'italic',
-                        display: 'block',
-                        mt: 0.5
-                      }}
-                    >
-                      Code: {person.employeeCode}
-                    </Typography>
-                  )}
+                  {/* Display the person name prominently */}
+                  <Typography 
+                    variant="caption" 
+                    sx={{ 
+                      color: 'text.secondary', 
+                      display: 'block',
+                      mt: 0.5
+                    }}
+                  >
+                    {person.name}
+                  </Typography>
                 </Paper>
             </Grid>
             );

@@ -395,9 +395,9 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
                 }}
               >
                 <MenuItem value="">All</MenuItem>
-                <MenuItem value="Dharmesh Bavadiya">Dharmesh</MenuItem>
-                <MenuItem value="Yogesh Bavadiya">Yogesh</MenuItem>
-                <MenuItem value="Bavadiya Realty LLP">Company</MenuItem>
+                <MenuItem value="Dharmesh Bavadiya">Dharmesh Bavadiya</MenuItem>
+                <MenuItem value="Yogesh Bavadiya">Yogesh Bavadiya</MenuItem>
+                <MenuItem value="Bavadiya Realty LLP">Bavadiya Realty LLP</MenuItem>
               </Select>
             </FormControl>
           </Grid>

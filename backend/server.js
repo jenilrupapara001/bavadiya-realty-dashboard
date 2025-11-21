@@ -101,7 +101,7 @@ const dataSchema = new mongoose.Schema({
   customerBro: Number,
   customerReceiveDate: String,
   customerReceivedBy: String,
-  employee: String, // Now stores employee name instead of code
+  employee: String, // Stores employee name only
   commission: Number,
 });
 
@@ -274,12 +274,12 @@ app.post('/api/login', async (req, res) => {
     dbUser.lastLogin = new Date();
     await dbUser.save();
     
-    // Create JWT token with expiration
+    // Create JWT token with extended expiration (30 days)
     const token = jwt.sign({
       username: dbUser.username,
       id: dbUser._id,
       role: dbUser.role
-    }, SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '24h' });
+    }, SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '720h' }); // 30 days = 720 hours
     
     const userResponse = dbUser.toObject();
     delete userResponse.password;
@@ -353,10 +353,30 @@ app.delete('/api/data/:id', authenticateToken, async (req, res) => {
 // ---- EMPLOYEE ENDPOINTS ------------------------
 app.get('/api/employees', authenticateToken, async (req, res) => {
    try {
-     const employees = await Employee.find();
+     // Ensure database connection
+     if (mongoose.connection.readyState !== 1) {
+       await connectToDatabase();
+     }
+     
+     let employees = await Employee.find();
+     
+     // If no employees exist, create default ones
+     if (employees.length === 0) {
+       const defaultEmployees = [
+         { name: 'Dharmesh Bavadiya', code: 'DB001', number: '+91-9876543210' },
+         { name: 'Yogesh Bavadiya', code: 'YB001', number: '+91-9876543211' },
+         { name: 'Bavadiya Realty LLP', code: 'BR001', number: '+91-9876543212' }
+       ];
+       
+       await Employee.insertMany(defaultEmployees);
+       employees = await Employee.find();
+       console.log('✅ Created default employees');
+     }
+     
      res.json(employees);
    } catch (error) {
-     res.status(500).json({ error: 'Failed to fetch employees' });
+     console.error('❌ Error fetching employees:', error.message);
+     res.status(500).json({ error: 'Failed to fetch employees', details: error.message });
    }
 });
 

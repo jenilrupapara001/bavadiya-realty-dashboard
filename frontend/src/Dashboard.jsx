@@ -433,10 +433,8 @@ setFormData({
   const outstandingAmount = totalBrokerage - paymentReceived;
 
   const employeeData = data.reduce((acc, item) => {
-    const employeeName = item.employee || 'Unknown';
-    
-    // Now the employee field directly contains the name, so we use it directly
-    const empName = employeeName;
+    // Ensure we always use the employee name directly from the item
+    const empName = item.employee || 'Unknown';
     
     // Calculate total brokerage for this entry
     const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
@@ -1979,9 +1977,9 @@ case 'user-settings':
                     sx={{ borderRadius: 2 }}
                   >
                     <MenuItem value="">Select</MenuItem>
-                    <MenuItem value="Dharmesh Bavadiya">Dharmesh</MenuItem>
-                    <MenuItem value="Yogesh Bavadiya">Yogesh</MenuItem>
-                    <MenuItem value="Bavadiya Realty LLP">Company</MenuItem>
+                    <MenuItem value="Dharmesh Bavadiya">Dharmesh Bavadiya</MenuItem>
+                    <MenuItem value="Yogesh Bavadiya">Yogesh Bavadiya</MenuItem>
+                    <MenuItem value="Bavadiya Realty LLP">Bavadiya Realty LLP</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -2033,9 +2031,9 @@ case 'user-settings':
                     sx={{ borderRadius: 2 }}
                   >
                     <MenuItem value="">Select</MenuItem>
-                    <MenuItem value="Dharmesh Bavadiya">Dharmesh</MenuItem>
-                    <MenuItem value="Yogesh Bavadiya">Yogesh</MenuItem>
-                    <MenuItem value="Bavadiya Realty LLP">Company</MenuItem>
+                    <MenuItem value="Dharmesh Bavadiya">Dharmesh Bavadiya</MenuItem>
+                    <MenuItem value="Yogesh Bavadiya">Yogesh Bavadiya</MenuItem>
+                    <MenuItem value="Bavadiya Realty LLP">Bavadiya Realty LLP</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
