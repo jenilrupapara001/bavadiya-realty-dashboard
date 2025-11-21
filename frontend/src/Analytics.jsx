@@ -179,13 +179,37 @@ const Analytics = () => {
       if (emp?._id) {
         map.set(emp._id, emp.name || emp.code || emp._id);
       }
+      // Also map by name for direct name lookups
+      if (emp?.name) {
+        map.set(emp.name, emp.name);
+      }
     });
     return map;
   }, [employees]);
 
   const employeeData = data.reduce((acc, item) => {
     const employeeCode = item.employee || 'Unknown';
-    const empName = employeeLookup.get(employeeCode) || employeeLookup.get(item.employeeName) || item.employeeName || employeeCode || 'Unknown';
+    const employeeName = item.employeeName || '';
+    
+    // Try multiple lookup strategies to find employee name
+    let empName = employeeLookup.get(employeeCode) || 
+                  employeeLookup.get(employeeName) || 
+                  employeeLookup.get(item.employee?.name) ||
+                  employeeName || 
+                  employeeCode || 
+                  'Unknown';
+    
+    // If still not found, try to find by exact name match in employees array
+    if (empName === 'Unknown' && employeeCode !== 'Unknown') {
+      const exactMatch = employees.find(emp => 
+        emp.name?.toLowerCase() === employeeCode.toLowerCase() || 
+        emp.code?.toLowerCase() === employeeCode.toLowerCase()
+      );
+      if (exactMatch) {
+        empName = exactMatch.name;
+      }
+    }
+    
     if (!acc[empName]) acc[empName] = { name: empName, deals: 0, revenue: 0, commission: 0 };
     acc[empName].deals += 1;
     acc[empName].revenue += item.basePrice || 0;

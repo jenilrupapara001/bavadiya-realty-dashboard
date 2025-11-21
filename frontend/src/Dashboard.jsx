@@ -433,8 +433,40 @@ setFormData({
   const outstandingAmount = totalBrokerage - paymentReceived;
 
   const employeeData = data.reduce((acc, item) => {
-    const emp = employees.find(e => e.code === item.employee);
-    const empName = emp ? emp.name : item.employee;
+    const employeeCode = item.employee || 'Unknown';
+    
+    // Create lookup map for employees
+    const employeeLookup = new Map();
+    employees.forEach(emp => {
+      if (emp?.code) {
+        employeeLookup.set(emp.code, emp.name || emp.code);
+      }
+      if (emp?.name) {
+        employeeLookup.set(emp.name, emp.name);
+      }
+      if (emp?._id) {
+        employeeLookup.set(emp._id, emp.name || emp.code || emp._id);
+      }
+    });
+    
+    // Try multiple lookup strategies to find employee name
+    let empName = employeeLookup.get(employeeCode) || 
+                  employeeLookup.get(item.employeeName) || 
+                  employeeLookup.get(item.employee?.name) ||
+                  item.employeeName || 
+                  employeeCode || 
+                  'Unknown';
+    
+    // If still not found, try to find by exact name match in employees array
+    if (empName === 'Unknown' && employeeCode !== 'Unknown') {
+      const exactMatch = employees.find(emp => 
+        emp.name?.toLowerCase() === employeeCode.toLowerCase() || 
+        emp.code?.toLowerCase() === employeeCode.toLowerCase()
+      );
+      if (exactMatch) {
+        empName = exactMatch.name;
+      }
+    }
     
     // Calculate total brokerage for this entry
     const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
@@ -570,7 +602,7 @@ setFormData({
 
   const topEmployees = useMemo(() => {
     const sorted = [...chartData].sort((a, b) => b.value - a.value);
-    return sorted.slice(0, 4);
+    return sorted.slice(0, 10); // Show more employees and rely on scrolling
   }, [chartData]);
 
   const tableStats = useMemo(() => {
@@ -1311,36 +1343,59 @@ case 'user-settings':
                           boxShadow: '0 15px 35px rgba(15,23,42,0.08)',
                           height: '100%',
                           display: 'flex',
-                          flexDirection: 'column',
-                          gap: 2
+                          flexDirection: 'column'
                         }}
                       >
-                        <Typography sx={{ fontWeight: 600 }}>Top Performers</Typography>
-                        {topEmployees.length === 0 && (
-                          <Typography variant="body2" color="text.secondary">
-                            No employee data available
-                          </Typography>
-                        )}
-                        {topEmployees.map((emp) => (
-                          <Box
-                            key={emp.name}
-                            sx={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              gap: 0.5,
-                              p: 1.5,
-                              borderRadius: 2,
-                              bgcolor: 'grey.50'
-                            }}
-                          >
-                            <Typography sx={{ fontWeight: 600 }}>{emp.name}</Typography>
+                        <Typography sx={{ fontWeight: 600, mb: 2 }}>Top Performers</Typography>
+                        <Box sx={{ 
+                          flex: 1, 
+                          overflowY: 'auto',
+                          maxHeight: '300px',
+                          '&::-webkit-scrollbar': {
+                            width: '6px',
+                          },
+                          '&::-webkit-scrollbar-track': {
+                            background: '#f1f1f1',
+                            borderRadius: '3px',
+                          },
+                          '&::-webkit-scrollbar-thumb': {
+                            background: '#c1c1c1',
+                            borderRadius: '3px',
+                            '&:hover': {
+                              background: '#a1a1a1',
+                            },
+                          },
+                        }}>
+                          {topEmployees.length === 0 && (
                             <Typography variant="body2" color="text.secondary">
-                              Revenue: {formatINR(emp.value)}
+                              No employee data available
                             </Typography>
-                          </Box>
-                        ))}
-                        <Divider />
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                          )}
+                          {topEmployees.map((emp) => (
+                            <Box
+                              key={emp.name}
+                              sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: 0.5,
+                                p: 1.5,
+                                borderRadius: 2,
+                                bgcolor: 'grey.50',
+                                mb: 1,
+                                '&:last-child': {
+                                  mb: 0
+                                }
+                              }}
+                            >
+                              <Typography sx={{ fontWeight: 600 }}>{emp.name}</Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                Revenue: {formatINR(emp.value)}
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Box>
+                        <Divider sx={{ mt: 2 }} />
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, pt: 2 }}>
                           <Typography variant="body2" color="text.secondary">
                             Total Employees: {chartData.length}
                           </Typography>
