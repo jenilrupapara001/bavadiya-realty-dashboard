@@ -974,10 +974,21 @@ const Analytics = () => {
                 </Typography>
               </Box>
             ) : (
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={safeEmployeeChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+              <ResponsiveContainer width="100%" height={400}>
+                <BarChart 
+                  data={safeEmployeeChartData} 
+                  margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis dataKey="name" stroke="#6b7280" />
+                  <XAxis 
+                    dataKey="name" 
+                    stroke="#6b7280"
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                    interval={0}
+                    tick={{ fontSize: 11 }}
+                  />
                   <YAxis stroke="#6b7280" tickFormatter={(value) => {
                     if (value >= 10000000) {
                       return `₹${(value / 10000000).toFixed(1)}Cr`;
