@@ -134,16 +134,39 @@ const Analytics = () => {
 
   const outstandingAmount = totalBrokerage - paymentReceived;
 
-  // Received By Analytics - Dynamic based on actual data
+  // Employee name mapping for consistency
+  const getEmployeeName = (employeeData) => {
+    if (!employeeData) return 'Unknown';
+    
+    // If employee data is a string (name), return it directly
+    if (typeof employeeData === 'string') {
+      return employeeData;
+    }
+    
+    // If employee data is an object, try to get the name
+    if (typeof employeeData === 'object') {
+      return employeeData.name || 'Unknown';
+    }
+    
+    return 'Unknown';
+  };
+
+  // Received By Analytics - Enhanced with better employee name handling
   const getReceivedByData = () => {
     const receivedByMap = new Map();
     
     data.forEach(item => {
       // Process owner received by
       if (item.ownerReceivedBy && item.receiveDate) {
-        const key = item.ownerReceivedBy;
+        const key = getEmployeeName(item.ownerReceivedBy);
         if (!receivedByMap.has(key)) {
-          receivedByMap.set(key, { name: key, ownerReceived: 0, customerReceived: 0, amount: 0 });
+          receivedByMap.set(key, { 
+            name: key, 
+            ownerReceived: 0, 
+            customerReceived: 0, 
+            amount: 0,
+            employeeCode: key // Store for reference
+          });
         }
         const entry = receivedByMap.get(key);
         entry.ownerReceived++;
@@ -153,9 +176,15 @@ const Analytics = () => {
       
       // Process customer received by
       if (item.customerReceivedBy && item.customerReceiveDate) {
-        const key = item.customerReceivedBy;
+        const key = getEmployeeName(item.customerReceivedBy);
         if (!receivedByMap.has(key)) {
-          receivedByMap.set(key, { name: key, ownerReceived: 0, customerReceived: 0, amount: 0 });
+          receivedByMap.set(key, { 
+            name: key, 
+            ownerReceived: 0, 
+            customerReceived: 0, 
+            amount: 0,
+            employeeCode: key // Store for reference
+          });
         }
         const entry = receivedByMap.get(key);
         entry.customerReceived++;
@@ -169,28 +198,44 @@ const Analytics = () => {
   
   const receivedByData = getReceivedByData();
 
-  // Employee performance with commission calculations
-  // Since we're now using employee names directly, we don't need complex lookup
-  // But we keep it for validation and additional data if needed
+  // Enhanced employee lookup with name mapping
   const employeeLookup = useMemo(() => {
     const map = new Map();
     employees.forEach(emp => {
       if (emp?.name) {
         map.set(emp.name, emp);
+        // Also map by code if available for backward compatibility
+        if (emp.code) {
+          map.set(emp.code, emp);
+        }
       }
     });
     return map;
   }, [employees]);
 
+  // Enhanced employee performance with better name handling
   const employeeData = data.reduce((acc, item) => {
-    const employeeName = item.employee || 'Unknown';
+    // Use the employee name from the item, fallback to 'Unknown'
+    const employeeName = getEmployeeName(item.employee) || 'Unknown';
     
-    // Now the employee field directly contains the name, so we use it directly
-    const empName = employeeName;
+    if (!acc[employeeName]) {
+      acc[employeeName] = { 
+        name: employeeName, 
+        deals: 0, 
+        revenue: 0, 
+        commission: 0,
+        employeeCode: null
+      };
+      
+      // Try to find employee code for this name
+      const empData = employeeLookup.get(employeeName);
+      if (empData && empData.code) {
+        acc[employeeName].employeeCode = empData.code;
+      }
+    }
     
-    if (!acc[empName]) acc[empName] = { name: empName, deals: 0, revenue: 0, commission: 0 };
-    acc[empName].deals += 1;
-    acc[empName].revenue += item.basePrice || 0;
+    acc[employeeName].deals += 1;
+    acc[employeeName].revenue += item.basePrice || 0;
     
     // Calculate total brokerage for this entry
     const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
@@ -198,10 +243,13 @@ const Analytics = () => {
     const totalBrok = ownerBrok + customerBrok;
     
     // Calculate commission based on total brokerage
-    acc[empName].commission += ((item.commission || 0) * totalBrok / 100);
+    acc[employeeName].commission += ((item.commission || 0) * totalBrok / 100);
     return acc;
   }, {});
-  const employeeChartData = Object.values(employeeData).sort((a, b) => b.revenue - a.revenue);
+  
+  const employeeChartData = Object.values(employeeData)
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, 10); // Show top 10 performers
 
   // Project distribution with multiple metrics
   const projectData = data.reduce((acc, item) => {
@@ -636,9 +684,43 @@ const Analytics = () => {
                     {formatINR(person.amount)}
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 0.5 }}>
-                    <Chip label={`Owner: ${person.ownerReceived}`} size="small" variant="outlined" />
-                    <Chip label={`Customer: ${person.customerReceived}`} size="small" variant="outlined" />
+                    <Chip 
+                      label={`Owner: ${person.ownerReceived}`} 
+                      size="small" 
+                      variant="outlined"
+                      sx={{ 
+                        bgcolor: `${accentColor}10`,
+                        borderColor: `${accentColor}40`,
+                        color: accentColor,
+                        fontWeight: 500
+                      }}
+                    />
+                    <Chip 
+                      label={`Customer: ${person.customerReceived}`} 
+                      size="small" 
+                      variant="outlined"
+                      sx={{ 
+                        bgcolor: `${accentColor}10`,
+                        borderColor: `${accentColor}40`,
+                        color: accentColor,
+                        fontWeight: 500
+                      }}
+                    />
                   </Box>
+                  {/* Show employee code if available */}
+                  {person.employeeCode && person.employeeCode !== person.name && (
+                    <Typography 
+                      variant="caption" 
+                      sx={{ 
+                        color: 'text.secondary', 
+                        fontStyle: 'italic',
+                        display: 'block',
+                        mt: 0.5
+                      }}
+                    >
+                      Code: {person.employeeCode}
+                    </Typography>
+                  )}
                 </Paper>
             </Grid>
             );
