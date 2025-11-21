@@ -436,17 +436,15 @@ setFormData({
     // Ensure we always use the employee name directly from the item
     const empName = item.employee || 'Unknown';
     
-    // Calculate total brokerage for this entry
-    const ownerBrok = typeof item.ownerBro === 'number' ? item.ownerBro : convertPercentageToAmount(item.ownerBro, item.basePrice);
-    const customerBrok = typeof item.customerBro === 'number' ? item.customerBro : convertPercentageToAmount(item.customerBro, item.basePrice);
-    const totalBrok = ownerBrok + customerBrok;
-    
-    // Calculate commission amount: (commission % * total brokerage) / 100
-    const commissionAmount = ((item.commission || 0) * totalBrok) / 100;
-    acc[empName] = (acc[empName] || 0) + commissionAmount;
+    // Calculate performance based on deals' base price
+    const basePrice = item.basePrice || 0;
+    acc[empName] = (acc[empName] || 0) + basePrice;
     return acc;
   }, {});
-  const chartData = Object.entries(employeeData).map(([name, value]) => ({ name, value }));
+  // Sort chart data in descending order by base price value
+  const chartData = Object.entries(employeeData)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
 
   const pieData = [
     { name: 'Received', value: paymentReceived, color: '#22c55e' }, // Green for received

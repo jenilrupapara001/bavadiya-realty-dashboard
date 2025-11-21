@@ -71,7 +71,7 @@ mongoose.connection.on('error', (err) => {
 });
 
 mongoose.connection.on('disconnected', () => {
-  console.log('⚠️  MongoDB disconnected');
+  console.log('⚠️ MongoDB disconnected');
   cachedConnection = null;
 });
 
@@ -208,7 +208,7 @@ async function initializeDefaultAdmin() {
       await defaultAdmin.save();
       console.log(`✅ Default admin user created: ${defaultUsername}`);
       console.log(`📝 Default password: ${defaultPassword}`);
-      console.log(`⚠️  Please change this password after first login!`);
+      console.log(`⚠️ Please change this password after first login!`);
     } else {
       console.log(`✅ Found ${userCount} existing user(s) in database`);
     }
@@ -230,7 +230,7 @@ app.post('/api/login', async (req, res) => {
 
     // Ensure database connection (for serverless)
     if (mongoose.connection.readyState !== 1) {
-      console.log('⚠️  MongoDB not connected, attempting to connect...');
+      console.log('⚠️ MongoDB not connected, attempting to connect...');
       try {
         await connectToDatabase();
       } catch (connErr) {
@@ -365,7 +365,9 @@ app.get('/api/employees', authenticateToken, async (req, res) => {
        const defaultEmployees = [
          { name: 'Dharmesh Bavadiya', code: 'DB001', number: '+91-9876543210' },
          { name: 'Yogesh Bavadiya', code: 'YB001', number: '+91-9876543211' },
-         { name: 'Bavadiya Realty LLP', code: 'BR001', number: '+91-9876543212' }
+         { name: 'Bavadiya Realty LLP', code: 'BR001', number: '+91-9876543212' },
+         { name: 'Prvin Rathod', code: 'PR001', number: '+91-9876543213' },
+         { name: 'Hardik Ranpariya', code: 'HR001', number: '+91-9876543214' }
        ];
        
        await Employee.insertMany(defaultEmployees);
