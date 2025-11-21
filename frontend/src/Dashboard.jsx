@@ -892,7 +892,7 @@ const menuItems = [
               })}
             </Grid>
 
-            <Paper sx={{ borderRadius: 4, p: { xs: 2, md: 3 } }}>
+            <Paper sx={{ borderRadius: 1, p: { xs: 2, md: 3 } }}>
               <Box
                 sx={{
                   display: 'flex',
