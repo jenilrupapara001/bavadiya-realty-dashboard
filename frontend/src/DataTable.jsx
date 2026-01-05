@@ -54,7 +54,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
 
   useEffect(() => {
     filterData();
-  }, [data, searchTerm, filterDateFrom, filterDateTo, filterEmployee, filterProject, filterStatus, filterReceivedBy]);
+  }, [enhancedData, searchTerm, filterDateFrom, filterDateTo, filterEmployee, filterProject, filterStatus, filterReceivedBy]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -130,11 +130,29 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
     }).format(amount).replace('₹', '₹');
   };
 
-  const filterData = () => {
-    let filtered = data;
+  // Generate project entry numbers for better organization
+  const generateProjectEntryNumbers = (data) => {
+    const projectCounts = {};
+    return data.map(item => {
+      if (item.projectName) {
+        projectCounts[item.projectName] = (projectCounts[item.projectName] || 0) + 1;
+        return {
+          ...item,
+          entryNumber: projectCounts[item.projectName]
+        };
+      }
+      return item;
+    });
+  };
 
-    // Hide payments where both payments are received
-    filtered = filtered.filter(item => !(item.receiveDate && item.customerReceiveDate));
+  // Enhanced data with entry numbers
+  const enhancedData = generateProjectEntryNumbers(data);
+
+  const filterData = () => {
+    let filtered = enhancedData;
+
+    // Show ALL entries - no filtering out based on payment status
+    // This ensures all 5 entries for a project are visible
 
     // Date filters
     if (filterDateFrom || filterDateTo) {
@@ -429,6 +447,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
                     py: { xs: 1, sm: 1.5 }
                   }
                 }}>
+                  <TableCell sx={{ minWidth: { xs: '60px', sm: '80px' } }}>Entry #</TableCell>
                   <TableCell sx={{ minWidth: { xs: '80px', sm: '100px' } }}>Date</TableCell>
                   <TableCell sx={{ minWidth: { xs: '80px', sm: '100px' } }}>Unit No</TableCell>
                   <TableCell sx={{ minWidth: { xs: '120px', sm: '150px' } }}>Project</TableCell>
@@ -460,6 +479,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
                       }
                     }}
                   >
+                    <TableCell sx={{ fontWeight: 500 }}>{row.entryNumber || '-'}</TableCell>
                     <TableCell sx={{ fontWeight: 500 }}>{row.date || '-'}</TableCell>
                     <TableCell>{row.unitNo || '-'}</TableCell>
                     <TableCell sx={{ 
@@ -468,7 +488,9 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap'
                     }}>
-                      {row.projectName || '-'}
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                        {row.projectName ? `${row.projectName} #${row.entryNumber}` : '-'}
+                      </Typography>
                     </TableCell>
                     <TableCell sx={{ 
                       maxWidth: { xs: '100px', sm: '120px' },

@@ -26,14 +26,12 @@ const mongoURI = process.env.MONGO_URI || 'mongodb+srv://jenilrupapara340_db_use
 
 // Connection options optimized for serverless (Vercel)
 const mongoOptions = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  serverSelectionTimeoutMS: 10000, // 10 seconds for initial connection
+  serverSelectionTimeoutMS: 15000, // 15 seconds for initial connection
   socketTimeoutMS: 45000,
   maxPoolSize: 10, // Maintain up to 10 socket connections
   minPoolSize: 1,
   maxIdleTimeMS: 30000,
-  connectTimeoutMS: 10000,
+  connectTimeoutMS: 15000,
   retryWrites: true,
   retryReads: true,
 };
@@ -49,8 +47,14 @@ async function connectToDatabase() {
 
   try {
     console.log('🔄 Connecting to MongoDB...');
+    console.log('🔗 Connection URI:', mongoURI.replace(/\/\/.*@/, '//[REDACTED]@'));
+    
     cachedConnection = await mongoose.connect(mongoURI, mongoOptions);
     console.log('✅ MongoDB connected successfully');
+    
+    // Verify connection by pinging
+    await mongoose.connection.db.admin().ping();
+    console.log('✅ MongoDB ping successful');
     
     // Initialize default admin if no users exist (only on first connection)
     await initializeDefaultAdmin();
@@ -58,6 +62,24 @@ async function connectToDatabase() {
     return cachedConnection;
   } catch (err) {
     console.error('❌ MongoDB connection error:', err.message);
+    
+    // Provide specific error messages for common issues
+    if (err.message.includes('authentication failed') || err.message.includes('bad auth')) {
+      console.error('❌ Authentication failed. Please check:');
+      console.error('   1. MongoDB Atlas username and password');
+      console.error('   2. Database user exists in MongoDB Atlas');
+      console.error('   3. Database name is correct');
+    } else if (err.message.includes('timeout')) {
+      console.error('❌ Connection timeout. Please check:');
+      console.error('   1. MongoDB Atlas IP whitelist includes 0.0.0.0/0');
+      console.error('   2. MongoDB cluster is not paused');
+      console.error('   3. Network connectivity');
+    } else if (err.message.includes('ECONNREFUSED')) {
+      console.error('❌ Connection refused. Please check:');
+      console.error('   1. MongoDB cluster is running');
+      console.error('   2. Connection string is correct');
+    }
+    
     console.error('❌ Full error:', err);
     cachedConnection = null;
     throw err;
@@ -234,9 +256,10 @@ app.post('/api/login', async (req, res) => {
       try {
         await connectToDatabase();
       } catch (connErr) {
-        console.error('❌ Failed to connect to MongoDB:', connErr.message);
+        console.error('❌ Failed to connect to MongoDB during login:', connErr.message);
         return res.status(503).json({ 
           error: 'Database connection unavailable',
+          message: 'Unable to connect to database. Please try again later.',
           details: process.env.NODE_ENV === 'development' ? connErr.message : undefined
         });
       }
