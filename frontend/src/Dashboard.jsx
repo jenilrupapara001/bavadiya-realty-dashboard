@@ -125,6 +125,24 @@ const Dashboard = () => {
     commission: '',
   });
 
+  // Generate project entry numbers for better organization
+  const generateProjectEntryNumbers = (data) => {
+    const projectCounts = {};
+    return data.map(item => {
+      if (item.projectName) {
+        projectCounts[item.projectName] = (projectCounts[item.projectName] || 0) + 1;
+        return {
+          ...item,
+          entryNumber: projectCounts[item.projectName]
+        };
+      }
+      return item;
+    });
+  };
+
+  // Enhanced data with entry numbers
+  const enhancedData = useMemo(() => generateProjectEntryNumbers(data), [data]);
+
   useEffect(() => {
     fetchData();
     fetchEmployees();
@@ -308,24 +326,6 @@ setFormData({
       maximumFractionDigits: 0,
     }).format(amount).replace('₹', '₹');
   };
-
-  // Generate project entry numbers for better organization
-  const generateProjectEntryNumbers = (data) => {
-    const projectCounts = {};
-    return data.map(item => {
-      if (item.projectName) {
-        projectCounts[item.projectName] = (projectCounts[item.projectName] || 0) + 1;
-        return {
-          ...item,
-          entryNumber: projectCounts[item.projectName]
-        };
-      }
-      return item;
-    });
-  };
-
-  // Enhanced data with entry numbers
-  const enhancedData = useMemo(() => generateProjectEntryNumbers(data), [data]);
 
   const handleSave = async () => {
     if (!validateForm()) {
