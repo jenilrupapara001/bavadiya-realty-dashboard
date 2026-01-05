@@ -22,7 +22,7 @@ app.use(cors({
 app.use(bodyParser.json());
 
 // ---- MongoDB Connection ----
-const mongoURI = process.env.MONGO_URI || 'mongodb+srv://jenilrupapara340_db_user:gPaASk6ZOa4Wa44L@sample-data.vyal4lo.mongodb.net/bavadiya-realty?retryWrites=true&w=majority';
+const mongoURI = process.env.MONGO_URI || 'mongodb+srv://jenilrupapara340_db_user:n200SXeRaRQNF2WF@sample-data.vyal4lo.mongodb.net/bavadiya-realty?retryWrites=true&w=majority';
 
 // Connection options optimized for serverless (Vercel)
 const mongoOptions = {
