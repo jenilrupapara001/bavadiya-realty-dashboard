@@ -46,6 +46,24 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  // Generate project entry numbers for better organization
+  const generateProjectEntryNumbers = (data) => {
+    const projectCounts = {};
+    return data.map(item => {
+      if (item.projectName) {
+        projectCounts[item.projectName] = (projectCounts[item.projectName] || 0) + 1;
+        return {
+          ...item,
+          entryNumber: projectCounts[item.projectName]
+        };
+      }
+      return item;
+    });
+  };
+
+  // Enhanced data with entry numbers
+  const enhancedData = generateProjectEntryNumbers(data);
+
   useEffect(() => {
     fetchData();
     fetchEmployees();
@@ -129,24 +147,6 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
       maximumFractionDigits: 0,
     }).format(amount).replace('₹', '₹');
   };
-
-  // Generate project entry numbers for better organization
-  const generateProjectEntryNumbers = (data) => {
-    const projectCounts = {};
-    return data.map(item => {
-      if (item.projectName) {
-        projectCounts[item.projectName] = (projectCounts[item.projectName] || 0) + 1;
-        return {
-          ...item,
-          entryNumber: projectCounts[item.projectName]
-        };
-      }
-      return item;
-    });
-  };
-
-  // Enhanced data with entry numbers
-  const enhancedData = generateProjectEntryNumbers(data);
 
   const filterData = () => {
     let filtered = enhancedData;
