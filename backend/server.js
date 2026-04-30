@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
+const fs = require('fs');
 const Joi = require('joi');
 
 // Import company configuration
@@ -118,6 +119,7 @@ async function connectToDatabase() {
 
     // Initialize default admin if no users exist (only on first connection)
     await initializeDefaultAdmin();
+    await initializeDefaultData();
 
     return cachedConnection;
   } catch (err) {
@@ -326,6 +328,67 @@ async function initializeDefaultAdmin() {
     }
   } catch (error) {
     console.error('❌ Error initializing default admin:', error);
+  }
+}
+
+/**
+ * Initializes default data (employees, projects, and payments)
+ * if the database is empty.
+ */
+async function initializeDefaultData() {
+  try {
+    const dataCount = await Data.countDocuments();
+    const employeeCount = await Employee.countDocuments();
+    const projectCount = await Project.countDocuments();
+
+    if (dataCount === 0 || employeeCount === 0 || projectCount === 0) {
+      console.log('🔄 Initializing default database data...');
+      const companyConf = getCurrentCompanyConfig();
+
+      // Seed Employees from configuration
+      if (employeeCount === 0) {
+        const defaultEmployees = companyConf.employees || [];
+        if (defaultEmployees.length > 0) {
+          await Employee.insertMany(defaultEmployees);
+          console.log(`✅ Seeded ${defaultEmployees.length} employees from config`);
+        }
+      }
+
+      // Seed Data and Projects from JSON file
+      if (dataCount === 0) {
+        const dataPath = path.join(__dirname, 'data.json');
+        if (fs.existsSync(dataPath)) {
+          const rawData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+          
+          // Seed Payment Records
+          const processedData = rawData.map(item => ({
+            ...item,
+            commission: item.commission || (item.basePrice * 0.02) // Default 2% commission
+          }));
+          await Data.insertMany(processedData);
+          console.log(`✅ Seeded ${processedData.length} payment records from data.json`);
+
+          // Seed Projects from unique projectNames in data.json
+          if (projectCount === 0) {
+            const projectNames = [...new Set(rawData.map(item => item.projectName))];
+            const projects = projectNames.map(name => ({
+              name,
+              description: `${name} Real Estate Project`,
+              location: 'Surat, Gujarat',
+              status: 'Active'
+            }));
+            await Project.insertMany(projects);
+            console.log(`✅ Seeded ${projects.length} projects from data.json`);
+          }
+        } else {
+          console.log('⚠️ data.json not found, skipping data seeding');
+        }
+      }
+    } else {
+      console.log(`✅ Database already contains data (${dataCount} payments, ${employeeCount} employees, ${projectCount} projects)`);
+    }
+  } catch (error) {
+    console.error('❌ Error initializing default data:', error);
   }
 }
 
