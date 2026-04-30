@@ -113,6 +113,7 @@ const Dashboard = () => {
   const [activeView, setActiveView] = useState('dashboard');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showAllEntries, setShowAllEntries] = useState(false);
   const [formData, setFormData] = useState({
     date: '',
     unitNo: '',
@@ -133,6 +134,24 @@ const Dashboard = () => {
     commission: '',
   });
 
+  // Generate project entry numbers for better organization
+  const generateProjectEntryNumbers = (data) => {
+    const projectCounts = {};
+    return data.map(item => {
+      if (item.projectName) {
+        projectCounts[item.projectName] = (projectCounts[item.projectName] || 0) + 1;
+        return {
+          ...item,
+          entryNumber: projectCounts[item.projectName]
+        };
+      }
+      return item;
+    });
+  };
+
+  // Enhanced data with entry numbers
+  const enhancedData = useMemo(() => generateProjectEntryNumbers(data), [data]);
+
   useEffect(() => {
     fetchData();
     fetchEmployees();
@@ -140,7 +159,7 @@ const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    let filtered = data;
+    let filtered = enhancedData;
     if (filterDateFrom || filterDateTo) {
       filtered = filtered.filter(item => {
         const itemDate = new Date(item.receiveDate);
@@ -171,7 +190,7 @@ if (filterReceivedBy) {
       );
     }
     setFilteredData(filtered);
-  }, [data, filterDateFrom, filterDateTo, filterEmployee, filterProject, filterStatus, filterReceivedBy, employees]);
+  }, [enhancedData, filterDateFrom, filterDateTo, filterEmployee, filterProject, filterStatus, filterReceivedBy, employees]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -597,7 +616,7 @@ setFormData({
   }, [data]);
 
   const projectPerformance = useMemo(() => {
-    return data.reduce((acc, item) => {
+    return enhancedData.reduce((acc, item) => {
       if (!item.projectName) return acc;
       if (!acc[item.projectName]) {
         acc[item.projectName] = { deals: 0, value: 0 };
@@ -606,7 +625,7 @@ setFormData({
       acc[item.projectName].value += item.basePrice || 0;
       return acc;
     }, {});
-  }, [data]);
+  }, [enhancedData]);
 
   const employeeStats = useMemo(() => {
     const totalEmployees = employees.length;
@@ -945,7 +964,7 @@ const menuItems = [
                   </TableHead>
                   <TableBody>
                     {projects.map((project) => {
-                      const stats = data
+                      const stats = enhancedData
                         .filter((item) => item.projectName === project.name)
                         .reduce(
                           (acc, item) => {
@@ -1448,6 +1467,7 @@ case 'user-settings':
                   >
                     Payment Records
                   </Typography>
+<<<<<<< HEAD
                   <Box sx={{ display: 'flex', gap: 2 }}>
                     <Search />
                     <Button
@@ -1466,6 +1486,35 @@ case 'user-settings':
                     </Button>
                     <Export />
                   </Box>
+=======
+                  <Button
+                    variant="contained"
+                    startIcon={<Add />}
+                    onClick={() => handleOpen()}
+                    sx={{
+                      bgcolor: 'primary.main',
+                      alignSelf: { xs: 'flex-start', sm: 'auto' },
+                      minWidth: { xs: '100%', sm: 'auto' },
+                      borderRadius: 2
+                    }}
+                    size="large"
+                  >
+                    Add New Entry
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={() => setShowAllEntries(!showAllEntries)}
+                    sx={{
+                      alignSelf: { xs: 'flex-start', sm: 'auto' },
+                      minWidth: { xs: '100%', sm: 'auto' },
+                      borderRadius: 2,
+                      ml: { xs: 0, sm: 2 }
+                    }}
+                    size="large"
+                  >
+                    {showAllEntries ? 'Show Less' : 'Show All Entries'}
+                  </Button>
+>>>>>>> 0d83de8fb6a1a6e4f70a13a7b176f8aa20423c71
                 </Box>
 
 {/* Filters */}
@@ -1586,6 +1635,15 @@ case 'user-settings':
                       <Chip label={`Entries: ${tableStats.totalEntries}`} color="primary" variant="outlined" />
                       <Chip label={`Value: ${formatINR(tableStats.totalValue)}`} color="success" variant="outlined" />
                       <Chip label={`Pending: ${tableStats.pending}`} color="warning" variant="outlined" />
+                      {!showAllEntries && filteredData.length > 10 && (
+                        <Chip 
+                          label={`Showing 10 of ${filteredData.length} entries`} 
+                          color="info" 
+                          variant="outlined" 
+                          onClick={() => setShowAllEntries(true)}
+                          sx={{ cursor: 'pointer' }}
+                        />
+                      )}
                     </Box>
                   </Box>
                   <Box
@@ -1609,6 +1667,7 @@ case 'user-settings':
                             letterSpacing: '0.5px'
                           }
                         }}>
+                          <TableCell>Entry #</TableCell>
                           <TableCell>Date</TableCell>
                           <TableCell>Unit No</TableCell>
                           <TableCell>Project</TableCell>
@@ -1626,7 +1685,7 @@ case 'user-settings':
                         </TableRow>
                       </TableHead>
                       <TableBody>
-{filteredData.slice(0, 10).map((row, index) => (
+{(showAllEntries ? filteredData : filteredData.slice(0, 10)).map((row, index) => (
   <TableRow
     key={row._id || index}
     sx={{
@@ -1635,9 +1694,14 @@ case 'user-settings':
       transition: 'background-color 0.2s ease'
     }}
   >
+    <TableCell sx={{ fontWeight: 500 }}>{row.entryNumber || '-'}</TableCell>
     <TableCell sx={{ fontWeight: 500 }}>{row.date || '-'}</TableCell>
     <TableCell>{row.unitNo || '-'}</TableCell>
-    <TableCell>{row.projectName || '-'}</TableCell>
+    <TableCell>
+      <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main' }}>
+        {row.projectName ? `${row.projectName} #${row.entryNumber}` : '-'}
+      </Typography>
+    </TableCell>
     <TableCell>{row.ownerName || '-'}</TableCell>
     <TableCell>{row.customerName || '-'}</TableCell>
     <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>

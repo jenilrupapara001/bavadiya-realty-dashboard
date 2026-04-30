@@ -87,18 +87,18 @@ async function createDatabaseIndexes() {
 }
 
 // ---- MongoDB Connection ----
-const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/realestate-dashboard';
+const mongoURI = process.env.MONGO_URI || 'mongodb+srv://jenilrupapara340_db_user:gPaASk6ZOa4Wa44L@sample-data.vyal4lo.mongodb.net/bavadiya-realty?retryWrites=true&w=majority';
 
 // Connection options for local and cloud MongoDB
 const mongoOptions = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  serverSelectionTimeoutMS: parseInt(process.env.MONGOOSE_SERVER_SELECTION_TIMEOUT) || 10000,
-  socketTimeoutMS: parseInt(process.env.MONGOOSE_SOCKET_TIMEOUT) || 45000,
-  maxPoolSize: parseInt(process.env.MONGOOSE_MAX_POOL_SIZE) || 10,
-  minPoolSize: parseInt(process.env.MONGOOSE_MIN_POOL_SIZE) || 1,
-  maxIdleTimeMS: parseInt(process.env.MONGOOSE_MAX_IDLE_TIME_MS) || 30000,
-  connectTimeoutMS: parseInt(process.env.MONGOOSE_CONNECT_TIMEOUT_MS) || 10000,
+  serverSelectionTimeoutMS: 10000, // 10 seconds for initial connection
+  socketTimeoutMS: 45000,
+  maxPoolSize: 10, // Maintain up to 10 socket connections
+  minPoolSize: 1,
+  maxIdleTimeMS: 30000,
+  connectTimeoutMS: 10000,
   retryWrites: true,
   retryReads: true,
 };
@@ -114,6 +114,8 @@ async function connectToDatabase() {
 
   try {
     console.log('🔄 Connecting to MongoDB...');
+    console.log('🔗 Connection URI:', mongoURI.replace(/\/\/.*@/, '//[REDACTED]@'));
+
     cachedConnection = await mongoose.connect(mongoURI, mongoOptions);
     console.log('✅ MongoDB connected successfully');
 
@@ -124,6 +126,24 @@ async function connectToDatabase() {
     return cachedConnection;
   } catch (err) {
     console.error('❌ MongoDB connection error:', err.message);
+
+    // Provide specific error messages for common issues
+    if (err.message.includes('authentication failed') || err.message.includes('bad auth')) {
+      console.error('❌ Authentication failed. Please check:');
+      console.error('   1. MongoDB Atlas username and password');
+      console.error('   2. Database user exists in MongoDB Atlas');
+      console.error('   3. Database name is correct');
+    } else if (err.message.includes('timeout')) {
+      console.error('❌ Connection timeout. Please check:');
+      console.error('   1. MongoDB Atlas IP whitelist includes 0.0.0.0/0');
+      console.error('   2. MongoDB cluster is not paused');
+      console.error('   3. Network connectivity');
+    } else if (err.message.includes('ECONNREFUSED')) {
+      console.error('❌ Connection refused. Please check:');
+      console.error('   1. MongoDB cluster is running');
+      console.error('   2. Connection string is correct');
+    }
+
     console.error('❌ Full error:', err);
     cachedConnection = null;
     throw err;
@@ -359,7 +379,7 @@ async function initializeDefaultData() {
         const dataPath = path.join(__dirname, 'data.json');
         if (fs.existsSync(dataPath)) {
           const rawData = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-          
+
           // Seed Payment Records
           const processedData = rawData.map(item => ({
             ...item,
@@ -412,6 +432,7 @@ app.post('/api/login', async (req, res) => {
         console.error('❌ Failed to connect to MongoDB:', connErr.message);
         return res.status(503).json({
           error: 'Database connection unavailable',
+          message: 'Unable to connect to database. Please try again later.',
           details: process.env.NODE_ENV === 'development' ? connErr.message : undefined
         });
       }

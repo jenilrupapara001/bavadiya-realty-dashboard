@@ -47,6 +47,24 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  // Generate project entry numbers for better organization
+  const generateProjectEntryNumbers = (data) => {
+    const projectCounts = {};
+    return data.map(item => {
+      if (item.projectName) {
+        projectCounts[item.projectName] = (projectCounts[item.projectName] || 0) + 1;
+        return {
+          ...item,
+          entryNumber: projectCounts[item.projectName]
+        };
+      }
+      return item;
+    });
+  };
+
+  // Enhanced data with entry numbers
+  const enhancedData = generateProjectEntryNumbers(data);
+
   useEffect(() => {
     fetchData();
     fetchEmployees();
@@ -55,7 +73,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
 
   useEffect(() => {
     filterData();
-  }, [data, searchTerm, filterDateFrom, filterDateTo, filterEmployee, filterProject, filterStatus, filterReceivedBy]);
+  }, [enhancedData, searchTerm, filterDateFrom, filterDateTo, filterEmployee, filterProject, filterStatus, filterReceivedBy]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -132,10 +150,10 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
   };
 
   const filterData = () => {
-    let filtered = data;
+    let filtered = enhancedData;
 
-    // Hide payments where both payments are received
-    filtered = filtered.filter(item => !(item.receiveDate && item.customerReceiveDate));
+    // Show ALL entries - no filtering out based on payment status
+    // This ensures all 5 entries for a project are visible
 
     // Date filters
     if (filterDateFrom || filterDateTo) {
@@ -459,6 +477,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
         <Box sx={{ overflowX: 'auto' }}>
           <Table stickyHeader>
             <TableHead>
+<<<<<<< HEAD
               <TableRow>
                 <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50', fontSize: '0.85rem' }}>Date</TableCell>
                 <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50', fontSize: '0.85rem' }}>Unit No</TableCell>
@@ -474,6 +493,39 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
                 <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50', fontSize: '0.85rem' }}>Comm Amt</TableCell>
                 <TableCell align="right" sx={{ fontWeight: 700, bgcolor: 'grey.50', fontSize: '0.85rem' }}>Actions</TableCell>
               </TableRow>
+=======
+                <TableRow sx={{
+                  bgcolor: 'primary.main',
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 1,
+                  '& th': {
+                    color: 'white',
+                    fontWeight: 600,
+                    fontSize: { xs: '0.625rem', sm: '0.75rem', md: '0.875rem' },
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    px: { xs: 1, sm: 1.5, md: 2 },
+                    py: { xs: 1, sm: 1.5 }
+                  }
+                }}>
+                  <TableCell sx={{ minWidth: { xs: '60px', sm: '80px' } }}>Entry #</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '80px', sm: '100px' } }}>Date</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '80px', sm: '100px' } }}>Unit No</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '120px', sm: '150px' } }}>Project</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '100px', sm: '120px' } }}>Owner</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '100px', sm: '120px' } }}>Customer</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '120px', sm: '140px' } }}>Base Price</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '130px', sm: '150px' } }}>Owner Received By</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '140px', sm: '160px' } }}>Customer Received By</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '80px', sm: '100px' } }}>Status</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '100px', sm: '120px' } }}>Employee</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '80px', sm: '100px' } }}>Commission (%)</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '140px', sm: '160px' } }}>Commission Amount</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '60px', sm: '80px' } }}>Actions</TableCell>
+                  <TableCell sx={{ minWidth: { xs: '60px', sm: '80px' } }}>Delete</TableCell>
+                </TableRow>
+>>>>>>> 0d83de8fb6a1a6e4f70a13a7b176f8aa20423c71
             </TableHead>
             <TableBody>
                 {paginatedData.map((row, index) => (
@@ -490,6 +542,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
                       }
                     }}
                   >
+                    <TableCell sx={{ fontWeight: 500 }}>{row.entryNumber || '-'}</TableCell>
                     <TableCell sx={{ fontWeight: 500 }}>{row.date || '-'}</TableCell>
                     <TableCell>{row.unitNo || '-'}</TableCell>
                     <TableCell sx={{ 
@@ -498,7 +551,9 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap'
                     }}>
-                      {row.projectName || '-'}
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: 'primary.main' }}>
+                        {row.projectName ? `${row.projectName} #${row.entryNumber}` : '-'}
+                      </Typography>
                     </TableCell>
                     <TableCell sx={{ 
                       maxWidth: { xs: '100px', sm: '120px' },
