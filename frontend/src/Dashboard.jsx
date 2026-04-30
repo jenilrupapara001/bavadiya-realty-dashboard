@@ -39,6 +39,7 @@ import {
   Alert,
   Snackbar,
   Grow,
+  useTheme,
   Avatar,
 } from '@mui/material';
 import {
@@ -63,15 +64,23 @@ import {
 } from '@mui/icons-material';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
+import API_CONFIG from './config/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useMediaQuery } from '@mui/material';
 import Analytics from './Analytics';
 import DataTable from './DataTable';
 import UserSettings from './UserSettings';
+import Export from './Export';
+import Search from './Search';
+import Notifications from './Notifications';
+import { CompanyContext } from './CompanyContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Dashboard = () => {
   const { logout } = useContext(AuthContext);
+  const { companyConfig } = useContext(CompanyContext);
   const isMobile = useMediaQuery((theme) => theme.breakpoints.down('md'));
+  const theme = useTheme();
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [filterDateFrom, setFilterDateFrom] = useState('');
@@ -174,7 +183,7 @@ if (filterReceivedBy) {
         return;
       }
 
-      const response = await axios.get('https://bavadiya-realty-backend.vercel.app/api/data', {
+      const response = await axios.get(API_CONFIG.buildURL(API_CONFIG.endpoints.data), {
         headers: { Authorization: `Bearer ${token}` },
         timeout: 10000, // 10 second timeout
       });
@@ -203,7 +212,7 @@ if (filterReceivedBy) {
   const fetchEmployees = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('https://bavadiya-realty-backend.vercel.app/api/employees', {
+      const response = await axios.get(API_CONFIG.buildURL(API_CONFIG.endpoints.employees), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setEmployees(response.data);
@@ -215,7 +224,7 @@ if (filterReceivedBy) {
   const fetchProjects = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('https://bavadiya-realty-backend.vercel.app/api/projects', {
+      const response = await axios.get(API_CONFIG.buildURL(API_CONFIG.endpoints.projects), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProjects(response.data);
@@ -317,12 +326,12 @@ setFormData({
     try {
       const token = localStorage.getItem('token');
       if (editingIndex !== null) {
-        await axios.put(`https://bavadiya-realty-backend.vercel.app/api/data/${editingIndex}`, formData, {
+        await axios.put(`${API_CONFIG.buildURL(API_CONFIG.endpoints.data)}/${editingIndex}`, formData, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSnackbar({ open: true, message: 'Payment entry updated successfully!', severity: 'success' });
       } else {
-        await axios.post('https://bavadiya-realty-backend.vercel.app/api/data', formData, {
+        await axios.post(API_CONFIG.buildURL(API_CONFIG.endpoints.data), formData, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSnackbar({ open: true, message: 'Payment entry added successfully!', severity: 'success' });
@@ -339,7 +348,7 @@ setFormData({
     if (window.confirm('Are you sure you want to delete this entry?')) {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.delete(`https://bavadiya-realty-backend.vercel.app/api/data/${id}`, {
+        const response = await axios.delete(`${API_CONFIG.buildURL(API_CONFIG.endpoints.data)}/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log('Delete response:', response.data);
@@ -357,12 +366,12 @@ setFormData({
     try {
       const token = localStorage.getItem('token');
       if (editingEmployeeIndex !== null) {
-        await axios.put(`https://bavadiya-realty-backend.vercel.app/api/employees/${editingEmployeeIndex}`, employeeFormData, {
+        await axios.put(`${API_CONFIG.buildURL(API_CONFIG.endpoints.employees)}/${editingEmployeeIndex}`, employeeFormData, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSnackbar({ open: true, message: 'Employee updated successfully!', severity: 'success' });
       } else {
-        await axios.post('https://bavadiya-realty-backend.vercel.app/api/employees', employeeFormData, {
+        await axios.post(API_CONFIG.buildURL(API_CONFIG.endpoints.employees), employeeFormData, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSnackbar({ open: true, message: 'Employee added successfully!', severity: 'success' });
@@ -381,12 +390,12 @@ setFormData({
     try {
       const token = localStorage.getItem('token');
       if (editingProjectIndex !== null) {
-        await axios.put(`https://bavadiya-realty-backend.vercel.app/api/projects/${editingProjectIndex}`, projectFormData, {
+        await axios.put(`${API_CONFIG.buildURL(API_CONFIG.endpoints.projects)}/${editingProjectIndex}`, projectFormData, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSnackbar({ open: true, message: 'Project updated successfully!', severity: 'success' });
       } else {
-        await axios.post('https://bavadiya-realty-backend.vercel.app/api/projects', projectFormData, {
+        await axios.post(API_CONFIG.buildURL(API_CONFIG.endpoints.projects), projectFormData, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSnackbar({ open: true, message: 'Project added successfully!', severity: 'success' });
@@ -405,7 +414,7 @@ setFormData({
     if (window.confirm('Are you sure you want to delete this project?')) {
       try {
         const token = localStorage.getItem('token');
-        await axios.delete(`https://bavadiya-realty-backend.vercel.app/api/projects/${id}`, {
+        await axios.delete(`${API_CONFIG.buildURL(API_CONFIG.endpoints.projects)}/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSnackbar({ open: true, message: 'Project deleted successfully!', severity: 'success' });
@@ -1124,36 +1133,64 @@ case 'user-settings':
 
                 {/* Metric Cards */}
                 <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
-                  {metricCards.map((card) => {
+                  {metricCards.map((card, index) => {
                     const Icon = card.icon;
                     return (
-                      <Grid item xs={12} sm={6} md={4} lg={3} key={card.key}>
-                        <Paper sx={cardBaseStyles}>
-                          <Avatar
-                            sx={{
-                              width: 44,
-                              height: 44,
-                              bgcolor: `${card.accent}15`,
-                              color: card.accent
-                            }}
-                          >
-                            {Icon && <Icon fontSize="small" />}
-                          </Avatar>
-                          <Typography sx={{ fontWeight: 600, color: 'text.primary', fontSize: { xs: 14, sm: 15 } }}>
-                            {card.title}
-                          </Typography>
-                          <Typography
-                            variant="h5"
-                            sx={{
-                              fontWeight: 700,
-                              color: 'text.primary',
-                              fontSize: { xs: '1.3rem', sm: '1.6rem', md: '1.8rem' },
-                              lineHeight: 1.2
-                            }}
-                          >
-                            {card.value}
-                          </Typography>
-                          <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: 'text.secondary' }}>
+                      <Grid item xs={12} sm={6} lg={3} key={index}>
+                        <Paper
+                          elevation={0}
+                          sx={{
+                            p: 3,
+                            height: '100%',
+                            borderRadius: 4,
+                            border: '1px solid',
+                            borderColor: 'divider',
+                            bgcolor: 'rgba(255, 255, 255, 0.5)',
+                            backdropFilter: 'blur(10px)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 1.5,
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                              transform: 'translateY(-4px)',
+                              boxShadow: '0 12px 24px rgba(15, 23, 42, 0.05)',
+                              borderColor: 'primary.light'
+                            }
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Avatar
+                              sx={{
+                                width: 44,
+                                height: 44,
+                                bgcolor: card.accent ? `${card.accent}15` : 'primary.light',
+                                color: card.accent || 'primary.main',
+                                boxShadow: `0 8px 16px ${card.accent ? `${card.accent}25` : 'rgba(15, 118, 110, 0.15)'}`
+                              }}
+                            >
+                              {Icon && <Icon fontSize="small" />}
+                            </Avatar>
+                            <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', letterSpacing: '0.05em' }}>
+                              STABLE
+                            </Typography>
+                          </Box>
+                          <Box>
+                            <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary', mb: 0.5 }}>
+                              {card.title}
+                            </Typography>
+                            <Typography
+                              variant="h4"
+                              sx={{
+                                fontWeight: 800,
+                                color: 'text.primary',
+                                fontSize: { xs: '1.5rem', sm: '1.75rem' },
+                                letterSpacing: '-0.02em'
+                              }}
+                            >
+                              {card.value}
+                            </Typography>
+                          </Box>
+                          <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 0.5 }}>
                             {card.subtitle}
                           </Typography>
                         </Paper>
@@ -1207,19 +1244,37 @@ case 'user-settings':
                 </Grid> */}
 
                 {/* Analytics Overview */}
-                <Box sx={{ mb: 4 }}>
-                  <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, color: 'text.primary', mb: 3 }}>
-                    Analytics Overview - Total Brokerage: {formatINR(totalBrokerage)}
-                  </Typography>
-                  <Grid container spacing={{ xs: 2, md: 3 }}>
+                <Box sx={{ mb: 6 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                    <Typography variant="h5" sx={{ 
+                      fontFamily: '"Cinzel", serif',
+                      fontWeight: 700, 
+                      color: 'text.primary',
+                    }}>
+                      Analytics Overview
+                    </Typography>
+                    <Chip 
+                      label={`Total Brokerage: ${formatINR(totalBrokerage)}`} 
+                      sx={{ 
+                        fontWeight: 700, 
+                        bgcolor: 'primary.main', 
+                        color: 'white',
+                        px: 1,
+                        boxShadow: '0 8px 16px rgba(15, 118, 110, 0.2)'
+                      }} 
+                    />
+                  </Box>
+                  <Grid container spacing={4}>
                     <Grid item xs={12} lg={8}>
                       <Paper
+                        elevation={0}
                         sx={{
-                          p: { xs: 2, sm: 3 },
-                          borderRadius: 2,
+                          p: { xs: 2, sm: 4 },
+                          borderRadius: 4,
                           border: '1px solid',
-                          borderColor: 'grey.100',
-                          boxShadow: '0 15px 35px rgba(15,23,42,0.08)'
+                          borderColor: 'divider',
+                          bgcolor: '#ffffff',
+                          boxShadow: '0 20px 40px rgba(15, 23, 42, 0.03)'
                         }}
                       >
                         <Typography
@@ -1393,20 +1448,24 @@ case 'user-settings':
                   >
                     Payment Records
                   </Typography>
-                  <Button
-                    variant="contained"
-                    startIcon={<Add />}
-                    onClick={() => handleOpen()}
-                    sx={{
-                      bgcolor: 'primary.main',
-                      alignSelf: { xs: 'flex-start', sm: 'auto' },
-                      minWidth: { xs: '100%', sm: 'auto' },
-                      borderRadius: 2
-                    }}
-                    size="large"
-                  >
-                    Add New Entry
-                  </Button>
+                  <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Search />
+                    <Button
+                      variant="contained"
+                      startIcon={<Add />}
+                      onClick={() => handleOpen()}
+                      sx={{
+                        bgcolor: 'primary.main',
+                        alignSelf: { xs: 'flex-start', sm: 'auto' },
+                        minWidth: { xs: '100%', sm: 'auto' },
+                        borderRadius: 2
+                      }}
+                      size="large"
+                    >
+                      Add New Entry
+                    </Button>
+                    <Export />
+                  </Box>
                 </Box>
 
 {/* Filters */}
@@ -1679,39 +1738,79 @@ case 'user-settings':
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', backgroundColor: '#F2F2F7' }}>
-      <AppBar position="fixed" sx={{
-        zIndex: (theme) => theme.zIndex.drawer + 1,
-        background: 'linear-gradient(90deg, #007AFF 0%, #5856D6 100%)',
-        boxShadow: '0 4px 20px rgba(0, 122, 255, 0.1)',
-        borderRadius: 0
-      }}>
-        <Toolbar>
-          {isMobile && (
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              onClick={() => setDrawerOpen(true)}
-              edge="start"
-              sx={{ mr: 2 }}
-            >
-              <Menu />
-            </IconButton>
-          )}
-          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
-            <img
-              src="https://crm.bavadiyarealty.com/storage/uploads/logo/1754457837_logo.png"
-              alt="Bavadiya Realty LLP"
-              style={{ height: '40px', marginRight: '12px' }}
-            />
-            <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
-              Bavadiya Realty LLP
-            </Typography>
+      <AppBar
+        position="fixed"
+        elevation={0}
+        sx={{
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(12px)',
+          color: 'text.primary',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
+        <Toolbar sx={{ justifyContent: 'space-between', px: { xs: 2, sm: 3 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {isMobile && (
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                onClick={() => setDrawerOpen(true)}
+                edge="start"
+                sx={{ mr: 2, color: 'primary.main' }}
+              >
+                <Menu />
+              </IconButton>
+            )}
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <img
+                src={companyConfig?.company?.logo || "https://crm.bavadiyarealty.com/storage/uploads/logo/1754457837_logo.png"}
+                alt="Logo"
+                style={{ height: '32px', marginRight: '12px' }}
+              />
+              <Typography 
+                variant="h6" 
+                noWrap 
+                component="div" 
+                sx={{ 
+                  fontFamily: '"Cinzel", serif',
+                  fontWeight: 700,
+                  fontSize: { xs: '1rem', sm: '1.25rem' },
+                  letterSpacing: '0.02em',
+                  color: 'primary.main'
+                }}
+              >
+                Bavadiya <Box component="span" sx={{ fontWeight: 400, opacity: 0.8 }}>Realty LLP</Box>
+              </Typography>
+            </Box>
           </Box>
-          <IconButton color="inherit" onClick={logout}>
-            <Logout />
-          </IconButton>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Notifications />
+            <Tooltip title="Account Settings">
+              <IconButton 
+                size="small" 
+                onClick={() => setActiveView('settings')}
+                sx={{ ml: 1, border: '1px solid', borderColor: 'divider' }}
+              >
+                <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main', fontSize: '0.875rem' }}>AD</Avatar>
+              </IconButton>
+            </Tooltip>
+            <IconButton 
+              onClick={logout}
+              sx={{ 
+                ml: 1, 
+                color: 'error.main',
+                '&:hover': { bgcolor: 'error.light', color: 'white' }
+              }}
+            >
+              <Logout fontSize="small" />
+            </IconButton>
+          </Box>
         </Toolbar>
       </AppBar>
+
       <Drawer
         variant={isMobile ? 'temporary' : 'permanent'}
         open={isMobile ? drawerOpen : true}
@@ -1722,27 +1821,24 @@ case 'user-settings':
           '& .MuiDrawer-paper': {
             width: 280,
             boxSizing: 'border-box',
-            background: 'linear-gradient(180deg, #F2F2F7 0%, #E5E5EA 100%)',
-            borderRight: '1px solid rgba(0,0,0,0.08)',
-            boxShadow: '2px 0 10px rgba(0,0,0,0.05)',
-            borderRadius: 0
+            backgroundColor: '#0f172a', // Deep slate for premium feel
+            color: 'white',
+            borderRight: 'none',
+            boxShadow: '4px 0 24px rgba(0,0,0,0.1)'
           },
         }}
       >
         <Toolbar />
-        <Box sx={{ overflow: 'auto', p: 2 }}>
-          <Box sx={{ p: 2, textAlign: 'center' }}>
-            <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
-              Dashboard
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Realty Management
+        <Box sx={{ overflow: 'auto', py: 3, px: 2 }}>
+          <Box sx={{ px: 2, mb: 4 }}>
+            <Typography variant="overline" sx={{ color: 'rgba(255,255,255,0.5)', fontWeight: 700, letterSpacing: '0.1em' }}>
+              Management Suite
             </Typography>
           </Box>
-          <Divider sx={{ mb: 2 }} />
-          <List>
-            {menuItems.map((item, index) => (
-              <ListItem key={item.text} disablePadding sx={{ mb: 0.5 }}>
+          
+          <List sx={{ px: 1 }}>
+            {menuItems.map((item) => (
+              <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
                 <ListItemButton
                   selected={activeView === item.view}
                   onClick={() => {
@@ -1750,10 +1846,14 @@ case 'user-settings':
                     if (isMobile) setDrawerOpen(false);
                   }}
                   sx={{
-                    borderRadius: 2,
+                    borderRadius: '12px',
+                    py: 1.5,
+                    transition: 'all 0.2s ease',
+                    color: 'rgba(255,255,255,0.7)',
                     '&.Mui-selected': {
                       backgroundColor: 'primary.main',
                       color: 'white',
+                      boxShadow: '0 8px 16px rgba(15, 118, 110, 0.3)',
                       '&:hover': {
                         backgroundColor: 'primary.dark',
                       },
@@ -1762,19 +1862,52 @@ case 'user-settings':
                       }
                     },
                     '&:hover': {
-                      backgroundColor: 'rgba(0, 122, 255, 0.04)',
+                      backgroundColor: 'rgba(255,255,255,0.05)',
+                      color: 'white',
+                      '& .MuiListItemIcon-root': {
+                        color: 'white',
+                      }
                     }
                   }}
                 >
-                  <ListItemIcon sx={{ minWidth: 40 }}>
-                    {item.icon}
+                  <ListItemIcon sx={{ 
+                    minWidth: 40, 
+                    color: activeView === item.view ? 'white' : 'rgba(255,255,255,0.5)',
+                    transition: 'color 0.2s ease'
+                  }}>
+                    {React.cloneElement(item.icon, { fontSize: 'small' })}
                   </ListItemIcon>
-                  <ListItemText primary={item.text} />
+                  <ListItemText 
+                    primary={item.text} 
+                    primaryTypographyProps={{ 
+                      fontSize: '0.9rem', 
+                      fontWeight: activeView === item.view ? 600 : 500,
+                      letterSpacing: '0.01em'
+                    }} 
+                  />
                 </ListItemButton>
               </ListItem>
             ))}
           </List>
-          <Divider sx={{ my: 2 }} />
+
+          <Box sx={{ mt: 'auto', pt: 4, px: 2 }}>
+            <Paper sx={{ 
+              p: 2, 
+              bgcolor: 'rgba(255,255,255,0.05)', 
+              borderRadius: 3, 
+              border: '1px solid rgba(255,255,255,0.1)'
+            }}>
+              <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.5)', display: 'block', mb: 1 }}>
+                SYSTEM STATUS
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ width: 8, height: 8, bgcolor: '#10B981', borderRadius: '50%', boxShadow: '0 0 8px #10B981' }} />
+                <Typography variant="caption" sx={{ color: 'white', fontWeight: 600 }}>
+                  Operational
+                </Typography>
+              </Box>
+            </Paper>
+          </Box>
         </Box>
       </Drawer>
 

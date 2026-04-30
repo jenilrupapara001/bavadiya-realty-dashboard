@@ -27,6 +27,7 @@ import {
 import { Search, FilterList, Edit, Add, Delete } from '@mui/icons-material';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
+import API_CONFIG from './config/api';
 
 const DataTable = ({ onEditEntry, onDeleteEntry }) => {
   const { logout } = useContext(AuthContext);
@@ -66,7 +67,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
         return;
       }
 
-      const response = await axios.get('https://bavadiya-realty-backend.vercel.app/api/data', {
+      const response = await axios.get(API_CONFIG.buildURL(API_CONFIG.endpoints.data), {
         headers: { Authorization: `Bearer ${token}` },
         timeout: 10000,
       });
@@ -94,7 +95,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
   const fetchEmployees = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('https://bavadiya-realty-backend.vercel.app/api/employees', {
+      const response = await axios.get(API_CONFIG.buildURL(API_CONFIG.endpoints.employees), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setEmployees(response.data);
@@ -106,7 +107,7 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
   const fetchProjects = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('https://bavadiya-realty-backend.vercel.app/api/projects', {
+      const response = await axios.get(API_CONFIG.buildURL(API_CONFIG.endpoints.projects), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProjects(response.data);
@@ -249,24 +250,47 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
         px: { xs: 2, sm: 3 }
       }}
     >
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600, color: 'primary.main', mb: { xs: 2, sm: 3, md: 4 }, fontSize: { xs: '1.5rem', sm: '2rem' } }}>
-        Payment Records
+      <Typography variant="h4" sx={{ 
+        fontWeight: 700, 
+        color: 'primary.main', 
+        mb: 4,
+        fontFamily: 'Cinzel, serif',
+        letterSpacing: '0.02em'
+      }}>
+        PAYMENT RECORDS
       </Typography>
 
       {/* Summary Cards */}
-      <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: { xs: 3, md: 4 } }}>
+      <Grid container spacing={{ xs: 2, md: 3 }} sx={{ mb: 4 }}>
         {[
-          { label: 'Total Portfolio', value: formatINR(totalValue), color: 'primary.main' },
-          { label: 'Total Brokerage', value: formatINR(totalBrokerage), color: 'success.main' },
-          { label: 'Payment Received', value: formatINR(paymentReceived), color: '#16a34a' },
-          { label: 'Outstanding Amount', value: formatINR(outstandingAmount), color: '#dc2626' }
+          { label: 'Total Portfolio', value: formatINR(totalValue), color: 'primary.main', accent: '#2563eb' },
+          { label: 'Total Brokerage', value: formatINR(totalBrokerage), color: 'secondary.main', accent: '#0f766e' },
+          { label: 'Payment Received', value: formatINR(paymentReceived), color: '#16a34a', accent: '#16a34a' },
+          { label: 'Outstanding Amount', value: formatINR(outstandingAmount), color: '#dc2626', accent: '#dc2626' }
         ].map((card) => (
           <Grid item xs={12} sm={6} lg={3} key={card.label}>
-            <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2, height: '100%' }}>
-              <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: 'text.secondary', fontWeight: 600 }}>
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                borderRadius: 4,
+                border: '1px solid',
+                borderColor: 'divider',
+                bgcolor: 'rgba(255, 255, 255, 0.5)',
+                backdropFilter: 'blur(10px)',
+                height: '100%',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 12px 24px rgba(15, 23, 42, 0.05)',
+                  borderColor: 'primary.light'
+                }
+              }}
+            >
+              <Typography sx={{ fontSize: 12, color: 'text.secondary', fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', mb: 1 }}>
                 {card.label}
               </Typography>
-              <Typography variant="h5" sx={{ fontWeight: 700, color: card.color, mt: 0.5 }}>
+              <Typography variant="h5" sx={{ fontWeight: 800, color: card.color, letterSpacing: '-0.02em' }}>
                 {card.value}
               </Typography>
             </Paper>
@@ -404,46 +428,52 @@ const DataTable = ({ onEditEntry, onDeleteEntry }) => {
         </Grid>
       </Paper>
 
-      {/* Data Table - Responsive */}
-      <Paper sx={{ borderRadius: 2, boxShadow: '0 4px 20px rgba(0,0,0,0.08)', p: { xs: 1.5, sm: 2.5 } }}>
-        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 2 }}>
-          <Chip label={`Entries: ${totalEntries}`} variant="outlined" />
-          <Chip label={`Value: ${formatINR(totalValue)}`} color="success" variant="outlined" />
-          <Chip label={`Pending: ${filteredData.filter(item => !(item.receiveDate && item.customerReceiveDate)).length}`} color="warning" variant="outlined" />
+      {/* Data Table */}
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: 4,
+          border: '1px solid',
+          borderColor: 'divider',
+          overflow: 'hidden',
+          bgcolor: '#ffffff',
+          boxShadow: '0 10px 30px rgba(15, 23, 42, 0.03)'
+        }}
+      >
+        <Box sx={{ p: 3, borderBottom: '1px solid', borderColor: 'divider', display: 'flex', gap: 1.5, flexWrap: 'wrap' }}>
+          <Chip 
+            label={`Total Entries: ${totalEntries}`} 
+            color="primary" 
+            variant="soft" 
+            sx={{ fontWeight: 600, bgcolor: 'primary.light', color: 'primary.main', border: 'none' }}
+          />
+          <Chip 
+            label={`Value: ${formatINR(totalValue)}`} 
+            sx={{ fontWeight: 600, bgcolor: 'secondary.light', color: 'secondary.main', border: 'none' }}
+          />
+          <Chip 
+            label={`Pending: ${filteredData.filter(item => !(item.receiveDate && item.customerReceiveDate)).length}`} 
+            sx={{ fontWeight: 600, bgcolor: 'warning.light', color: 'warning.dark', border: 'none' }}
+          />
         </Box>
         <Box sx={{ overflowX: 'auto' }}>
-          <Table sx={{ minWidth: { xs: 900, md: '100%' } }}>
+          <Table stickyHeader>
             <TableHead>
-                <TableRow sx={{
-                  bgcolor: 'primary.main',
-                  position: 'sticky',
-                  top: 0,
-                  zIndex: 1,
-                  '& th': {
-                    color: 'white',
-                    fontWeight: 600,
-                    fontSize: { xs: '0.625rem', sm: '0.75rem', md: '0.875rem' },
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.5px',
-                    px: { xs: 1, sm: 1.5, md: 2 },
-                    py: { xs: 1, sm: 1.5 }
-                  }
-                }}>
-                  <TableCell sx={{ minWidth: { xs: '80px', sm: '100px' } }}>Date</TableCell>
-                  <TableCell sx={{ minWidth: { xs: '80px', sm: '100px' } }}>Unit No</TableCell>
-                  <TableCell sx={{ minWidth: { xs: '120px', sm: '150px' } }}>Project</TableCell>
-                  <TableCell sx={{ minWidth: { xs: '100px', sm: '120px' } }}>Owner</TableCell>
-                  <TableCell sx={{ minWidth: { xs: '100px', sm: '120px' } }}>Customer</TableCell>
-                  <TableCell sx={{ minWidth: { xs: '120px', sm: '140px' } }}>Base Price</TableCell>
-                  <TableCell sx={{ minWidth: { xs: '130px', sm: '150px' } }}>Owner Received By</TableCell>
-                  <TableCell sx={{ minWidth: { xs: '140px', sm: '160px' } }}>Customer Received By</TableCell>
-                  <TableCell sx={{ minWidth: { xs: '80px', sm: '100px' } }}>Status</TableCell>
-                  <TableCell sx={{ minWidth: { xs: '100px', sm: '120px' } }}>Employee</TableCell>
-                  <TableCell sx={{ minWidth: { xs: '80px', sm: '100px' } }}>Commission (%)</TableCell>
-                  <TableCell sx={{ minWidth: { xs: '140px', sm: '160px' } }}>Commission Amount</TableCell>
-                  <TableCell sx={{ minWidth: { xs: '60px', sm: '80px' } }}>Actions</TableCell>
-                  <TableCell sx={{ minWidth: { xs: '60px', sm: '80px' } }}>Delete</TableCell>
-                </TableRow>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50', fontSize: '0.85rem' }}>Date</TableCell>
+                <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50', fontSize: '0.85rem' }}>Unit No</TableCell>
+                <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50', fontSize: '0.85rem' }}>Project</TableCell>
+                <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50', fontSize: '0.85rem' }}>Owner</TableCell>
+                <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50', fontSize: '0.85rem' }}>Customer</TableCell>
+                <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50', fontSize: '0.85rem' }}>Base Price</TableCell>
+                <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50', fontSize: '0.85rem' }}>Owner RecBy</TableCell>
+                <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50', fontSize: '0.85rem' }}>Cust RecBy</TableCell>
+                <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50', fontSize: '0.85rem' }}>Status</TableCell>
+                <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50', fontSize: '0.85rem' }}>Employee</TableCell>
+                <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50', fontSize: '0.85rem' }}>Comm (%)</TableCell>
+                <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50', fontSize: '0.85rem' }}>Comm Amt</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 700, bgcolor: 'grey.50', fontSize: '0.85rem' }}>Actions</TableCell>
+              </TableRow>
             </TableHead>
             <TableBody>
                 {paginatedData.map((row, index) => (

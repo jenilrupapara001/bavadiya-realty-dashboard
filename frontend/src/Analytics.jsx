@@ -30,6 +30,7 @@ import {
 } from '@mui/icons-material';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
+import API_CONFIG from './config/api';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Cell, PieChart, Pie, Label
@@ -49,12 +50,13 @@ const Analytics = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const isMediumScreen = useMediaQuery(theme.breakpoints.down('md'));
 
-  // ✅ backend base URL (production)
-  const API_BASE_URL = 'https://bavadiya-realty-backend.vercel.app';
+  // Use API configuration
+  const API_BASE_URL = API_CONFIG.getBaseURL();
 
   useEffect(() => {
     fetchData();
     fetchEmployees();
+    fetchAnalytics();
   }, []);
 
   useEffect(() => {
@@ -68,7 +70,7 @@ const Analytics = () => {
     setError(null);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_BASE_URL}/api/data`, {
+      const response = await axios.get(API_CONFIG.buildURL(API_CONFIG.endpoints.data), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setData(response.data || []);
@@ -80,12 +82,26 @@ const Analytics = () => {
     }
   };
 
+  const fetchAnalytics = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(API_CONFIG.buildURL(API_CONFIG.endpoints.analytics), {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Update state with analytics data if needed
+      console.log('Analytics data:', response.data);
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+    }
+  };
+
   const fetchEmployees = async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
       
-      const response = await axios.get(`${API_BASE_URL}/api/employees`, {
+      const response = await axios.get(API_CONFIG.buildURL(API_CONFIG.endpoints.employees), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setEmployees(response.data || []);
@@ -360,19 +376,21 @@ const Analytics = () => {
     activeProjectIndex !== null ? safeProjectChartData[activeProjectIndex] : null;
 
   const cardBaseStyles = {
-    borderRadius: 2,
-    p: { xs: 2.5, sm: 3 },
+    p: 3,
     height: '100%',
-    border: '1px solid rgba(15,23,42,0.06)',
-    boxShadow: '0px 12px 32px rgba(15,23,42,0.06)',
-    backgroundColor: 'background.paper',
+    borderRadius: 4,
+    border: '1px solid',
+    borderColor: 'divider',
+    bgcolor: 'rgba(255, 255, 255, 0.5)',
+    backdropFilter: 'blur(10px)',
     display: 'flex',
     flexDirection: 'column',
-    gap: 1,
-    transition: 'all 0.2s ease',
+    gap: 1.5,
+    transition: 'all 0.3s ease',
     '&:hover': {
-      boxShadow: '0px 16px 40px rgba(15,23,42,0.1)',
-      transform: 'translateY(-1px)'
+      transform: 'translateY(-4px)',
+      boxShadow: '0 12px 24px rgba(15, 23, 42, 0.05)',
+      borderColor: 'primary.light'
     }
   };
 
@@ -545,10 +563,16 @@ const Analytics = () => {
 
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
-      <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main', mb: 1 }}>
-        Reports & Analytics
+      <Typography variant="h4" sx={{ 
+        fontWeight: 700, 
+        color: 'primary.main', 
+        mb: 1,
+        fontFamily: 'Cinzel, serif',
+        letterSpacing: '0.02em'
+      }}>
+        REPORTS & ANALYTICS
       </Typography>
-      <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 4 }}>
+      <Typography variant="subtitle1" sx={{ mb: 4, fontWeight: 500, color: 'text.secondary' }}>
         Consolidated insights for projects, payments, and teams
       </Typography>
 
@@ -558,36 +582,44 @@ const Analytics = () => {
           const Icon = card.icon;
           return (
             <Grid item xs={12} sm={6} md={3} key={card.key}>
-              <Paper sx={cardBaseStyles}>
-                <Avatar
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    bgcolor: `${card.accent}15`,
-                    color: card.accent
-                  }}
-                >
-                  {Icon && <Icon fontSize="small" />}
-                </Avatar>
-                <Typography sx={{ fontWeight: 600, color: 'text.primary', fontSize: { xs: 14, sm: 15 } }}>
-                  {card.title}
-              </Typography>
-                <Typography
-                  variant="h5"
-                  sx={{
-                fontWeight: 700, 
-                    color: 'text.primary',
-                    fontSize: { xs: '1.3rem', sm: '1.6rem', md: '1.8rem' },
-                lineHeight: 1.2
-                  }}
-                >
-                  {card.value}
-              </Typography>
-                <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: 'text.secondary' }}>
+              <Paper elevation={0} sx={cardBaseStyles}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                  <Avatar
+                    sx={{
+                      width: 44,
+                      height: 44,
+                      bgcolor: `${card.accent}15`,
+                      color: card.accent,
+                      boxShadow: `0 8px 16px ${card.accent}25`
+                    }}
+                  >
+                    {Icon && <Icon fontSize="small" />}
+                  </Avatar>
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', letterSpacing: '0.05em' }}>
+                    LIVE
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary', mb: 0.5 }}>
+                    {card.title}
+                  </Typography>
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      fontWeight: 800,
+                      color: 'text.primary',
+                      fontSize: { xs: '1.5rem', sm: '1.75rem' },
+                      letterSpacing: '-0.02em'
+                    }}
+                  >
+                    {card.value}
+                  </Typography>
+                </Box>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                   {card.subtitle}
-              </Typography>
+                </Typography>
               </Paper>
-        </Grid>
+            </Grid>
           );
         })}
       </Grid>
@@ -601,36 +633,44 @@ const Analytics = () => {
           const Icon = card.icon;
           return (
             <Grid item xs={12} sm={6} md={3} key={card.key}>
-              <Paper sx={cardBaseStyles}>
-                <Avatar
-                  sx={{
-                    width: 44,
-                    height: 44,
-                    bgcolor: `${card.accent}15`,
-                    color: card.accent
-                  }}
-                >
-                  {Icon && <Icon fontSize="small" />}
-                </Avatar>
-                <Typography sx={{ fontWeight: 600, color: 'text.primary', fontSize: { xs: 14, sm: 15 } }}>
-                  {card.title}
-              </Typography>
-                <Typography
-                  variant="h5"
-                  sx={{
-                fontWeight: 700, 
-                    color: 'text.primary',
-                    fontSize: { xs: '1.3rem', sm: '1.6rem', md: '1.8rem' },
-                lineHeight: 1.2
-                  }}
-                >
-                  {card.value}
-              </Typography>
-                <Typography sx={{ fontSize: { xs: 11, sm: 12 }, color: 'text.secondary' }}>
+              <Paper elevation={0} sx={cardBaseStyles}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                  <Avatar
+                    sx={{
+                      width: 44,
+                      height: 44,
+                      bgcolor: `${card.accent}15`,
+                      color: card.accent,
+                      boxShadow: `0 8px 16px ${card.accent}25`
+                    }}
+                  >
+                    {Icon && <Icon fontSize="small" />}
+                  </Avatar>
+                  <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', letterSpacing: '0.05em' }}>
+                    TRACKED
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary', mb: 0.5 }}>
+                    {card.title}
+                  </Typography>
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      fontWeight: 800,
+                      color: 'text.primary',
+                      fontSize: { xs: '1.5rem', sm: '1.75rem' },
+                      letterSpacing: '-0.02em'
+                    }}
+                  >
+                    {card.value}
+                  </Typography>
+                </Box>
+                <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
                   {card.meta}
-              </Typography>
+                </Typography>
               </Paper>
-        </Grid>
+            </Grid>
           );
         })}
       </Grid>
@@ -642,75 +682,72 @@ const Analytics = () => {
       <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ mb: 4 }}>
         {safeReceivedByData.length === 0 ? (
           <Grid item xs={12}>
-            <Alert severity="info">No payment records with received amounts found. Add payment records to see analytics.</Alert>
+            <Alert severity="info" sx={{ borderRadius: 3 }}>No payment records with received amounts found.</Alert>
           </Grid>
         ) : (
           safeReceivedByData.map((person, index) => {
             const accentColor = COLORS[index % COLORS.length];
             return (
-            <Grid item xs={12} sm={6} md={4} key={person.name}>
-                <Paper sx={cardBaseStyles}>
-                  <Avatar
-                    sx={{
-                      width: 44,
-                      height: 44,
-                      bgcolor: `${accentColor}15`,
-                      color: accentColor
-                    }}
-                  >
-                    <Person fontSize="small" />
-                  </Avatar>
-                  <Typography sx={{ fontWeight: 600, color: 'text.primary', fontSize: { xs: 14, sm: 15 } }}>
-                    {person.name}
-                  </Typography>
-                  <Typography
-                    variant="h5"
-                    sx={{
-                    fontWeight: 700, 
-                      color: accentColor,
-                      fontSize: { xs: '1.3rem', sm: '1.6rem', md: '1.8rem' },
-                    lineHeight: 1.2
-                    }}
-                  >
-                    {formatINR(person.amount)}
-                  </Typography>
+              <Grid item xs={12} sm={6} md={4} key={person.name}>
+                <Paper elevation={0} sx={cardBaseStyles}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                    <Avatar
+                      sx={{
+                        width: 44,
+                        height: 44,
+                        bgcolor: `${accentColor}15`,
+                        color: accentColor,
+                        boxShadow: `0 8px 16px ${accentColor}25`
+                      }}
+                    >
+                      <Person fontSize="small" />
+                    </Avatar>
+                    <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary', letterSpacing: '0.05em' }}>
+                      COLLECTOR
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary', mb: 0.5 }}>
+                      {person.name}
+                    </Typography>
+                    <Typography
+                      variant="h4"
+                      sx={{
+                        fontWeight: 800,
+                        color: accentColor,
+                        fontSize: { xs: '1.5rem', sm: '1.75rem' },
+                        letterSpacing: '-0.02em'
+                      }}
+                    >
+                      {formatINR(person.amount)}
+                    </Typography>
+                  </Box>
                   <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 0.5 }}>
                     <Chip 
                       label={`Owner: ${person.ownerReceived}`} 
                       size="small" 
-                      variant="outlined"
+                      variant="soft"
                       sx={{ 
-                        bgcolor: `${accentColor}10`,
-                        borderColor: `${accentColor}40`,
+                        bgcolor: `${accentColor}15`,
                         color: accentColor,
-                        fontWeight: 500
+                        fontWeight: 600,
+                        border: 'none'
                       }}
                     />
                     <Chip 
                       label={`Customer: ${person.customerReceived}`} 
                       size="small" 
-                      variant="outlined"
+                      variant="soft"
                       sx={{ 
-                        bgcolor: `${accentColor}10`,
-                        borderColor: `${accentColor}40`,
+                        bgcolor: `${accentColor}15`,
                         color: accentColor,
-                        fontWeight: 500
+                        fontWeight: 600,
+                        border: 'none'
                       }}
                     />
                   </Box>
-                  {/* Display the person name prominently */}
-                  <Typography 
-                    variant="caption" 
-                    sx={{ 
-                      color: 'text.secondary', 
-                      display: 'block',
-                      mt: 0.5
-                    }}
-                  >
-                    {person.name}
-                  </Typography>
                 </Paper>
-            </Grid>
+              </Grid>
             );
           })
         )}

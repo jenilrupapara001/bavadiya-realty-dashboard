@@ -43,9 +43,12 @@ import {
   Delete,
   CheckCircle,
   Cancel as CancelIcon,
+  History
 } from '@mui/icons-material';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
+import API_CONFIG from './config/api';
+import Audit from './Audit';
 
 const UserSettings = () => {
   const { logout } = React.useContext(AuthContext);
@@ -57,6 +60,7 @@ const UserSettings = () => {
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [auditLogs, setAuditLogs] = useState([]);
 
   // Profile form state
   const [profileData, setProfileData] = useState({
@@ -97,13 +101,13 @@ const UserSettings = () => {
     }
   }, [activeTab]);
 
-  const API_BASE_URL = 'https://bavadiya-realty-backend.vercel.app';
+
 
   const fetchCurrentUser = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_BASE_URL}/api/users/profile`, {
+      const response = await axios.get(API_CONFIG.buildURL(API_CONFIG.endpoints.profile), {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -127,7 +131,7 @@ const UserSettings = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${API_BASE_URL}/api/users`, {
+      const response = await axios.get(API_CONFIG.buildURL(API_CONFIG.endpoints.users), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(response.data || []);
@@ -143,7 +147,7 @@ const UserSettings = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`${API_BASE_URL}/api/users/${currentUser._id}`, profileData, {
+      await axios.put(API_CONFIG.buildURL(`${API_CONFIG.endpoints.users}/${currentUser._id}`), profileData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -172,7 +176,7 @@ const UserSettings = () => {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `${API_BASE_URL}/api/users/${currentUser._id}/password`,
+        API_CONFIG.buildURL(`${API_CONFIG.endpoints.users}/${currentUser._id}/password`),
         {
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword
@@ -200,7 +204,7 @@ const UserSettings = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${API_BASE_URL}/api/users`, newUserData, {
+      await axios.post(API_CONFIG.buildURL(API_CONFIG.endpoints.users), newUserData, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
@@ -227,7 +231,7 @@ const UserSettings = () => {
     if (window.confirm('Are you sure you want to deactivate this user?')) {
       try {
         const token = localStorage.getItem('token');
-        await axios.delete(`${API_BASE_URL}/api/users/${userId}`, {
+        await axios.delete(API_CONFIG.buildURL(`${API_CONFIG.endpoints.users}/${userId}`), {
           headers: { Authorization: `Bearer ${token}` },
         });
         
@@ -272,27 +276,37 @@ const UserSettings = () => {
   return (
     <Box
       component="section"
-      sx={{ maxWidth: '1200px', mx: 'auto', py: 4, px: { xs: 2, sm: 3, md: 4 } }}
+      sx={{ maxWidth: '1400px', mx: 'auto', py: 4 }}
     >
       <Paper
+        elevation={0}
         sx={{
           borderRadius: 4,
-          p: { xs: 3, md: 4 },
+          p: 4,
           mb: 4,
           display: 'flex',
           flexDirection: { xs: 'column', md: 'row' },
           gap: 3,
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: 'linear-gradient(135deg, #0f172a 0%, #1d4ed8 80%)',
-          color: 'primary.contrastText'
+          bgcolor: 'rgba(255, 255, 255, 0.5)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid',
+          borderColor: 'divider',
+          boxShadow: '0 10px 30px rgba(15, 23, 42, 0.03)'
         }}
       >
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700, mb: 1 }}>
-            User Settings & Management
+          <Typography variant="h4" sx={{ 
+            fontWeight: 700, 
+            mb: 1, 
+            color: 'primary.main',
+            fontFamily: 'Cinzel, serif',
+            letterSpacing: '0.02em'
+          }}>
+            SYSTEM SETTINGS
           </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.85 }}>
+          <Typography variant="body1" sx={{ color: 'text.secondary', fontWeight: 500 }}>
             Control access, update your profile, and manage the team in one workspace.
           </Typography>
         </Box>
@@ -301,8 +315,13 @@ const UserSettings = () => {
             <Chip
               key={item.label}
               label={`${item.label}: ${item.value}`}
-              variant="outlined"
-              sx={{ borderColor: 'primary.contrastText', color: 'primary.contrastText' }}
+              variant="soft"
+              sx={{ 
+                fontWeight: 600, 
+                bgcolor: 'primary.light', 
+                color: 'primary.main',
+                border: 'none'
+              }}
             />
           ))}
         </Box>
@@ -310,14 +329,14 @@ const UserSettings = () => {
 
       <Paper sx={{ width: '100%', borderRadius: 4, p: { xs: 1, md: 2 } }}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs 
-            value={activeTab} 
-            onChange={handleTabChange} 
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
             aria-label="user settings tabs"
             variant="scrollable"
             scrollButtons="auto"
             allowScrollButtonsMobile
-            sx={{ 
+            sx={{
               '& .MuiTab-root': {
                 textTransform: 'none',
                 fontWeight: 600,
@@ -328,6 +347,7 @@ const UserSettings = () => {
             <Tab icon={<Person />} label="Profile Settings" />
             <Tab icon={<Security />} label="Security" />
             <Tab icon={<People />} label="User Management" />
+            <Tab icon={<History />} label="Audit Logs" />
           </Tabs>
         </Box>
 
@@ -335,7 +355,18 @@ const UserSettings = () => {
         <TabPanel value={activeTab} index={0}>
           <Grid container spacing={4}>
             <Grid item xs={12} md={4}>
-              <Paper sx={{ textAlign: 'center', borderRadius: 4, p: 4 }}>
+              <Paper 
+                elevation={0}
+                sx={{ 
+                  textAlign: 'center', 
+                  borderRadius: 4, 
+                  p: 4,
+                  bgcolor: 'rgba(255, 255, 255, 0.5)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid',
+                  borderColor: 'divider'
+                }}
+              >
                 <Avatar
                   sx={{ 
                     width: 120, 
@@ -537,44 +568,58 @@ const UserSettings = () => {
 
         {/* User Management Tab */}
         <TabPanel value={activeTab} index={2}>
-          <Paper sx={{ borderRadius: 4, p: { xs: 2, md: 3 } }}>
+          <Paper 
+            elevation={0}
+            sx={{ 
+              borderRadius: 4, 
+              overflow: 'hidden',
+              border: '1px solid',
+              borderColor: 'divider',
+              bgcolor: '#ffffff'
+            }}
+          >
             <Box sx={{ 
-              mb: 2, 
+              p: 3, 
               display: 'flex', 
               justifyContent: 'space-between', 
-              alignItems: { xs: 'stretch', sm: 'center' },
-              flexDirection: { xs: 'column', sm: 'row' },
-              gap: { xs: 2, sm: 0 }
+              alignItems: 'center',
+              borderBottom: '1px solid',
+              borderColor: 'divider'
             }}>
               <Box>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  User Management
+                <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                  Team Members
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Invite admins and disable inactive users.
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+                  Invite admins and manage user permissions.
                 </Typography>
               </Box>
               <Button
                 variant="contained"
                 startIcon={<Add />}
                 onClick={() => setAddUserOpen(true)}
-                sx={{ borderRadius: 2 }}
+                sx={{ 
+                  borderRadius: 2, 
+                  fontWeight: 600,
+                  px: 3,
+                  bgcolor: 'primary.main',
+                  '&:hover': { bgcolor: 'primary.dark' }
+                }}
               >
-                Add New User
+                Add Member
               </Button>
             </Box>
-            <Divider sx={{ mb: 2 }} />
             <Box sx={{ width: '100%', overflowX: 'auto' }}>
-              <Table sx={{ minWidth: 760 }}>
+              <Table stickyHeader>
                 <TableHead>
-                  <TableRow sx={{ bgcolor: 'background.default', '& th': { fontWeight: 600, color: 'text.secondary', textTransform: 'uppercase' } }}>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Username</TableCell>
-                    <TableCell>Email</TableCell>
-                    <TableCell>Role</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Last Login</TableCell>
-                    <TableCell align="right">Actions</TableCell>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50' }}>Member</TableCell>
+                    <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50' }}>Username</TableCell>
+                    <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50' }}>Email</TableCell>
+                    <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50' }}>Role</TableCell>
+                    <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50' }}>Status</TableCell>
+                    <TableCell sx={{ fontWeight: 700, bgcolor: 'grey.50' }}>Last Login</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 700, bgcolor: 'grey.50' }}>Actions</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -641,6 +686,11 @@ const UserSettings = () => {
               rowsPerPageOptions={[5, 10, 25, 50]}
             />
           </Paper>
+        </TabPanel>
+
+        {/* Audit Logs Tab */}
+        <TabPanel value={activeTab} index={3}>
+          <Audit />
         </TabPanel>
       </Paper>
 

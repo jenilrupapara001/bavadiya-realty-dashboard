@@ -45,6 +45,10 @@ A modern, production-ready real estate payment management system with iOS-inspir
 - **🏗️ Project Management**: Complete project lifecycle management
 - **👥 Employee Management**: Performance tracking, commission calculations
 - **🔐 Secure Authentication**: JWT-based login with encrypted passwords
+- **📤 Data Export**: CSV/JSON export functionality for all data types
+- **🔍 Advanced Search**: Full-text search across payments, employees, and projects
+- **🔔 Notifications**: Real-time system notifications and alerts
+- **📋 Audit Logging**: Complete activity tracking and audit trail
 
 ### 🎨 **Modern UI/UX**
 - **🍎 iOS-Inspired Design**: Clean, modern interface with Apple design language
@@ -396,6 +400,82 @@ curl -X GET https://your-api-domain.com/api/analytics/dashboard \
     "partial": 12,
     "pending": 8
   }
+}
+```
+
+### 📤 **Export**
+
+#### **GET** `/api/export`
+Export data in CSV or JSON format
+
+```bash
+curl -X GET "https://your-api-domain.com/api/export?type=csv&dataType=payments" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+**Query Parameters:**
+- `type` (string): Export format (`csv` or `json`)
+- `dataType` (string): Data type to export (`payments`, `employees`, or `projects`)
+
+### 🔍 **Search**
+
+#### **GET** `/api/search`
+Advanced search across all data types
+
+```bash
+curl -X GET "https://your-api-domain.com/api/search?query=Sunrise&type=all" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+**Query Parameters:**
+- `query` (string): Search term
+- `type` (string): Search scope (`all`, `payments`, `employees`, or `projects`)
+
+### 🔔 **Notifications**
+
+#### **GET** `/api/notifications`
+Retrieve user notifications
+
+```bash
+curl -X GET https://your-api-domain.com/api/notifications \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+**Response:**
+```json
+{
+  "notifications": [
+    {
+      "id": 1,
+      "message": "New payment received",
+      "read": false,
+      "timestamp": "2024-01-15T10:30:00Z"
+    }
+  ]
+}
+```
+
+### 📋 **Audit Logging**
+
+#### **GET** `/api/audit`
+Retrieve system audit logs
+
+```bash
+curl -X GET https://your-api-domain.com/api/audit \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+**Response:**
+```json
+{
+  "logs": [
+    {
+      "timestamp": "2024-01-15T10:30:00Z",
+      "action": "User login",
+      "user": "admin",
+      "details": "Successful login from IP 192.168.1.1"
+    }
+  ]
 }
 ```
 
